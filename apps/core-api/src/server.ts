@@ -7,12 +7,14 @@ import { connectRabbit } from "./queue/rabbit.js"
 import  "./cache/redis.js";
 import "./search/meili.js";
 import router from "./routes/index.js"
+import { connectDB } from "./db/connect.js"
 
 const app = express()
 const PORT = Number(process.env.PORT) || 5000
 app.use(express.json())
 app.use("/api", router)
 app.use(httpLogger)
+connectDB()
 app.get("/health", (req, res) => {
     res.status(200).json({
         status: "ok",
