@@ -5,6 +5,7 @@ import { logger } from "./utils/logger.js"
 import { errorHandler, notFound } from "./middlewares/errorHandler.js"
 import { connectRabbit } from "./queue/rabbit.js"
 import  "./cache/redis.js";
+import "./search/meili.js";
 
 const app = express()
 const PORT = Number(process.env.PORT) || 5000

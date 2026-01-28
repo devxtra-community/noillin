@@ -52,6 +52,9 @@ importers:
       ioredis:
         specifier: ^5.9.2
         version: 5.9.2
+      meilisearch:
+        specifier: ^0.55.0
+        version: 0.55.0
       morgan:
         specifier: ^1.10.1
         version: 1.10.1
@@ -3536,6 +3539,12 @@ packages:
       }
     engines: { node: ">= 0.8" }
 
+  meilisearch@0.55.0:
+    resolution:
+      {
+        integrity: sha512-qSMeiezfDgIqciIeYzh5E4pXDZZD7CtHeWDCs43kN3trLgl5FtfmBAIkljL3huFaOx08feYtC8FfIFUpVwq6rg==,
+      }
+
   merge-descriptors@2.0.0:
     resolution:
       {
@@ -7008,6 +7017,8 @@ snapshots:
   math-intrinsics@1.1.0: {}
 
   media-typer@1.1.0: {}
+
+  meilisearch@0.55.0: {}
 
   merge-descriptors@2.0.0: {}
 
