@@ -11,6 +11,10 @@ redis.on("connect", ()=>{
     logger.info("Redis connected successfully")
 })
 
+redis.on("reconnecting", () => {
+  logger.warn("Redis reconnecting...");
+});
+
 redis.on("error", (err:unknown)=>{
     logger.error(`Redis error:${String(err)}`)
 })
