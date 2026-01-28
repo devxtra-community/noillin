@@ -1,8 +1,10 @@
 import express from "express"
+
 import { httpLogger } from "./middlewares/httpLogger.js"
 import { logger } from "./utils/logger.js"
 import { errorHandler, notFound } from "./middlewares/errorHandler.js"
-
+import { connectRabbit } from "./queue/rabbit.js"
+import  "./cache/redis.js";
 
 const app = express()
 const PORT = Number(process.env.PORT) || 5000
@@ -18,6 +20,7 @@ app.get("/health", (req, res) => {
 
 app.use(notFound)
 app.use(errorHandler)
+connectRabbit()
 app.listen(PORT, () => {
     logger.info(`Core API is running at http://localhost:${PORT}`);
     

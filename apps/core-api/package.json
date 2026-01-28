@@ -15,12 +15,14 @@
   "license": "ISC",
   "packageManager": "pnpm@10.27.0",
   "dependencies": {
+    "amqplib": "^0.10.9",
     "express": "^5.2.1",
     "ioredis": "^5.9.2",
     "morgan": "^1.10.1",
     "winston": "^3.19.0"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.10.8",
     "@types/express": "^5.0.6",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.0.10",
