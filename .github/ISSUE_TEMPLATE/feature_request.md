@@ -12,7 +12,7 @@ What problem does this solve?
 
 ### Proposed Solution
 
-Describe your idea.
+Describe your idea please.
 
 ### Alternatives Considered
 
