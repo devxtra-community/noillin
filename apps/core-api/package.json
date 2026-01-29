@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec tsx src/server.ts",
     "build": "tsc --noEmit",
+    "build:prod": "tsc",
     "start": "ts-node src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
