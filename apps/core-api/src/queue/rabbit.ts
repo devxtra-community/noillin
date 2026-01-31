@@ -2,12 +2,14 @@ import amqp from "amqplib"
 
 import { logger } from "../utils/logger.js"
 
-const rabbitUrl = process.env.RABBIT_URL
-if (!rabbitUrl) {
-    throw new Error("RABBIT_URL is not defined in environment variables")
-}
+const rabbitUrl = process.env.RABBIT_URL as string
 
 export const connectRabbit = async() => {
+      if (!process.env.RABBIT_URL) {
+    console.warn("RabbitMQ disabled: RABBIT_URL not set");
+    return;
+    }
+
     try{
     const connection = await amqp.connect(rabbitUrl)
     logger.info("RabbitMQ is connected")
