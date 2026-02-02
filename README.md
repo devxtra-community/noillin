@@ -8,7 +8,6 @@
 ## 1. Project Purpose
 
 Noillin is built to solve structured influencer–brand collaboration at scale by:
-
 - Eliminating manual coordination and availability conflicts
 - Enforcing payment-before-confirmation booking rules
 - Supporting single and multi-influencer (group) gigs
@@ -36,7 +35,6 @@ Noillin is built to solve structured influencer–brand collaboration at scale b
 Exactly **three deployable backend services**:
 
 ### 1. Core / Auth Service
-
 - Authentication & authorization (JWT, RBAC)
 - Influencer, Brand, Admin profiles
 - Gig management (single & group gigs)
@@ -48,14 +46,12 @@ Exactly **three deployable backend services**:
 - Meilisearch indexing
 
 ### 2. Realtime Service
-
 - Socket.IO server
 - Realtime chat (brand ↔ influencer)
 - Realtime notifications
 - Redis pub/sub for horizontal scaling
 
 ### 3. Worker Service
-
 - RabbitMQ consumers
 - Async background jobs:
   - Notifications
@@ -90,7 +86,6 @@ No additional backend services are allowed.
   - Path-based service forwarding
 
 Example routing:
-
 - `/api/*` → Core Service
 - `/socket/*` → Realtime Service
 
@@ -118,20 +113,19 @@ noillin/
 ├── pnpm-workspace.yaml
 ├── package.json
 └── README.md
-```
 ````
 
 ---
 
 ## 7. Prerequisites
 
-- Node.js (>= 20)
-- pnpm (via Corepack)
-- MongoDB
-- Redis
-- RabbitMQ
-- Meilisearch
-- NGINX
+* Node.js (>= 20)
+* pnpm (via Corepack)
+* MongoDB
+* Redis
+* RabbitMQ
+* Meilisearch
+* NGINX
 
 ---
 
@@ -182,10 +176,10 @@ REDIS_URL=redis://localhost:6379
 
 Start required services:
 
-- MongoDB
-- Redis
-- RabbitMQ
-- Meilisearch
+* MongoDB
+* Redis
+* RabbitMQ
+* Meilisearch
 
 Run backend services:
 
@@ -203,14 +197,15 @@ sudo nginx -c /path/to/nginx.conf
 
 ## 11. Deployment Overview (CI/CD)
 
-- Monorepo CI using **GitHub Actions**
-- Workflow steps:
-  - Install dependencies using pnpm
-  - Lint, type-check, and build services
-  - SSH into server
-  - Pull latest code
-  - Install production dependencies
-  - Restart services using PM2
+* Monorepo CI using **GitHub Actions**
+* Workflow steps:
+
+  * Install dependencies using pnpm
+  * Lint, type-check, and build services
+  * SSH into server
+  * Pull latest code
+  * Install production dependencies
+  * Restart services using PM2
 
 Each service is deployed independently but within the same repository.
 
@@ -218,47 +213,46 @@ Each service is deployed independently but within the same repository.
 
 ## 12. System Rules & Constraints (Do Not Break)
 
-- Exactly **3 backend services**
-- No direct public access to backend services
-- All traffic must pass through NGINX
-- Booking is confirmed **only after payment success**
-- Redis must be used for booking slot locking
-- RabbitMQ must handle async workloads
-- MongoDB is the single source of truth
-- pnpm workspace structure must remain intact
+* Exactly **3 backend services**
+* No direct public access to backend services
+* All traffic must pass through NGINX
+* Booking is confirmed **only after payment success**
+* Redis must be used for booking slot locking
+* RabbitMQ must handle async workloads
+* MongoDB is the single source of truth
+* pnpm workspace structure must remain intact
 
 ---
 
 ## 13. Scale Assumptions
 
-- Initial scale: thousands of users
-- Redis pub/sub enables realtime horizontal scaling
-- Worker Service scales independently
-- Stateless backend services behind NGINX
-- Search queries offloaded to Meilisearch
+* Initial scale: thousands of users
+* Redis pub/sub enables realtime horizontal scaling
+* Worker Service scales independently
+* Stateless backend services behind NGINX
+* Search queries offloaded to Meilisearch
 
 ---
 
 ## 14. Future Improvements
 
-- Rate limiting at NGINX
-- JWT validation at gateway
-- Admin analytics dashboard
-- Webhook-based payment retries
-- Advanced availability optimization for group gigs
-- Read replicas for MongoDB
+* Rate limiting at NGINX
+* JWT validation at gateway
+* Admin analytics dashboard
+* Webhook-based payment retries
+* Advanced availability optimization for group gigs
+* Read replicas for MongoDB
 
 ---
 
 ## 15. Design Philosophy
 
-- Explicit boundaries over microservice sprawl
-- Predictable request flow
-- Payment-first booking integrity
-- Realtime where it matters, async where it scales
-- Infrastructure-aware backend design
-- Production-first decisions over shortcuts
+* Explicit boundaries over microservice sprawl
+* Predictable request flow
+* Payment-first booking integrity
+* Realtime where it matters, async where it scales
+* Infrastructure-aware backend design
+* Production-first decisions over shortcuts
 
 ```
-
 ```
