@@ -35,6 +35,7 @@ const UserSchema = new Schema<IUser>(
       lowercase: true,
       trim: true,
       index: true,
+      immutable: true,
     },
     password: {
       type: String,
@@ -49,7 +50,7 @@ const UserSchema = new Schema<IUser>(
     adminLevel: {
       type: String,
       enum: Object.values(AdminLevel),
-      default: AdminLevel.NORMAL,
+      default: null,
     },
     isEmailVerified: {
       type: Boolean,
@@ -67,5 +68,6 @@ const UserSchema = new Schema<IUser>(
   },
   { timestamps: true }
 );
+UserSchema.index({ role: 1, status: 1 });
 
 export const User = model<IUser>("User", UserSchema)
