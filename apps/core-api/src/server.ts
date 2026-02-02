@@ -28,7 +28,7 @@ app.get("/health", (req, res) => {
 app.use(notFound)
 app.use(errorHandler)
 connectRabbit()
-app.listen(PORT, () => {
+app.listen(PORT,"127.0.0.1", () => {
     logger.info(`Core API is running at http://localhost:${PORT}`);
     
 })

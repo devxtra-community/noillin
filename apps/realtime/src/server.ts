@@ -1,6 +1,8 @@
-import express from "express";
 import { createServer } from "http";
+
+import express from "express";
 import { Server } from "socket.io";
+
 import { httpLogger } from "./middlewares/httpLogger";
 import { logger } from "./utils/logger";
 import { errorHandler, notFound } from "./middlewares/errorHandler";
@@ -33,6 +35,6 @@ io.on("connection", (socket) => {
 app.use(notFound)
 app.use(errorHandler)
 const PORT = Number(process.env.PORT) || 6001;
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, "127.0.0.1",() => {
   logger.info(`Realtime service running at http://localhost:${PORT}`);
 });
