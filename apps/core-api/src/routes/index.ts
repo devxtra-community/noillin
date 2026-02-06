@@ -1,15 +1,15 @@
 import { Router } from "express";
 
-import authRoutes from "../modules/auth/auth.routes.js";
 import userRoutes from "../modules/users/users.routes.js";
-import profileRoutes from "../modules/profile/profile.routes.js";
-import gigRoutes from "../modules/gigs/gigs.routes.js";
-import availabilityRoutes from "../modules/availability/availability.routes.js";
-import bookingRoutes from "../modules/bookings/bookings.routes.js";
-import orderRoutes from "../modules/orders/orders.routes.js";
-import paymentRoutes from "../modules/payments/payments.routes.js";
-import searchRoutes from "../modules/search/search.routes.js";
 
+import authRoutes from "./auth.routes.js";
+import profileRoutes from "./profile.routes.js";
+import gigRoutes from "./gigs.routes.js";
+import availabilityRoutes from "./availability.routes.js";
+import bookingRoutes from "./bookings.routes.js";
+import orderRoutes from "./orders.routes.js";
+import paymentRoutes from "./payments.routes.js";
+import searchRoutes from "./search.routes.js";
 import healthRoutes from "./health.routes.js";
 
 const router:Router = Router()

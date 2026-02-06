@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 
-import { verifyAccessToken } from "./auth.utils.js";
-import type { JwtPayload } from "./auth.utils.js";
+import { verifyAccessToken } from "../modules/auth/auth.utils.js";
+import type { JwtPayload } from "../modules/auth/auth.utils.js";
 
 export interface AuthRequest extends Request {
   user?: JwtPayload;
