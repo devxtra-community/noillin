@@ -14,6 +14,9 @@ export const connectRabbit = async() => {
     const connection = await amqp.connect(rabbitUrl)
     logger.info("RabbitMQ is connected")
     
+    connection.on("error", (err) => {
+      logger.error("RabbitMQ connection error", err);
+    });
     connection.on("close", () => {
   logger.warn("RabbitMQ connection closed");
 });

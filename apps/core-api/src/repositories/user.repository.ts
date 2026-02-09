@@ -2,13 +2,30 @@ import { User } from "../modules/users/user.model.js";
 
 class UserRepository{
     async findEmailWithPassword(email: string) {
-    return User.findOne({ email }).select("+password");
-}
+       const normalizedEmail = email.trim().toLowerCase();
 
+    return User.findOne({ email: normalizedEmail }).select("+password");
+}
+    
+    
+  async findByEmail(email: string) {
+    return User.findOne({ email });
+  }
 
     async saveRefreshToken(userId:string, refreshToken:string){
         return User.findByIdAndUpdate(userId,{refreshToken})
     }
+    
+  async create(data: {
+    email: string;
+    password: string;
+    role: string;
+    isEmailVerified: boolean;
+    status: string;
+  }) {
+    return User.create(data);
+  }
 }
+
 
 export const userRepository = new UserRepository()

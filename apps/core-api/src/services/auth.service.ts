@@ -20,6 +20,47 @@ import bcrypt from "bcrypt";
 import { signAccessToken, signRefreshToken } from "../modules/auth/auth.utils.js";
 import type { HttpError } from "../modules/auth/http-error.js";
 import { userRepository } from "../repositories/user.repository.js"
+import { pendingSignupRepository } from "../repositories/Signup.repository.js";
+import { logger } from "../utils/logger.js";
+
+// import { sendMail } from "../../utils/nodemailer";
+
+interface SignupInput {
+  email: string;
+  password: string;
+  role: "INFLUENCER" | "BRAND";
+  documents: string[];
+}
+
+export const signupService = async (data: SignupInput) => {
+  const existingUser = await userRepository.findEmailWithPassword(data.email);
+  if (existingUser) {
+    const err: HttpError = new Error("User already exists");
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const existingRequest =
+    await pendingSignupRepository.findByEmail(data.email);
+
+  if (existingRequest) {
+    const err: HttpError = new Error("Signup request already submitted");
+    err.statusCode = 409;
+    throw err;
+  }
+
+  const passwordHash = await bcrypt.hash(data.password, 10);
+
+  await pendingSignupRepository.create({
+    email: data.email.toLowerCase(),
+    passwordHash,
+    role: data.role,
+    documents: data.documents,
+    status: "PENDING",
+  });
+
+  return { message: "Signup request submitted for review" };
+};
 
 
 interface LoginResult {
@@ -36,9 +77,12 @@ export const loginService = async(
   email : string,
   password : string
 ): Promise<LoginResult> => {
+  
   const user = await userRepository.findEmailWithPassword(email)
+    logger.info(`EMAIL: ${email}`);
+
   if (!user) {
-    const err: HttpError = new Error("Invalid credentials")
+    const err: HttpError = new Error("Invalid credentialss")
     err.statusCode = 401
     throw err
   }
@@ -54,6 +98,7 @@ export const loginService = async(
     err.statusCode = 403
     throw err
   }
+
 
   const isMatch = await bcrypt.compare(password, user.password)
   console.log("PASSWORD FROM DB:", user.password);
