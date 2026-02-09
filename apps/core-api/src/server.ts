@@ -17,6 +17,7 @@ app.use(httpLogger)
 app.use(express.json())
 app.use("/api", router)
 connectDB()
+
 app.get("/health", (req, res) => {
     res.status(200).json({
         status: "ok",

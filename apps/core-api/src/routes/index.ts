@@ -10,10 +10,12 @@ import orderRoutes from "./orders.routes.js";
 import paymentRoutes from "./payments.routes.js";
 import searchRoutes from "./search.routes.js";
 import healthRoutes from "./health.routes.js";
+import adminRoutes from "./admin.route.js"
 
 const router:Router = Router()
 router.use("/health", healthRoutes)
 router.use("/auth", authRoutes)
+router.use("/admin", adminRoutes)
 router.use("/users", userRoutes)
 router.use("/profile", profileRoutes)
 router.use("/gigs", gigRoutes);

@@ -10,8 +10,10 @@ if (!mongoUri) {
 
 export const connectDB = async () => {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, { dbName: "noillin" });
     logger.info("MongoDB connected successfully");
+    logger.info(`CONNECTED DB: ${mongoose.connection.name}`);
+
   } catch (err: unknown) {
     logger.error(`MongoDB connection failed: ${String(err)}`);
     process.exit(1);
