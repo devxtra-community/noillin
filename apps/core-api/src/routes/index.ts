@@ -1,7 +1,6 @@
 import { Router } from "express";
 
-import userRoutes from "../modules/users/users.routes.js";
-
+import userRoutes from "./users.routes.js";
 import authRoutes from "./auth.routes.js";
 import profileRoutes from "./profile.routes.js";
 import gigRoutes from "./gigs.routes.js";
