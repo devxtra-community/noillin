@@ -2,7 +2,7 @@ import IORedis from "ioredis";
 import type {Redis} from "ioredis";
 
 import { logger } from "../utils/logger.js";
-const redis_url = process.env.REDIS_URL
+const redis_url = process.env.REDIS_URL 
 if (!redis_url){
     throw new Error("REDIS_URL is not defined in environment variables")
 }

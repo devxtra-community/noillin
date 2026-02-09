@@ -2,7 +2,7 @@ import { MeiliSearch } from "meilisearch";
 
 import { logger } from "../utils/logger.js";
 
-const host = process.env.MEILI_HOST;
+const host = process.env.MEILI_HOST ;
 
 if (!host) {
   throw new Error("MEILI_HOST is not defined in environment variables");
