@@ -46,6 +46,9 @@ importers:
       amqplib:
         specifier: ^0.10.9
         version: 0.10.9
+      bcrypt:
+        specifier: ^6.0.0
+        version: 6.0.0
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -74,6 +77,9 @@ importers:
       "@types/amqplib":
         specifier: ^0.10.8
         version: 0.10.8
+      "@types/bcrypt":
+        specifier: ^6.0.0
+        version: 6.0.0
       "@types/express":
         specifier: ^5.0.6
         version: 5.0.6
@@ -1251,6 +1257,12 @@ packages:
         integrity: sha512-vtDp8Pk1wsE/AuQ8/Rgtm6KUZYqcnTgNvEHwzCkX8rL7AGsC6zqAfKAAJhUZXFhM/Pp++tbnUHiam/8vVpPztA==,
       }
 
+  "@types/bcrypt@6.0.0":
+    resolution:
+      {
+        integrity: sha512-/oJGukuH3D2+D+3H4JWLaAsJ/ji86dhRidzZ/Od7H/i8g+aCmvkeCc6Ni/f9uxGLSQVCRZkX2/lqEFG2BvWtlQ==,
+      }
+
   "@types/body-parser@1.19.6":
     resolution:
       {
@@ -1947,6 +1959,13 @@ packages:
         integrity: sha512-NF+epuEdnUYVlGuhaxbbq+dvJttwLnGY+YixlXlME5KpQ5W3CnXA5cVTneY3SPbPDRkcjMbifrwmFYcClgOZeg==,
       }
     engines: { node: ">= 0.8" }
+
+  bcrypt@6.0.0:
+    resolution:
+      {
+        integrity: sha512-cU8v/EGSrnH+HnxV2z0J7/blxH8gq7Xh2JFT6Aroax7UohdmiJJlxApMxtKfuI7z68NvvVcmR78k2LbT6efhRg==,
+      }
+    engines: { node: ">= 18" }
 
   binary-extensions@2.3.0:
     resolution:
@@ -3906,6 +3925,20 @@ packages:
       sass:
         optional: true
 
+  node-addon-api@8.5.0:
+    resolution:
+      {
+        integrity: sha512-/bRZty2mXUIFY/xU5HLvveNHlswNJej+RnxBjOMkidWfwZzgTbPG1E3K5TOxRLOR+5hX7bSofy8yf1hZevMS8A==,
+      }
+    engines: { node: ^18 || ^20 || >= 21 }
+
+  node-gyp-build@4.8.4:
+    resolution:
+      {
+        integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==,
+      }
+    hasBin: true
+
   node-releases@2.0.27:
     resolution:
       {
@@ -5659,6 +5692,10 @@ snapshots:
     dependencies:
       "@types/node": 25.0.10
 
+  "@types/bcrypt@6.0.0":
+    dependencies:
+      "@types/node": 25.0.10
+
   "@types/body-parser@1.19.6":
     dependencies:
       "@types/connect": 3.4.38
@@ -6127,6 +6164,11 @@ snapshots:
   basic-auth@2.0.1:
     dependencies:
       safe-buffer: 5.1.2
+
+  bcrypt@6.0.0:
+    dependencies:
+      node-addon-api: 8.5.0
+      node-gyp-build: 4.8.4
 
   binary-extensions@2.3.0: {}
 
@@ -7436,6 +7478,10 @@ snapshots:
     transitivePeerDependencies:
       - "@babel/core"
       - babel-plugin-macros
+
+  node-addon-api@8.5.0: {}
+
+  node-gyp-build@4.8.4: {}
 
   node-releases@2.0.27: {}
 
