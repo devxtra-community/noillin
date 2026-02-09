@@ -12,7 +12,7 @@ redis.on("connect", ()=>{
 })
 
 redis.on("reconnecting", () => {
-  logger.warn("Redis reconnecting...");
+  logger.warn("Redis reconnecting..");
 });
 
 redis.on("error", (err:unknown)=>{
