@@ -17,7 +17,7 @@
 // export const authService = new AuthService();
 import bcrypt from "bcrypt";
 
-import { signAccessToken, signRefreshToken } from "../modules/auth/auth.utils.js";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../modules/auth/auth.utils.js";
 import type { HttpError } from "../modules/auth/http-error.js";
 import { userRepository } from "../repositories/user.repository.js"
 import { pendingSignupRepository } from "../repositories/Signup.repository.js";
@@ -61,6 +61,7 @@ export const signupService = async (data: SignupInput) => {
 
   return { message: "Signup request submitted for review" };
 };
+
 
 
 interface LoginResult {
@@ -130,3 +131,74 @@ export const loginService = async(
     }
   }
 }
+
+
+interface RefreshResult {
+  accessToken: string;
+  refreshToken: string;
+}
+export const refreshTokenService = async (
+  refreshToken: string
+): Promise<RefreshResult> => {
+  if (!refreshToken) {
+    const err: HttpError = new Error("Refresh token required");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  let payload;
+  try {
+    payload = verifyRefreshToken(refreshToken);
+  } catch {
+    const err: HttpError = new Error("Invalid refresh token");
+    err.statusCode = 401;
+    throw err;
+  }
+
+  const user = await userRepository.findById(payload.userId);
+
+  // ✅ FIRST check user existence
+  if (!user || !user.refreshToken) {
+    const err: HttpError = new Error("Refresh token mismatch");
+    err.statusCode = 401;
+    throw err;
+  }
+
+
+  // ✅ Compare after narrowing
+  if (user.refreshToken.trim() !== refreshToken.trim()) {
+    const err: HttpError = new Error("Refresh token mismatch");
+    err.statusCode = 401;
+    throw err;
+  }
+
+  const newPayload = {
+    userId: user._id.toString(),
+    role: user.role,
+    adminLevel: user.adminLevel ?? null,
+  };
+
+  const newAccessToken = signAccessToken(newPayload);
+  const newRefreshToken = signRefreshToken(newPayload);
+
+  await userRepository.saveRefreshToken(user._id.toString(), newRefreshToken);
+
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+  };
+};
+
+
+export const logoutService = async (userId: string) => {
+  if (!userId) {
+    const err: HttpError = new Error("User not authenticated");
+    err.statusCode = 401;
+    throw err;
+  }
+
+  // Invalidate refresh token
+  await userRepository.saveRefreshToken(userId, "");
+
+  return { message: "Logged out successfully" };
+};

@@ -12,8 +12,14 @@ class UserRepository{
     return User.findOne({ email });
   }
 
+    async findById(userId: string) {
+      return User.findById(userId).select("+refreshToken");
+}
+
+
     async saveRefreshToken(userId:string, refreshToken:string){
-        return User.findByIdAndUpdate(userId,{refreshToken})
+        return User.findByIdAndUpdate(userId,{refreshToken}, { new: true }
+)
     }
     
   async create(data: {
