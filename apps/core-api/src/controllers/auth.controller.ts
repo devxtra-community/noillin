@@ -1,9 +1,18 @@
-import type { NextFunction, Request, Response } from "express";
 
-import { logoutService, refreshTokenService } from "../services/auth.service.js";
-import { loginService, signupService } from "../services/auth.service.js";
+import type { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
+
+import { User } from "../modules/users/user.model.js"; 
+import {
+  logoutService,
+  refreshTokenService,
+  loginService,
+  signupService,
+} from "../services/auth.service.js";
 import type { HttpError } from "../modules/auth/http-error.js";
 
+
+// ================= SIGNUP =================
 export const signupController = async (
   req: Request,
   res: Response,
@@ -27,6 +36,7 @@ export const signupController = async (
 
     res.status(201).json({
       success: true,
+      message: "Signup successful. Please verify your email.",
       data: result,
     });
   } catch (error) {
@@ -34,6 +44,8 @@ export const signupController = async (
   }
 };
 
+
+// ================= LOGIN =================
 export const loginController = async (
   req: Request,
   res: Response,
@@ -60,6 +72,55 @@ export const loginController = async (
 };
 
 
+// ================= EMAIL VERIFICATION =================
+export const verifyEmailController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      const err: HttpError = new Error("Token missing");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const decoded = jwt.verify(
+      token as string,
+      process.env.EMAIL_VERIFICATION_SECRET as string
+    ) as { userId: string };
+
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      const err: HttpError = new Error("Invalid token");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already verified",
+      });
+    }
+
+    user.isEmailVerified = true;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully. Await admin approval.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// ================= REFRESH TOKEN =================
 export const refreshTokenController = async (
   req: Request,
   res: Response,
@@ -79,16 +140,23 @@ export const refreshTokenController = async (
   }
 };
 
+
+// ================= LOGOUT =================
 export const logoutController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const userId = req.user?.userId; 
+    const userId = req.user?.userId;
+
     if (!userId) {
-      return res.status(401).json({ success: false, message: "Unauthorized" });
-}
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
     const result = await logoutService(userId);
 
     res.status(200).json({
@@ -99,3 +167,4 @@ export const logoutController = async (
     next(error);
   }
 };
+

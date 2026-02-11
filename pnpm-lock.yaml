@@ -70,6 +70,12 @@ importers:
       morgan:
         specifier: ^1.10.1
         version: 1.10.1
+      node-cron:
+        specifier: ^4.2.1
+        version: 4.2.1
+      nodemailer:
+        specifier: ^8.0.1
+        version: 8.0.1
       winston:
         specifier: ^3.19.0
         version: 3.19.0
@@ -92,6 +98,9 @@ importers:
       "@types/node":
         specifier: ^25.0.10
         version: 25.0.10
+      "@types/nodemailer":
+        specifier: ^7.0.9
+        version: 7.0.9
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -1345,6 +1354,12 @@ packages:
     resolution:
       {
         integrity: sha512-zWW5KPngR/yvakJgGOmZ5vTBemDoSqF3AcV/LrO5u5wTWyEAVVh+IT39G4gtyAkh3CtTZs8aX/yRM82OfzHJRg==,
+      }
+
+  "@types/nodemailer@7.0.9":
+    resolution:
+      {
+        integrity: sha512-vI8oF1M+8JvQhsId0Pc38BdUP2evenIIys7c7p+9OZXSPOH5c1dyINP1jT8xQ2xPuBUXmIC87s+91IZMDjH8Ow==,
       }
 
   "@types/qs@6.14.0":
@@ -3932,6 +3947,13 @@ packages:
       }
     engines: { node: ^18 || ^20 || >= 21 }
 
+  node-cron@4.2.1:
+    resolution:
+      {
+        integrity: sha512-lgimEHPE/QDgFlywTd8yTR61ptugX3Qer29efeyWw2rv259HtGBNn1vZVmp8lB9uo9wC0t/AT4iGqXxia+CJFg==,
+      }
+    engines: { node: ">=6.0.0" }
+
   node-gyp-build@4.8.4:
     resolution:
       {
@@ -3944,6 +3966,13 @@ packages:
       {
         integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==,
       }
+
+  nodemailer@8.0.1:
+    resolution:
+      {
+        integrity: sha512-5kcldIXmaEjZcHR6F28IKGSgpmZHaF1IXLWFTG+Xh3S+Cce4MiakLtWY+PlBU69fLbRa8HlaGIrC/QolUpHkhg==,
+      }
+    engines: { node: ">=6.0.0" }
 
   nodemon@3.1.11:
     resolution:
@@ -5749,6 +5778,10 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
+  "@types/nodemailer@7.0.9":
+    dependencies:
+      "@types/node": 25.0.10
+
   "@types/qs@6.14.0": {}
 
   "@types/range-parser@1.2.7": {}
@@ -7481,9 +7514,13 @@ snapshots:
 
   node-addon-api@8.5.0: {}
 
+  node-cron@4.2.1: {}
+
   node-gyp-build@4.8.4: {}
 
   node-releases@2.0.27: {}
+
+  nodemailer@8.0.1: {}
 
   nodemon@3.1.11:
     dependencies:
