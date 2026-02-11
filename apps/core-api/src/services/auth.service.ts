@@ -51,16 +51,33 @@ export const signupService = async (data: SignupInput) => {
 
   const passwordHash = await bcrypt.hash(data.password, 10);
 
+  // 🔥 GENERATE OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  console.log("Generated OTP:", otp); // 👈 ADD THIS LINE
+  const hashedOtp = await bcrypt.hash(otp, 10);
+
   await pendingSignupRepository.create({
     email: data.email.toLowerCase(),
     passwordHash,
     role: data.role,
     documents: data.documents,
     status: "PENDING",
+
+    // 🔐 OTP fields
+    emailOtpHash: hashedOtp,
+    emailOtpExpiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    otpAttempts: 0,
+    otpResendCount: 0,
+    otpLastSentAt: new Date(),
+    isEmailVerified: false,
   });
 
-  return { message: "Signup request submitted for review" };
+  // 🔥 SEND OTP EMAIL HERE
+  // await sendOtpEmail(data.email, otp);
+
+  return { message: "OTP sent to your email" };
 };
+
 
 
 
