@@ -28,10 +28,10 @@ app.use(httpLogger);
 app.use(express.json());
 app.use("/api", router);
 
-// 🔥 Connect Database
+//  Connect Database
 connectDB();
 
-// 🔥 CRON JOB (Runs every hour)
+//  CRON JOB (Runs every hour)
 cron.schedule("0 * * * *", async () => {
   logger.info("Running cleanup for expired pending signups...");
   await cleanupExpiredSignups();
