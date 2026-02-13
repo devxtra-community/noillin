@@ -12,6 +12,7 @@ export enum AdminLevel {
 }
 
 export enum UserStatus {
+  PENDING = "PENDING",   // 🔥 add this
   ACTIVE = "ACTIVE",
   SUSPENDED = "SUSPENDED",
 }
@@ -59,7 +60,7 @@ const UserSchema = new Schema<IUser>(
     status: {
       type: String,
       enum: Object.values(UserStatus),
-      default: UserStatus.ACTIVE,
+      default: UserStatus.PENDING, // 🔥 start as pending
     },
     refreshToken: {
       type: String,
@@ -68,6 +69,7 @@ const UserSchema = new Schema<IUser>(
   },
   { timestamps: true }
 );
+
 UserSchema.index({ role: 1, status: 1 });
 
-export const User = model<IUser>("User", UserSchema)
+export const User = model<IUser>("User", UserSchema);
