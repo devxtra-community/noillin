@@ -10,4 +10,4 @@ router.post("/refresh", refreshTokenController);
 router.post("/logout", authenticate, logoutController);
 router.get("/verify-email", verifyEmailController);
 
-export default router
+export default router                   

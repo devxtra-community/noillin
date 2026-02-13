@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-import { User } from "../modules/users/user.model.js"; 
+import { User } from "../models/user.model.js";
 import {
   logoutService,
   refreshTokenService,
@@ -30,7 +30,7 @@ export const signupController = async (
       email,
       password,
       role,
-      documents: businessInfo ,
+      documents: businessInfo,
     });
 
     res.status(201).json({
@@ -61,9 +61,21 @@ export const loginController = async (
 
     const data = await loginService(email, password);
 
+    // Set refresh token as HttpOnly cookie
+    res.cookie("refreshToken", data.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Send only access token and user info in response
     res.status(200).json({
       success: true,
-      data,
+      data: {
+        accessToken: data.accessToken,
+        user: data.user,
+      },
     });
   } catch (error) {
     next(error);
@@ -126,13 +138,30 @@ export const refreshTokenController = async (
   next: NextFunction
 ) => {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      const err: HttpError = new Error("Refresh token missing");
+      err.statusCode = 401;
+      throw err;
+    }
 
     const result = await refreshTokenService(refreshToken);
 
+    // Set new refresh token as HttpOnly cookie
+    res.cookie("refreshToken", result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Send only access token in response
     res.status(200).json({
       success: true,
-      data: result,
+      data: {
+        accessToken: result.accessToken,
+      },
     });
   } catch (error) {
     next(error);
@@ -157,6 +186,13 @@ export const logoutController = async (
     }
 
     const result = await logoutService(userId);
+
+    // Clear refresh token cookie
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
 
     res.status(200).json({
       success: true,

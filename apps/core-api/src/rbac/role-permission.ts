@@ -1,5 +1,5 @@
 
-import { UserRole } from "../modules/users/user.model.js";
+import { UserRole } from "../models/user.model.js";
 
 import { Permission } from "./permission.js";
 
