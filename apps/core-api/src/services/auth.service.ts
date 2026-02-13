@@ -22,6 +22,8 @@ import type { HttpError } from "../modules/auth/http-error.js";
 import { userRepository } from "../repositories/user.repository.js"
 import { pendingSignupRepository } from "../repositories/Signup.repository.js";
 import { logger } from "../utils/logger.js";
+import { sendOtpEmail } from "../utils/sendotpEmail.js";
+
 
 // import { sendMail } from "../../utils/nodemailer";
 
@@ -50,6 +52,11 @@ export const signupService = async (data: SignupInput) => {
   }
 
   const passwordHash = await bcrypt.hash(data.password, 10);
+
+  //  GENERATE OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  await sendOtpEmail(data.email, otp);
+  const hashedOtp = await bcrypt.hash(otp, 10);
 
   await pendingSignupRepository.create({
     email: data.email.toLowerCase(),
