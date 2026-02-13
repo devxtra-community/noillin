@@ -4,8 +4,9 @@ import { PendingSignup } from "../models/pendingSignup.models.js";
 interface CreatePendingSignupInput {
   email: string;
   passwordHash: string;
+  documents: string;
   role: "INFLUENCER" | "BRAND";
-  documents: string[];
+
   status: "PENDING" | "APPROVED" | "REJECTED";
 
   // 🔐 OTP fields (optional)

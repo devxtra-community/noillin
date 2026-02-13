@@ -31,7 +31,7 @@ interface SignupInput {
   email: string;
   password: string;
   role: "INFLUENCER" | "BRAND";
-  documents: string[];
+  documents: string;
 }
 
 export const signupService = async (data: SignupInput) => {
@@ -64,22 +64,10 @@ export const signupService = async (data: SignupInput) => {
     role: data.role,
     documents: data.documents,
     status: "PENDING",
-
-    // 🔐 OTP fields
-    emailOtpHash: hashedOtp,
-    emailOtpExpiresAt: new Date(Date.now() + 5 * 60 * 1000),
-    otpAttempts: 0,
-    otpResendCount: 0,
-    otpLastSentAt: new Date(),
-    isEmailVerified: false,
   });
 
-  // 🔥 SEND OTP EMAIL HERE
-  // await sendOtpEmail(data.email, otp);
-
-  return { message: "OTP sent to your email" };
+  return { message: "Signup request submitted for review" };
 };
-
 
 
 

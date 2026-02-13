@@ -1,4 +1,3 @@
-
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
@@ -19,7 +18,7 @@ export const signupController = async (
   next: NextFunction
 ) => {
   try {
-    const { email, password, role, documents } = req.body;
+    const { email, password, role, documents: businessInfo } = req.body;
 
     if (!email || !password || !role) {
       const err: HttpError = new Error("Missing required fields");
@@ -31,7 +30,7 @@ export const signupController = async (
       email,
       password,
       role,
-      documents: documents ?? [],
+      documents: businessInfo ,
     });
 
     res.status(201).json({

@@ -1,3 +1,5 @@
+
+import cors from "cors"
 import "dotenv/config";
 import express from "express";
 import cron from "node-cron";
@@ -12,9 +14,16 @@ import router from "./routes/index.js";
 import { connectDB } from "./db/connect.js";
 import { cleanupExpiredSignups } from "./services/verification.service.js";
 
-const app = express();
-const PORT = Number(process.env.PORT) || 5000;
 
+
+const app = express()
+const PORT = Number(process.env.PORT) || 5000
+app.use(httpLogger)
+app.use(express.json())
+app.use(cors({origin: "*"})) 
+app.use("/", router)
+
+connectDB()
 app.use(httpLogger);
 app.use(express.json());
 app.use("/api", router);

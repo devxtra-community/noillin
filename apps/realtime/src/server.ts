@@ -1,6 +1,7 @@
 import { createServer } from "http";
 
 import express from "express";
+import cors from "cors";
 import { Server } from "socket.io";
 
 import { httpLogger } from "./middlewares/httpLogger";
@@ -8,6 +9,7 @@ import { logger } from "./utils/logger";
 import { errorHandler, notFound } from "./middlewares/errorHandler";
 
 const app = express();
+app.use(cors())
 app.use(express.json())
 app.use(httpLogger)
 const httpServer = createServer(app);

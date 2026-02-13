@@ -156,7 +156,7 @@ export const approveSignupService = async (email: string) => {
 // ================= REJECT SIGNUP =================
 export const rejectSignupService = async (
   email: string,
-  reason?: string
+  _reason?: string
 ) => {
   const pending = await pendingSignupRepository.findByEmail(email);
 

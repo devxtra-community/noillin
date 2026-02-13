@@ -18,8 +18,8 @@ const PendingSignupSchema = new Schema(
       enum: ["INFLUENCER", "BRAND"],
       required: true,
     },
+    documents: { type: String },
 
-    documents: [{ type: String }],
 
     status: {
       type: String,
