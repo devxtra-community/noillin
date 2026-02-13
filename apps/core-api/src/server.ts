@@ -1,5 +1,6 @@
 import  "dotenv/config" 
 import express from "express"
+import cors from "cors"
 
 import { httpLogger } from "./middlewares/httpLogger.js"
 import { logger } from "./utils/logger.js"
@@ -15,7 +16,9 @@ const app = express()
 const PORT = Number(process.env.PORT) || 5000
 app.use(httpLogger)
 app.use(express.json())
-app.use("/api", router)
+app.use(cors({origin: "*"})) 
+app.use("/", router)
+
 connectDB()
 
 app.get("/health", (req, res) => {

@@ -1,9 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+
+import api from "@/lib/axios.client";
 
 export default function LoginPage() {
-  const [role, setRole] = useState<"brand" | "influencer">("brand");
+  const [role, setRole] = useState<"BRAND" | "INFLUENCER">("BRAND");
+  const[formData,setFormData]=useState({
+    email:"",
+    password:""
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleInputChange=(e: React.ChangeEvent<HTMLInputElement>)=>{
+    const {name,value}=e.target;
+    setFormData(prev=>({
+      ...prev,
+      [name]:value
+      
+    }));
+  }
+
+    const handleSubmit=async (e:React.FormEvent<HTMLFormElement>)=>{
+      e.preventDefault();
+      setLoading(true);
+      setError("");
+      console.log("In submit")
+      try {
+        const payload={
+        email:formData.email,
+        password:formData.password,
+        role:role
+      }
+
+      const response=await api.post("/auth/login",payload);
+
+      if(response.data.accessToken){
+        localStorage.setItem("accessToken",response.data.accessToken);
+        window.location.href="/signup";
+      }
+
+      } catch (error) {
+        const errorMessage=error instanceof Error ? error.message : "Login failed. Please try again.";
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+
+
+    }
+    
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -22,9 +69,9 @@ export default function LoginPage() {
         <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
           <button
             type="button"
-            onClick={() => setRole("brand")}
+            onClick={() => setRole("BRAND")}
             className={`w-1/2 py-2 sm:py-2.5 text-sm font-medium rounded-sm transition hover:cursor-pointer ${
-              role === "brand"
+              role === "BRAND"
                 ? "bg-white shadow text-gray-900"
                 : "text-gray-500 "
             }`}
@@ -34,9 +81,9 @@ export default function LoginPage() {
 
           <button
             type="button"
-            onClick={() => setRole("influencer")}
+            onClick={() => setRole("INFLUENCER")}
             className={`w-1/2 py-2 sm:py-2.5 text-sm font-medium rounded-md transition hover:cursor-pointer ${
-              role === "influencer"
+              role === "INFLUENCER"
                 ? "bg-white shadow text-gray-900"
                 : "text-gray-500"
             }`}
@@ -45,13 +92,19 @@ export default function LoginPage() {
           </button>
         </div>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          {error &&(
+            <div className="text-red-500 text-sm">{error}</div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Email address
             </label>
             <input
               type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-50"
             />
           </div>
@@ -72,6 +125,9 @@ export default function LoginPage() {
             <input
               type="password"
               placeholder="••••••••"
+              name="password"
+              value={formData.password}
+              onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-50"
             />
           </div>
@@ -80,7 +136,8 @@ export default function LoginPage() {
             type="submit"
             className="w-full py-2.5 rounded-lg font-medium text-white transition hover:cursor-pointer bg-[#059669] hover:bg-[#047857]"
           >
-            Sign In as {role === "brand" ? "Brand" : "Influencer"}
+            Sign In as {role === "BRAND" ? "Brand" : "Influencer"}
+            {loading && <span className="ml-2">...</span>}
           </button>
         </form>
 

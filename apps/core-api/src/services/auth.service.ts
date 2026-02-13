@@ -29,7 +29,7 @@ interface SignupInput {
   email: string;
   password: string;
   role: "INFLUENCER" | "BRAND";
-  documents: string[];
+  documents: string;
 }
 
 export const signupService = async (data: SignupInput) => {

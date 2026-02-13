@@ -5,7 +5,7 @@ interface CreatePendingSignupInput {
   role: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   passwordHash: string;
-  documents: string[];
+  documents: string;
 
 
 }
