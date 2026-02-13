@@ -23,7 +23,6 @@ import { userRepository } from "../repositories/user.repository.js"
 import { pendingSignupRepository } from "../repositories/Signup.repository.js";
 import { logger } from "../utils/logger.js";
 
-// import { sendMail } from "../../utils/nodemailer";
 
 interface SignupInput {
   email: string;
@@ -157,7 +156,6 @@ export const refreshTokenService = async (
 
   const user = await userRepository.findById(payload.userId);
 
-  // ✅ FIRST check user existence
   if (!user || !user.refreshToken) {
     const err: HttpError = new Error("Refresh token mismatch");
     err.statusCode = 401;
@@ -165,7 +163,6 @@ export const refreshTokenService = async (
   }
 
 
-  // ✅ Compare after narrowing
   if (user.refreshToken.trim() !== refreshToken.trim()) {
     const err: HttpError = new Error("Refresh token mismatch");
     err.statusCode = 401;
@@ -197,7 +194,6 @@ export const logoutService = async (userId: string) => {
     throw err;
   }
 
-  // Invalidate refresh token
   await userRepository.saveRefreshToken(userId, "");
 
   return { message: "Logged out successfully" };
