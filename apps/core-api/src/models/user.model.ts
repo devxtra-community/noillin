@@ -12,7 +12,7 @@ export enum AdminLevel {
 }
 
 export enum UserStatus {
-  PENDING = "PENDING",   // add this
+  PENDING = "PENDING",   // 🔥 add this
   ACTIVE = "ACTIVE",
   SUSPENDED = "SUSPENDED",
 }
@@ -60,7 +60,7 @@ const UserSchema = new Schema<IUser>(
     status: {
       type: String,
       enum: Object.values(UserStatus),
-      default: UserStatus.PENDING, //  start as pending
+      default: UserStatus.PENDING, // 🔥 start as pending
     },
     refreshToken: {
       type: String,
