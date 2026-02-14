@@ -2,55 +2,54 @@
 
 import React, { useState } from "react";
 
-import api from "@/lib/axios.client";
+import api, { setAccessToken } from "@/lib/axios.client";
 
 export default function LoginPage() {
   const [role, setRole] = useState<"BRAND" | "INFLUENCER">("BRAND");
-  const[formData,setFormData]=useState({
-    email:"",
-    password:""
+  const [formData, setFormData] = useState({
+    email: "",
+    password: ""
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleInputChange=(e: React.ChangeEvent<HTMLInputElement>)=>{
-    const {name,value}=e.target;
-    setFormData(prev=>({
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
       ...prev,
-      [name]:value
-      
+      [name]: value
+
     }));
   }
 
-    const handleSubmit=async (e:React.FormEvent<HTMLFormElement>)=>{
-      e.preventDefault();
-      setLoading(true);
-      setError("");
-      console.log("In submit")
-      try {
-        const payload={
-        email:formData.email,
-        password:formData.password,
-        role:role
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const payload = {
+        email: formData.email,
+        password: formData.password,
+        role: role
       }
 
-      const response=await api.post("/auth/login",payload);
+      const response = await api.post("/auth/login", payload);
 
-      if(response.data.accessToken){
-        localStorage.setItem("accessToken",response.data.accessToken);
-        window.location.href="/signup";
+      // Access token is now in response.data.data.accessToken
+      if (response.data.data?.accessToken) {
+        setAccessToken(response.data.data.accessToken);
+        window.location.href = "/dashboard";
       }
 
-      } catch (error) {
-        const errorMessage=error instanceof Error ? error.message : "Login failed. Please try again.";
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-
-
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Login failed. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
-    
+  }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -70,11 +69,10 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => setRole("BRAND")}
-            className={`w-1/2 py-2 sm:py-2.5 text-sm font-medium rounded-sm transition hover:cursor-pointer ${
-              role === "BRAND"
-                ? "bg-white shadow text-gray-900"
-                : "text-gray-500 "
-            }`}
+            className={`w-1/2 py-2 sm:py-2.5 text-sm font-medium rounded-sm transition hover:cursor-pointer ${role === "BRAND"
+              ? "bg-white shadow text-gray-900"
+              : "text-gray-500 "
+              }`}
           >
             Brand
           </button>
@@ -82,18 +80,17 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => setRole("INFLUENCER")}
-            className={`w-1/2 py-2 sm:py-2.5 text-sm font-medium rounded-md transition hover:cursor-pointer ${
-              role === "INFLUENCER"
-                ? "bg-white shadow text-gray-900"
-                : "text-gray-500"
-            }`}
+            className={`w-1/2 py-2 sm:py-2.5 text-sm font-medium rounded-md transition hover:cursor-pointer ${role === "INFLUENCER"
+              ? "bg-white shadow text-gray-900"
+              : "text-gray-500"
+              }`}
           >
             Influencer
           </button>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          {error &&(
+          {error && (
             <div className="text-red-500 text-sm">{error}</div>
           )}
           <div>
