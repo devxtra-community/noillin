@@ -12,7 +12,7 @@ export enum AdminLevel {
 }
 
 export enum UserStatus {
-  PENDING = "PENDING",   // 🔥 add this
+  PENDING = "PENDING",
   ACTIVE = "ACTIVE",
   SUSPENDED = "SUSPENDED",
 }
@@ -25,6 +25,12 @@ export interface IUser extends Document {
   isEmailVerified: boolean;
   status: UserStatus;
   refreshToken?: string;
+
+  // 🔐 Forgot Password Fields
+  resetOtp?: string;
+  resetOtpExpiry?: Date;
+  resetSessionToken?: string;
+  resetSessionExpiry?: Date;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -38,38 +44,67 @@ const UserSchema = new Schema<IUser>(
       index: true,
       immutable: true,
     },
+
     password: {
       type: String,
       required: true,
-      select: false,
+      select: false, // 🔐 never return password
     },
+
     role: {
       type: String,
       enum: Object.values(UserRole),
       required: true,
     },
+
     adminLevel: {
       type: String,
       enum: Object.values(AdminLevel),
       default: null,
     },
+
     isEmailVerified: {
       type: Boolean,
       default: false,
     },
+
     status: {
       type: String,
       enum: Object.values(UserStatus),
-      default: UserStatus.PENDING, // 🔥 start as pending
+      default: UserStatus.PENDING,
     },
+
     refreshToken: {
       type: String,
       select: false,
+    },
+
+    // ================================
+    // 🔐 FORGOT PASSWORD FIELDS
+    // ================================
+
+    resetOtp: {
+      type: String,
+      select: false, // never return OTP
+    },
+
+    resetOtpExpiry: {
+      type: Date,
+    },
+
+    resetSessionToken: {
+      type: String,
+      select: false, // never expose session token
+    },
+
+    resetSessionExpiry: {
+      type: Date,
     },
   },
   { timestamps: true }
 );
 
+// compound index (already yours)
 UserSchema.index({ role: 1, status: 1 });
 
 export const User = model<IUser>("User", UserSchema);
