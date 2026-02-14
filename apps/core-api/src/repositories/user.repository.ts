@@ -2,17 +2,17 @@ import { User } from "../modules/users/user.model.js";
 
 class UserRepository {
 
-  // ===============================
+  
   // FIND USER WITH PASSWORD
-  // ===============================
+  
   async findEmailWithPassword(email: string) {
     const normalizedEmail = email.trim().toLowerCase();
     return User.findOne({ email: normalizedEmail }).select("+password");
   }
 
-  // ===============================
+  
   // FIND USER WITH RESET FIELDS
-  // ===============================
+  
   async findByEmailWithResetFields(email: string) {
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -20,24 +20,23 @@ class UserRepository {
       .select("+password +resetOtp +resetSessionToken");
   }
 
-  // ===============================
+  
   // NORMAL FIND BY EMAIL
-  // ===============================
+  
   async findByEmail(email: string) {
     const normalizedEmail = email.trim().toLowerCase();
     return User.findOne({ email: normalizedEmail });
   }
 
-  // ===============================
   // FIND BY ID
-  // ===============================
+  
   async findById(userId: string) {
     return User.findById(userId).select("+refreshToken");
   }
 
-  // ===============================
+  
   // SAVE REFRESH TOKEN
-  // ===============================
+  
   async saveRefreshToken(userId: string, refreshToken: string) {
     return User.findByIdAndUpdate(
       userId,
@@ -46,9 +45,9 @@ class UserRepository {
     );
   }
 
-  // ===============================
+  
   // SAVE RESET OTP
-  // ===============================
+  
   async saveResetOtp(
     userId: string,
     hashedOtp: string,
@@ -64,9 +63,9 @@ class UserRepository {
     );
   }
 
-  // ===============================
+  
   // SAVE RESET SESSION TOKEN
-  // ===============================
+  
   async saveResetSession(
     userId: string,
     token: string,
@@ -84,9 +83,9 @@ class UserRepository {
     );
   }
 
-  // ===============================
+  
   // UPDATE PASSWORD (Production-Safe)
-  // ===============================
+  
   async updatePassword(userId: string, hashedPassword: string) {
     return User.findByIdAndUpdate(
       userId,
@@ -101,9 +100,9 @@ class UserRepository {
     );
   }
 
-  // ===============================
+  
   // CLEAR RESET SESSION
-  // ===============================
+  
   async clearResetSession(userId: string) {
     return User.findByIdAndUpdate(
       userId,
@@ -115,9 +114,9 @@ class UserRepository {
     );
   }
 
-  // ===============================
+  
   // CREATE USER
-  // ===============================
+  
   async create(data: {
     email: string;
     password: string;
