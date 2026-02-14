@@ -15,6 +15,8 @@
 // }
 
 // export const authService = new AuthService();
+import crypto from "crypto";
+
 import bcrypt from "bcrypt";
 
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../modules/auth/auth.utils.js";
@@ -209,3 +211,118 @@ export const logoutService = async (userId: string) => {
 
   return { message: "Logged out successfully" };
 };
+
+
+// forgotPasswordService
+
+export const forgotPasswordService = async (email: string) => {
+  const user = await userRepository.findEmailWithPassword(email);
+
+  if (!user) return; // security: don't reveal existence
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  console.log("RESET OTP:", otp); // 👈 ADD THIS LINE
+  console.log("Forgot password controller triggered");
+
+  const hashedOtp = await bcrypt.hash(otp, 10);
+
+  const expiry = new Date(Date.now() + 10 * 60 * 1000);
+
+  await userRepository.saveResetOtp(
+    user._id.toString(),
+    hashedOtp,
+    expiry
+  );
+
+  await sendOtpEmail(email, otp);
+
+  logger.info(`Reset OTP sent to ${email}`);
+};
+
+// verifyOtpService
+
+export const verifyOtpService = async (
+  email: string,
+  otp: string
+): Promise<string> => {
+
+  const user = await userRepository.findByEmailWithResetFields(email);
+
+  if (!user || !user.resetOtp || !user.resetOtpExpiry) {
+    const err: HttpError = new Error("Invalid request");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (user.resetOtpExpiry < new Date()) {
+    const err: HttpError = new Error("OTP expired");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const isMatch = await bcrypt.compare(otp, user.resetOtp);
+
+  if (!isMatch) {
+    const err: HttpError = new Error("Invalid OTP");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const resetSessionToken = crypto.randomBytes(32).toString("hex");
+
+  const sessionExpiry = new Date(Date.now() + 10 * 60 * 1000);
+
+  await userRepository.saveResetSession(
+    user._id.toString(),
+    resetSessionToken,
+    sessionExpiry
+  );
+
+  return resetSessionToken;
+};
+
+// resetPasswordService
+
+export const resetPasswordService = async (
+  email: string,
+  newPassword: string,
+  resetSessionToken: string
+) => {
+
+  const user = await userRepository.findByEmailWithResetFields(email);
+
+  if (
+    !user ||
+    !user.resetSessionToken ||
+    !user.resetSessionExpiry
+  ) {
+    const err: HttpError = new Error("Invalid request");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (user.resetSessionToken !== resetSessionToken) {
+    const err: HttpError = new Error("Invalid session");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (user.resetSessionExpiry < new Date()) {
+    const err: HttpError = new Error("Session expired");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  await userRepository.updatePassword(
+    user._id.toString(),
+    hashedPassword
+  );
+
+  await userRepository.clearResetSession(user._id.toString());
+
+  logger.info(`Password reset successful for ${email}`);
+};
+
+
