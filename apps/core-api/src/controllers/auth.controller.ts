@@ -7,8 +7,12 @@ import {
   refreshTokenService,
   loginService,
   signupService,
+  forgotPasswordService,
+  verifyOtpService,
+  resetPasswordService,
 } from "../services/auth.service.js";
 import type { HttpError } from "../modules/auth/http-error.js";
+// import { log } from "winston";
 
 
 // ================= SIGNUP =================
@@ -202,4 +206,87 @@ export const logoutController = async (
     next(error);
   }
 };
+
+// ================= FORGOT PASSWORD =================
+export const forgotPasswordController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      const err: HttpError = new Error("Email is required");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    await forgotPasswordService(email);
+
+    res.status(200).json({
+      success: true,
+      message: "If account exists, OTP sent",
+      
+    });
+   
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ================= VERIFY OTP =================
+export const verifyOtpController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      const err: HttpError = new Error("Email and OTP required");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const resetSessionToken = await verifyOtpService(email, otp);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP verified",
+      data: { resetSessionToken },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ================= RESET PASSWORD =================
+export const resetPasswordController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, newPassword, resetSessionToken } = req.body;
+
+    if (!email || !newPassword || !resetSessionToken) {
+      const err: HttpError = new Error("Missing required fields");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    await resetPasswordService(email, newPassword, resetSessionToken);
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successful",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 
