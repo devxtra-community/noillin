@@ -30,6 +30,7 @@ app.use(cors({
 connectDB()
 app.use(httpLogger);
 app.use(express.json());
+
 app.use("/api", router);
 
 //  Connect Database
