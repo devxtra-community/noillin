@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 
-import api, { setAccessToken } from "@/lib/axios.client";
+import api from "@/lib/axios.client";
+import { useAuthStore } from "@/store/auth.store";
+
+
 
 export default function LoginPage() {
   const [role, setRole] = useState<"BRAND" | "INFLUENCER">("BRAND");
@@ -12,7 +15,7 @@ export default function LoginPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const setAuth = useAuthStore((state)=>state.setAuth)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -38,7 +41,8 @@ export default function LoginPage() {
 
       // Access token is now in response.data.data.accessToken
       if (response.data.data?.accessToken) {
-        setAccessToken(response.data.data.accessToken);
+        const {accessToken, user} = response.data.data
+        setAuth(accessToken, user)
         window.location.href = "/dashboard";
       }
 

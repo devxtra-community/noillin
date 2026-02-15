@@ -1,13 +1,7 @@
 import axios from 'axios';
 
-// Store access token in memory (more secure than localStorage)
-let accessToken: string | null = null;
+import { useAuthStore } from '@/store/auth.store';
 
-export const  setAccessToken = (token: string | null) => {
-    accessToken = token;
-};
-
-export const getAccessToken = () => accessToken;
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -17,10 +11,11 @@ const api = axios.create({
     }
 })
 
+
 // Request interceptor
 api.interceptors.request.use(
     (config) => {
-        const token = getAccessToken();
+        const token = useAuthStore.getState().accessToken;
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`
@@ -71,9 +66,14 @@ api.interceptors.response.use(
                 // Try to refresh the token
                 const response = await api.post("/auth/refresh");
                 const newAccessToken = response.data.data.accessToken;
-
+                const currentUser = useAuthStore.getState().user
+                if (!currentUser) {
+                    useAuthStore.getState().clearAuth();
+                    window.location.href = "/login";
+                    return Promise.reject(new Error("User not found"));
+                }
                 // Save new access token in memory
-                setAccessToken(newAccessToken);
+                useAuthStore.getState().setAuth(newAccessToken, currentUser);
 
                 // Update authorization header
                 api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
@@ -87,7 +87,7 @@ api.interceptors.response.use(
             } catch (refreshError) {
                 // Refresh failed, clear token and redirect to login
                 processQueue(refreshError as Error, null);
-                setAccessToken(null);
+                useAuthStore.getState().clearAuth();
                 window.location.href = "/signup";
                 return Promise.reject(refreshError);
             } finally {
