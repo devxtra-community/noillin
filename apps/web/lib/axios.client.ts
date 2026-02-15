@@ -67,6 +67,11 @@ api.interceptors.response.use(
                 const response = await api.post("/auth/refresh");
                 const newAccessToken = response.data.data.accessToken;
                 const currentUser = useAuthStore.getState().user
+                if (!currentUser) {
+                    useAuthStore.getState().clearAuth();
+                    window.location.href = "/login";
+                    return Promise.reject(new Error("User not found"));
+                }
                 // Save new access token in memory
                 useAuthStore.getState().setAuth(newAccessToken, currentUser);
 
