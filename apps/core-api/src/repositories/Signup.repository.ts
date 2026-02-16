@@ -26,9 +26,12 @@ class PendingSignupRepository {
   }
 
   // ================= FIND =================
-  findByEmail(email: string) {
-    return PendingSignup.findOne({ email });
-  }
+ findByEmail(email: string) {
+  return PendingSignup
+    .findOne({ email })
+    .select("+emailOtpHash");
+}
+
 
   // ================= UPDATE STATUS =================
   updateStatus(email: string, status: "APPROVED" | "REJECTED") {
