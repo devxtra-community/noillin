@@ -1,9 +1,9 @@
 export default function VerifyOtp() {
-  return (
+  return (<>
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8">
 
-        <h2 className="text-2xl font-bold text-center mb-2">
+        <h2 className="text-2xl text-black font-bold text-center mb-2">
           Verify OTP
         </h2>
 
@@ -16,18 +16,18 @@ export default function VerifyOtp() {
             type="text"
             maxLength={6}
             placeholder="Enter OTP"
-            className="w-full px-4 py-2 text-center tracking-widest border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 text-gray-400 py-2 text-center tracking-widest border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
           />
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+            className="w-full bg-green-700 text-white py-2 rounded-lg hover:bg-green-800 transition"
           >
             Verify OTP
           </button>
         </form>
 
-        <p className="text-center text-sm mt-6">
+        <p className="text-center text-gray-400 text-sm mt-6">
           Didn’t receive OTP?{" "}
           <span className="text-blue-600 cursor-pointer hover:underline">
             Resend
@@ -36,5 +36,5 @@ export default function VerifyOtp() {
 
       </div>
     </div>
-  );
+  </>);
 }
