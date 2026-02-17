@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import type { HttpError } from "../modules/auth/http-error.js";
 import { pendingSignupRepository } from "../repositories/Signup.repository.js";
 import { userRepository } from "../repositories/user.repository.js";
-import { profileRepository } from "../repositories/profile.repository.js";
 
 // ================= VERIFY OTP =================
 export const verifyOtpService = async (
@@ -141,39 +140,13 @@ export const approveSignupService = async (email: string) => {
     throw err;
   }
 
-  const user = await userRepository.create({
+  await userRepository.create({
     email: pending.email,
     password: pending.passwordHash,
     role: pending.role,
     isEmailVerified: true,
     status: "ACTIVE",
   });
-
-  if (user.role === "INFLUENCER") {
-    await profileRepository.createInfluencer({
-      userId: user._id,
-      fullName: "",
-      username: user.email.split("@")[0],
-      categories: [],
-      languages: [],
-      isProfileComplete: false,
-      isVerified: false,
-    });
-  }
-
-  if (user.role === "BRAND") {
-    await profileRepository.createBrand({
-      userId: user._id,
-      companyName: "",
-      industry: "",
-      contactPersonName: "",
-      contactEmail: user.email,
-      documents: [],
-      isProfileComplete: false,
-      isVerified: false,
-    });
-  }
-
 
   await pendingSignupRepository.deleteByEmail(email);
 
@@ -198,8 +171,9 @@ export const rejectSignupService = async (
   return { message: "Signup rejected successfully" };
 };
 
+// ================= CLEANUP EXPIRED SIGNUPS =================
 export const cleanupExpiredSignups = async () => {
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000); 
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
 
   await pendingSignupRepository.deleteMany({
     isEmailVerified: false,
