@@ -398,7 +398,7 @@ let payload: InfluencerPayload | BrandPayload = {
                                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
                                     <div className="border-b border-gray-100 pb-4">
                                         <h2 className="text-2xl font-bold text-gray-900">Brand Details</h2>
-                                        <p className="mt-1 text-sm text-gray-500">Tell us about your company and what you're looking for.</p>
+                                        <p className="mt-1 text-sm text-gray-500">Tell us about your company and what you are looking for.</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-2">
@@ -479,7 +479,7 @@ let payload: InfluencerPayload | BrandPayload = {
                                     {loading ? "Updating..." : "Save Changes"}
                                 </button>
                                 <p className="mt-4 text-center text-sm text-gray-400">
-                                    By clicking "Create Profile", you agree to our Terms of Service and Privacy Policy.
+                                    By clicking Create Profile, you agree to our Terms of Service and Privacy Policy.
                                 </p>
                             </div>
 
