@@ -2,6 +2,7 @@ import { create } from "zustand";
 
 interface User {
   id: string;
+  email: string;
   role: "ADMIN" | "BRAND" | "INFLUENCER";
   adminLevel?: "SUPER" | "NORMAL" | null;
 }
