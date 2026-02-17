@@ -91,7 +91,6 @@ export const loginController = async (
 
 
 
-// ================= REFRESH TOKEN =================
 export const refreshTokenController = async (
   req: Request,
   res: Response,
@@ -121,6 +120,8 @@ export const refreshTokenController = async (
       success: true,
       data: {
         accessToken: result.accessToken,
+        user: result.user,
+        
       },
     });
   } catch (error) {
@@ -129,7 +130,6 @@ export const refreshTokenController = async (
 };
 
 
-// ================= LOGOUT =================
 export const logoutController = async (
   req: Request,
   res: Response,
