@@ -61,7 +61,7 @@ export default function LoginPage() {
         ),
       };
 
-      const response = await api.post("api/auth/signup", payload);
+      const response = await api.post("/auth/signup", payload);
 
       if (response.data.accessToken) {
         // localStorage.setItem("accessToken", response.data.accessToken);

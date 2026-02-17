@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
 
 
 
+
 export default function LoginPage() {
+    const router = useRouter();
+
   const [role, setRole] = useState<"BRAND" | "INFLUENCER">("BRAND");
   const [formData, setFormData] = useState({
     email: "",
@@ -43,7 +47,9 @@ export default function LoginPage() {
       if (response.data.data?.accessToken) {
         const {accessToken, user} = response.data.data
         setAuth(accessToken, user)
-        window.location.href = "/dashboard";
+        router.push("/home");
+
+        // window.location.href = "/home";
       }
 
     } catch (error) {

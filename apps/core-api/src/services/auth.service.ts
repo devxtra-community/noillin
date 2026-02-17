@@ -1,20 +1,4 @@
-// class AuthService {
-//   async loginUser(_email: string, _password: string) {
-//     // find user
-//     // compare password
-//     // create tokens
-//     // save refresh token
-//     // return tokens
-//   }
 
-
-//   async refreshSession(_token: string) {
-//     // verify refresh token
-//     // issue new access token
-//   }
-// }
-
-// export const authService = new AuthService();
 import crypto from "crypto";
 
 import bcrypt from "bcrypt";
@@ -58,7 +42,7 @@ export const signupService = async (data: SignupInput) => {
   //  GENERATE OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   await sendOtpEmail(data.email, otp);
-  const hashedOtp = await bcrypt.hash(otp, 10);
+  // const hashedOtp = await bcrypt.hash(otp, 10);
 
   await pendingSignupRepository.create({
     email: data.email.toLowerCase(),
@@ -142,10 +126,77 @@ export const loginService = async(
 }
 
 
+// interface RefreshResult {
+//   accessToken: string;
+//   refreshToken: string;
+// }
+// export const refreshTokenService = async (
+//   refreshToken: string
+// ): Promise<RefreshResult> => {
+//   if (!refreshToken) {
+//     const err: HttpError = new Error("Refresh token required");
+//     err.statusCode = 400;
+//     throw err;
+//   }
+
+//   let payload;
+//   try {
+//     payload = verifyRefreshToken(refreshToken);
+//   } catch {
+//     const err: HttpError = new Error("Invalid refresh token");
+//     err.statusCode = 401;
+//     throw err;
+//   }
+
+//   const user = await userRepository.findById(payload.userId);
+
+//   if (!user || !user.refreshToken) {
+//     const err: HttpError = new Error("Refresh token mismatch");
+//     err.statusCode = 401;
+//     throw err;
+//   }
+
+
+//   if (user.refreshToken.trim() !== refreshToken.trim()) {
+//     const err: HttpError = new Error("Refresh token mismatch");
+//     err.statusCode = 401;
+//     throw err;
+//   }
+
+//   const newPayload = {
+//     userId: user._id.toString(),
+//     role: user.role,
+//     adminLevel: user.adminLevel ?? null,
+//   };
+
+//   const newAccessToken = signAccessToken(newPayload);
+//   const newRefreshToken = signRefreshToken(newPayload);
+
+//   await userRepository.saveRefreshToken(user._id.toString(), newRefreshToken);
+
+//   return {
+//     accessToken: newAccessToken,
+//     refreshToken: newRefreshToken,
+//     user: {
+//       id: user._id.toString(),
+//       email: user.email,
+//       role: user.role,
+//       adminLevel: user.adminLevel ?? null,
+//     },
+//   };
+// };
+
 interface RefreshResult {
   accessToken: string;
   refreshToken: string;
+  user: {
+    id: string;
+    email: string;
+    role: string;
+    adminLevel: string | null;
+  };
 }
+
 export const refreshTokenService = async (
   refreshToken: string
 ): Promise<RefreshResult> => {
@@ -166,15 +217,12 @@ export const refreshTokenService = async (
 
   const user = await userRepository.findById(payload.userId);
 
-  // ✅ FIRST check user existence
   if (!user || !user.refreshToken) {
     const err: HttpError = new Error("Refresh token mismatch");
     err.statusCode = 401;
     throw err;
   }
 
-
-  // ✅ Compare after narrowing
   if (user.refreshToken.trim() !== refreshToken.trim()) {
     const err: HttpError = new Error("Refresh token mismatch");
     err.statusCode = 401;
@@ -190,11 +238,20 @@ export const refreshTokenService = async (
   const newAccessToken = signAccessToken(newPayload);
   const newRefreshToken = signRefreshToken(newPayload);
 
-  await userRepository.saveRefreshToken(user._id.toString(), newRefreshToken);
+  await userRepository.saveRefreshToken(
+    user._id.toString(),
+    newRefreshToken
+  );
 
   return {
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
+    user: {
+      id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+      adminLevel: user.adminLevel ?? null,
+    },
   };
 };
 
