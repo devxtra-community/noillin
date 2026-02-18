@@ -13,6 +13,7 @@ import { sendOtpEmail } from "../utils/sendotpEmail.js";
 
 
 
+
 interface SignupInput {
   email: string;
   password: string;
@@ -451,5 +452,4 @@ export const resetPasswordService = async (
 
   logger.info(`Password reset successful for ${email}`);
 };
-
 
