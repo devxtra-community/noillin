@@ -17,3 +17,5 @@ if (process.env.MEILI_KEY) {
 export const meili = new MeiliSearch(config);
 
 logger.info("Meilisearch client initialized");
+
+
