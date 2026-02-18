@@ -77,12 +77,6 @@ const GigSchema = new Schema<GigDocument>(
       index: true
     },
 
-    searchMeta: {
-      searchableText: {
-        type: String
-      }
-    },
-
     isDeleted: {
       type: Boolean,
       default: false,
