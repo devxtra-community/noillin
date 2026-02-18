@@ -34,7 +34,7 @@ const InfluencerProfileSchema = new Schema<IInfluencerProfile>(
 
     fullName: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
     },
 

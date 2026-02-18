@@ -46,9 +46,11 @@ api.interceptors.response.use(
         const originalRequest = error.config;
 
         // If error is 401 and we haven't tried to refresh yet
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && !originalRequest._retry) 
+        {
             if (isRefreshing) {
                 // If already refreshing, queue this request
+                
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject });
                 }).then(token => {
@@ -64,23 +66,22 @@ api.interceptors.response.use(
 
             try {
                 // Try to refresh the token
+                // const response = await api.post("/auth/refresh");
+                // const newAccessToken = response.data.data.accessToken;
                 const response = await api.post("/auth/refresh");
-                const newAccessToken = response.data.data.accessToken;
-                const currentUser = useAuthStore.getState().user
-                if (!currentUser) {
-                    useAuthStore.getState().clearAuth();
-                    window.location.href = "/login";
-                    return Promise.reject(new Error("User not found"));
-                }
+                const { accessToken, user } = response.data.data;
+
+                // useAuthStore.getState().setAuth(accessToken, user);
+
                 // Save new access token in memory
-                useAuthStore.getState().setAuth(newAccessToken, currentUser);
+                useAuthStore.getState().setAuth(accessToken, user);
 
                 // Update authorization header
-                api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
                 // Process queued requests
-                processQueue(null, newAccessToken);
+                processQueue(null, accessToken);
 
                 // Retry original request
                 return api(originalRequest);
