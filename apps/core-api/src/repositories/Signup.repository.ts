@@ -9,7 +9,7 @@ interface CreatePendingSignupInput {
 
   status: "PENDING" | "APPROVED" | "REJECTED";
 
-  // 🔐 OTP fields (optional)
+  //  OTP fields (optional)
   emailOtpHash?: string | null;
   emailOtpExpiresAt?: Date | null;
   otpAttempts?: number;

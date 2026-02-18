@@ -55,13 +55,13 @@ export const signupService = async (data: SignupInput) => {
 
   const passwordHash = await bcrypt.hash(data.password, 10);
 
-  // 🔥 1️⃣ Generate OTP
+  //  Generate OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // 🔥 2️⃣ Hash OTP before saving
+  //  Hash OTP before saving
   const hashedOtp = await bcrypt.hash(otp, 10);
 
-  // 🔥 3️⃣ Save pending signup with OTP
+  //  Save pending signup with OTP
   await pendingSignupRepository.create({
     email: data.email.toLowerCase(),
     passwordHash,
@@ -77,7 +77,7 @@ export const signupService = async (data: SignupInput) => {
     isEmailVerified: false,
   });
 
-  // 🔥 4️⃣ Send REAL Gmail OTP
+  //  Send REAL Gmail OTP
   await sendOtpEmail(data.email, otp);
 
   return { message: "OTP sent to your email" };

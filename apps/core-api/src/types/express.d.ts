@@ -1,4 +1,4 @@
-import type { JwtPayload } from "../modules/auth/auth.utils.js";
+import type { JwtPayload } from "../modules/auth/auth.utils.ts";
 
 declare global {
   namespace Express {

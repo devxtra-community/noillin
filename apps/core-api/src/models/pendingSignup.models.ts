@@ -27,7 +27,7 @@ const PendingSignupSchema = new Schema(
       default: "PENDING",
     },
 
-    // 🔐 OTP FIELDS START HERE
+    //  OTP FIELDS START HERE
 
  emailOtpHash: {
   type: String,

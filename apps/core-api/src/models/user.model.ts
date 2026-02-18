@@ -26,7 +26,7 @@ export interface IUser extends Document {
   status: UserStatus;
   refreshToken?: string;
 
-  // 🔐 Forgot Password Fields
+  //  Forgot Password Fields
   resetOtp?: string;
   resetOtpExpiry?: Date;
   resetSessionToken?: string;
@@ -48,7 +48,7 @@ const UserSchema = new Schema<IUser>(
     password: {
       type: String,
       required: true,
-      select: false, // 🔐 never return password
+      select: false, //  never return password
     },
 
     role: {
@@ -80,7 +80,7 @@ const UserSchema = new Schema<IUser>(
     },
 
     // ================================
-    // 🔐 FORGOT PASSWORD FIELDS
+    //  FORGOT PASSWORD FIELDS
     // ================================
 
     resetOtp: {

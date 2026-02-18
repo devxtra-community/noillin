@@ -17,7 +17,7 @@ class UserRepository {
     const normalizedEmail = email.trim().toLowerCase();
 
     return User.findOne({ email: normalizedEmail })
-      .select("+password +resetOtp +resetSessionToken");
+      .select("+password +resetSessionExpiry +resetSessionToken");
   }
 
   
