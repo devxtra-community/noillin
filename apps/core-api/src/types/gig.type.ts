@@ -33,10 +33,6 @@ export interface GigDocument {
 
   status: GigStatus;
 
-  // Used only for search indexing
-  searchMeta?: {
-    searchableText?: string;
-  };
 
   isDeleted: boolean;
 
