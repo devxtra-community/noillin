@@ -1,20 +1,4 @@
-// class AuthService {
-//   async loginUser(_email: string, _password: string) {
-//     // find user
-//     // compare password
-//     // create tokens
-//     // save refresh token
-//     // return tokens
-//   }
 
-
-//   async refreshSession(_token: string) {
-//     // verify refresh token
-//     // issue new access token
-//   }
-// }
-
-// export const authService = new AuthService();
 import crypto from "crypto";
 
 import bcrypt from "bcrypt";
@@ -27,7 +11,7 @@ import { logger } from "../utils/logger.js";
 import { sendOtpEmail } from "../utils/sendotpEmail.js";
 
 
-// import { sendMail } from "../../utils/nodemailer";
+
 
 interface SignupInput {
   email: string;
@@ -55,21 +39,36 @@ export const signupService = async (data: SignupInput) => {
 
   const passwordHash = await bcrypt.hash(data.password, 10);
 
-  //  GENERATE OTP
+  // 🔥 1️⃣ Generate OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   await sendOtpEmail(data.email, otp);
+  // const hashedOtp = await bcrypt.hash(otp, 10);
+
+  // 🔥 2️⃣ Hash OTP before saving
   const hashedOtp = await bcrypt.hash(otp, 10);
 
+  // 🔥 3️⃣ Save pending signup with OTP
   await pendingSignupRepository.create({
     email: data.email.toLowerCase(),
     passwordHash,
     role: data.role,
     documents: data.documents,
     status: "PENDING",
+
+    emailOtpHash: hashedOtp,
+    emailOtpExpiresAt: new Date(Date.now() + 5 * 60 * 1000),
+    otpAttempts: 0,
+    otpResendCount: 0,
+    otpLastSentAt: new Date(),
+    isEmailVerified: false,
   });
 
-  return { message: "Signup request submitted for review" };
+  // 🔥 4️⃣ Send REAL Gmail OTP
+  await sendOtpEmail(data.email, otp);
+
+  return { message: "OTP sent to your email" };
 };
+
 
 
 
@@ -142,10 +141,77 @@ export const loginService = async(
 }
 
 
+// interface RefreshResult {
+//   accessToken: string;
+//   refreshToken: string;
+// }
+// export const refreshTokenService = async (
+//   refreshToken: string
+// ): Promise<RefreshResult> => {
+//   if (!refreshToken) {
+//     const err: HttpError = new Error("Refresh token required");
+//     err.statusCode = 400;
+//     throw err;
+//   }
+
+//   let payload;
+//   try {
+//     payload = verifyRefreshToken(refreshToken);
+//   } catch {
+//     const err: HttpError = new Error("Invalid refresh token");
+//     err.statusCode = 401;
+//     throw err;
+//   }
+
+//   const user = await userRepository.findById(payload.userId);
+
+//   if (!user || !user.refreshToken) {
+//     const err: HttpError = new Error("Refresh token mismatch");
+//     err.statusCode = 401;
+//     throw err;
+//   }
+
+
+//   if (user.refreshToken.trim() !== refreshToken.trim()) {
+//     const err: HttpError = new Error("Refresh token mismatch");
+//     err.statusCode = 401;
+//     throw err;
+//   }
+
+//   const newPayload = {
+//     userId: user._id.toString(),
+//     role: user.role,
+//     adminLevel: user.adminLevel ?? null,
+//   };
+
+//   const newAccessToken = signAccessToken(newPayload);
+//   const newRefreshToken = signRefreshToken(newPayload);
+
+//   await userRepository.saveRefreshToken(user._id.toString(), newRefreshToken);
+
+//   return {
+//     accessToken: newAccessToken,
+//     refreshToken: newRefreshToken,
+//     user: {
+//       id: user._id.toString(),
+//       email: user.email,
+//       role: user.role,
+//       adminLevel: user.adminLevel ?? null,
+//     },
+//   };
+// };
+
 interface RefreshResult {
   accessToken: string;
   refreshToken: string;
+  user: {
+    id: string;
+    email: string;
+    role: string;
+    adminLevel: string | null;
+  };
 }
+
 export const refreshTokenService = async (
   refreshToken: string
 ): Promise<RefreshResult> => {
@@ -166,7 +232,7 @@ export const refreshTokenService = async (
 
   const user = await userRepository.findById(payload.userId);
 
-  // ✅ FIRST check user existence
+  //  FIRST check user existence
   if (!user || !user.refreshToken) {
     const err: HttpError = new Error("Refresh token mismatch");
     err.statusCode = 401;
@@ -174,7 +240,7 @@ export const refreshTokenService = async (
   }
 
 
-  // ✅ Compare after narrowing
+  //  Compare after narrowing
   if (user.refreshToken.trim() !== refreshToken.trim()) {
     const err: HttpError = new Error("Refresh token mismatch");
     err.statusCode = 401;
@@ -190,11 +256,20 @@ export const refreshTokenService = async (
   const newAccessToken = signAccessToken(newPayload);
   const newRefreshToken = signRefreshToken(newPayload);
 
-  await userRepository.saveRefreshToken(user._id.toString(), newRefreshToken);
+  await userRepository.saveRefreshToken(
+    user._id.toString(),
+    newRefreshToken
+  );
 
   return {
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
+    user: {
+      id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+      adminLevel: user.adminLevel ?? null,
+    },
   };
 };
 
@@ -213,16 +288,68 @@ export const logoutService = async (userId: string) => {
 };
 
 
+// ================= VERIFY SIGNUP OTP =================
+export const verifySignupOtpService = async (
+  email: string,
+  otp: string
+): Promise<void> => {
+
+  const pending = await pendingSignupRepository.findByEmail(email);
+
+  if (!pending) {
+    const err: HttpError = new Error("Signup request not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  if (pending.isEmailVerified) {
+    const err: HttpError = new Error("Email already verified");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (!pending.emailOtpHash || !pending.emailOtpExpiresAt) {
+    const err: HttpError = new Error("OTP not found");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (pending.emailOtpExpiresAt < new Date()) {
+    const err: HttpError = new Error("OTP expired");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const isMatch = await bcrypt.compare(
+    otp,
+    pending.emailOtpHash
+  );
+
+  if (!isMatch) {
+    const err: HttpError = new Error("Invalid OTP");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  //  SUCCESS
+  pending.isEmailVerified = true;
+  pending.emailOtpHash = null;
+  pending.emailOtpExpiresAt = null;
+
+  await pending.save();
+};
+
+
+
 // forgotPasswordService
 
 export const forgotPasswordService = async (email: string) => {
   const user = await userRepository.findEmailWithPassword(email);
 
-  if (!user) return; // security: don't reveal existence
+  if (!user) return; 
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  console.log("RESET OTP:", otp); // 👈 ADD THIS LINE
-  console.log("Forgot password controller triggered");
+  console.log("RESET OTP:", otp); 
 
   const hashedOtp = await bcrypt.hash(otp, 10);
 

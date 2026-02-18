@@ -10,6 +10,7 @@ import {
   forgotPasswordService,
   verifyOtpService,
   resetPasswordService,
+  verifySignupOtpService,
 } from "../services/auth.service.js";
 import type { HttpError } from "../modules/auth/http-error.js";
 // import { log } from "winston";
@@ -87,55 +88,9 @@ export const loginController = async (
 };
 
 
-// ================= EMAIL VERIFICATION =================
-export const verifyEmailController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { token } = req.query;
-
-    if (!token) {
-      const err: HttpError = new Error("Token missing");
-      err.statusCode = 400;
-      throw err;
-    }
-
-    const decoded = jwt.verify(
-      token as string,
-      process.env.EMAIL_VERIFICATION_SECRET as string
-    ) as { userId: string };
-
-    const user = await User.findById(decoded.userId);
-
-    if (!user) {
-      const err: HttpError = new Error("Invalid token");
-      err.statusCode = 400;
-      throw err;
-    }
-
-    if (user.isEmailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: "Email already verified",
-      });
-    }
-
-    user.isEmailVerified = true;
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Email verified successfully. Await admin approval.",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 
-// ================= REFRESH TOKEN =================
+
 export const refreshTokenController = async (
   req: Request,
   res: Response,
@@ -165,6 +120,8 @@ export const refreshTokenController = async (
       success: true,
       data: {
         accessToken: result.accessToken,
+        user: result.user,
+        
       },
     });
   } catch (error) {
@@ -173,7 +130,6 @@ export const refreshTokenController = async (
 };
 
 
-// ================= LOGOUT =================
 export const logoutController = async (
   req: Request,
   res: Response,
@@ -207,6 +163,33 @@ export const logoutController = async (
   }
 };
 
+// ================= VERIFY SIGNUP OTP =================
+export const verifySignupOtpController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      const err: HttpError = new Error("Email and OTP required");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    await verifySignupOtpService(email, otp);
+
+    res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 // ================= FORGOT PASSWORD =================
 export const forgotPasswordController = async (
   req: Request,
@@ -236,7 +219,7 @@ export const forgotPasswordController = async (
 };
 
 // ================= VERIFY OTP =================
-export const verifyOtpController = async (
+export const verifyResetOtpController = async (
   req: Request,
   res: Response,
   next: NextFunction

@@ -92,7 +92,7 @@ class UserRepository {
       userId,
       {
         password: hashedPassword,
-        refreshToken: "", // 🔐 invalidate all sessions
+        refreshToken: "", //  invalidate all sessions
       },
       {
         new: true,
