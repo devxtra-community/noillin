@@ -1,7 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
 
-import { User } from "../models/user.model.js";
 import {
   logoutService,
   refreshTokenService,
@@ -11,6 +9,7 @@ import {
   verifyOtpService,
   resetPasswordService,
   verifySignupOtpService,
+  
 } from "../services/auth.service.js";
 import type { HttpError } from "../modules/auth/http-error.js";
 // import { log } from "winston";
@@ -271,20 +270,5 @@ export const resetPasswordController = async (
   }
 };
 
-// ================= listGigsController  =================
-
-// export const listGigsController = async (req: Request, res: Response) => {
-//   try {
-//     const page = Number(req.query.page) || 1;
-//     const limit = Number(req.query.limit) || 10;
-
-//     const result = await listGigsService(req.query, page, limit);
-
-//     res.status(200).json(result);
-//   } catch (error) {
-//     console.error("Error listing gigs:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
 
 

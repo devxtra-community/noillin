@@ -77,6 +77,7 @@ const GigSchema = new Schema<GigDocument>(
       index: true
     },
 
+  
     isDeleted: {
       type: Boolean,
       default: false,
