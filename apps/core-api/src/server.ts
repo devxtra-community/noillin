@@ -14,6 +14,7 @@ import "./search/meili.js";
 import router from "./routes/index.js";
 import { connectDB } from "./db/connect.js";
 import { cleanupExpiredSignups } from "./services/verification.service.js";
+import { setupMeili } from "./search/setup.js";
 
 
 
@@ -52,6 +53,7 @@ app.get("/health", (req, res) => {
 
 app.use(notFound);
 app.use(errorHandler);
+await setupMeili();
 
 connectRabbit();
 
