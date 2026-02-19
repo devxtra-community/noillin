@@ -1,10 +1,20 @@
-import { meili } from "./meili.js";
+import { logger } from "../utils/logger.js";
 
-export const setupGigIndex=async () =>{
-    const index=meili.index("gigs");
+import { setupBrandIndex } from "./indexes/brand.index.js";
+import { setupGigIndex } from "./indexes/gig.index.js";
+import { setupInfluencerIndex } from "./indexes/influencer.index.js";
 
-    await index.updateSettings({
-        searchableAttributes:[],
-        filterableAttributes:[]
-    })
+export const setupMeili=async ()=>{
+    try {
+        await Promise.all([
+            setupBrandIndex(),
+            setupGigIndex(),
+            setupInfluencerIndex()
+        ])
+    logger.info("Meilisearch indexes configured successfully");
+
+    } catch (error) {
+        logger.error("Meili setup failed",error)
+        process.exit(1);
+    }
 }
