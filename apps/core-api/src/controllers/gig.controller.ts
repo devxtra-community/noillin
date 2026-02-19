@@ -1,6 +1,6 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 
-import { getGigDetailsService, listGigsService } from "../services/gig.service.js";
+import { createGigService, getGigDetailsService, listGigsService } from "../services/gig.service.js";
 
 /* ================= LIST GIGS ================= */
 
@@ -48,5 +48,35 @@ export const getGigDetailsController = async (
     return res.status(err.statusCode || 500).json({
       message: err.message || "Internal server error"
     });
+  }
+};
+
+
+
+
+export const createGigController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId, role } = req.user!;
+
+    const result = await createGigService(
+      userId,
+      role,
+      req.body
+    );
+
+    return res.status(201).json({
+      success: true,
+      message:
+        result.collaborators.length > 0
+          ? "Gig created as draft. Waiting for collaborator approval."
+          : "Gig created and published successfully.",
+      data: result.gig
+    });
+  } catch (error) {
+    next(error);
   }
 };
