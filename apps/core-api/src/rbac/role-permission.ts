@@ -18,5 +18,9 @@ export const RolePermissions: Record<UserRole, Permission[]> = {
   [UserRole.INFLUENCER]: [
     Permission.CREATE_PROFILE,
     Permission.UPDATE_PROFILE,
+    Permission.CREATE_GIG,
+    Permission.UPDATE_GIG,
+    Permission.DELETE_GIG,
+    Permission.PUBLISH_GIG
   ],
 };
