@@ -1,6 +1,38 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { createGigService, getGigDetailsService, listGigsService } from "../services/gig.service.js";
+import { createGigService, deleteGigService, editGigService, getGigDetailsService, listGigsService } from "../services/gig.service.js";
+import type { AuthRequest } from "../middlewares/auth.middleware.js";
+
+
+
+// ================= CREATE GIG =================
+
+export const createGigController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId, role } = req.user!;
+
+    const result = await createGigService(
+      userId,
+      role,
+      req.body
+    );
+
+    return res.status(201).json({
+      success: true,
+      message:
+        result.collaborators.length > 0
+          ? "Gig created as draft. Waiting for collaborator approval."
+          : "Gig created and published successfully.",
+      data: result.gig
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 /* ================= LIST GIGS ================= */
 
@@ -54,29 +86,98 @@ export const getGigDetailsController = async (
 
 
 
-export const createGigController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
+// ================= EDIT GIG =================
+export const editGigController = async (
+  req: AuthRequest,
+  res: Response
 ) => {
   try {
-    const { userId, role } = req.user!;
+    const { id } = req.params;
 
-    const result = await createGigService(
-      userId,
-      role,
+    // 1️⃣ Check if ID exists AND is string
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({
+        message: "Invalid Gig ID"
+      });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
+    }
+
+    const updatedGig = await editGigService(
+      id,
+      req.user,
       req.body
     );
 
-    return res.status(201).json({
-      success: true,
-      message:
-        result.collaborators.length > 0
-          ? "Gig created as draft. Waiting for collaborator approval."
-          : "Gig created and published successfully.",
-      data: result.gig
+    return res.status(200).json(updatedGig);
+
+  } catch (error: unknown) {
+    console.error("Error editing gig:", error);
+
+    if (error instanceof Error) {
+      const statusCode =
+        (error as { statusCode?: number }).statusCode || 500;
+
+      return res.status(statusCode).json({
+        message: error.message
+      });
+    }
+
+    return res.status(500).json({
+      message: "Internal server error"
     });
-  } catch (error) {
-    next(error);
+  }
+};
+
+
+
+//* ================= DELETE GIG =================
+
+export const deleteGigController = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+
+    // 1️⃣ Validate ID exists and is string
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({
+        message: "Invalid Gig ID"
+      });
+    }
+
+    // 2️⃣ Ensure authenticated user exists
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
+    }
+
+    await deleteGigService(id, req.user);
+
+    return res.status(200).json({
+      message: "Gig deleted successfully"
+    });
+
+  } catch (error: unknown) {
+    console.error("Error deleting gig:", error);
+
+    if (error instanceof Error) {
+      const statusCode =
+        (error as { statusCode?: number }).statusCode ?? 500;
+
+      return res.status(statusCode).json({
+        message: error.message
+      });
+    }
+
+    return res.status(500).json({
+      message: "Internal server error"
+    });
   }
 };
