@@ -30,12 +30,13 @@ app.use(cors({
 
 connectDB()
 app.use(httpLogger);
-app.use(express.json());
 
 app.use("/api", router);
+app.use(express.json());
 
 //  Connect Database
 connectDB();
+ await connectRabbit();
 
 //  CRON JOB (Runs every hour)
 cron.schedule("0 * * * *", async () => {
@@ -55,7 +56,6 @@ app.use(notFound);
 app.use(errorHandler);
 await setupMeili();
 
-connectRabbit();
 
 app.listen(PORT, "127.0.0.1", () => {
   logger.info(`Core API is running at http://localhost:${PORT}`);
