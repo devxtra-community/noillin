@@ -231,21 +231,21 @@ export const editGigService = async (
   user: JwtPayload,
   updateData: EditableGigFields
 ) => {
-  // 1️⃣ Validate Gig ID
+  //  Validate Gig ID
   if (!mongoose.Types.ObjectId.isValid(gigId)) {
     const err: HttpError = new Error("Invalid gig ID");
     err.statusCode = 400;
     throw err;
   }
 
-  // 2️⃣ Ensure user role is INFLUENCER
+  //  Ensure user role is INFLUENCER
   if (user.role !== "INFLUENCER") {
     const err: HttpError = new Error("Only influencers can edit gigs");
     err.statusCode = 403;
     throw err;
   }
 
-  // 3️⃣ Find influencer profile using userId from JWT
+  //  Find influencer profile using userId from JWT
   const influencerProfile = await InfluencerProfile.findOne({
     userId: user.userId
   });
@@ -256,7 +256,7 @@ export const editGigService = async (
     throw err;
   }
 
-  // 4️⃣ Find gig (must not be deleted)
+  //  Find gig (must not be deleted)
   const gig = await GigModel.findOne({
     _id: gigId,
     isDeleted: false
@@ -268,7 +268,7 @@ export const editGigService = async (
     throw err;
   }
 
-  // 5️⃣ Ownership check
+  //  Ownership check
   if (
     gig.primaryInfluencerId.toString() !==
     influencerProfile._id.toString()
@@ -280,7 +280,7 @@ export const editGigService = async (
     throw err;
   }
 
-  // 6️⃣ Safe field updates (no any, no unsafe casting)
+  //  Safe field updates (no any, no unsafe casting)
 
   if (updateData.title !== undefined) {
     gig.title = updateData.title;
@@ -342,21 +342,21 @@ export const deleteGigService = async (
   gigId: string,
   user: JwtPayload
 ): Promise<void> => {
-  // 1️⃣ Validate ObjectId
+  //  Validate ObjectId
   if (!mongoose.Types.ObjectId.isValid(gigId)) {
     const err: HttpError = new Error("Invalid gig ID");
     err.statusCode = 400;
     throw err;
   }
 
-  // 2️⃣ Only influencers allowed
+  //  Only influencers allowed
   if (user.role !== "INFLUENCER") {
     const err: HttpError = new Error("Only influencers can delete gigs");
     err.statusCode = 403;
     throw err;
   }
 
-  // 3️⃣ Find influencer profile
+  //  Find influencer profile
   const influencerProfile: IInfluencerProfile | null =
     await InfluencerProfile.findOne({
       userId: user.userId
@@ -368,7 +368,7 @@ export const deleteGigService = async (
     throw err;
   }
 
-  // 4️⃣ Find gig
+  //  Find gig
  const gig = await GigModel.findOne({
   _id: gigId,
   isDeleted: false
@@ -381,7 +381,7 @@ export const deleteGigService = async (
     throw err;
   }
 
-  // 5️⃣ Ownership check
+  //  Ownership check
   if (
     gig.primaryInfluencerId.toString() !==
     influencerProfile._id.toString()
@@ -393,7 +393,7 @@ export const deleteGigService = async (
     throw err;
   }
 
-  // 6️⃣ Soft delete
+  //  Soft delete
   gig.isDeleted = true;
   gig.status = "archived";
 
