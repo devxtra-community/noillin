@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import { Types } from "mongoose";
+import type { JwtPayload } from "jsonwebtoken";
 
 import { GigModel } from "../models/gig.model.js";
 import { create_gig } from "../repositories/gig.repository.js";
-import { type GigStatus } from "../types/gig.type.js";
-import { InfluencerProfile } from "../models/influencer.model.js";
+import { type GigDocument, type GigStatus } from "../types/gig.type.js";
+import { InfluencerProfile, type IInfluencerProfile } from "../models/influencer.model.js";
 import { UserRole } from "../models/user.model.js";
 
 
@@ -201,4 +202,200 @@ const gig = await create_gig({
     gig,
     collaborators: collaboratorObjectIds
   };
+};
+
+//* ================= EDIT GIG ================= */
+
+
+interface HttpError extends Error {
+  statusCode?: number;
+}
+
+type EditableGigFields = {
+  title?: string;
+  description?: string;
+  category?: string;
+  tags?: string[];
+  deliverables?: string[];
+  pricing?: {
+    basePrice: number;
+    currency: "INR" | "USD";
+    negotiationAllowed?: boolean;
+  };
+  maxBookingsPerSlot?: number;
+  status?: "draft" | "published" | "paused" | "archived";
+};
+
+export const editGigService = async (
+  gigId: string,
+  user: JwtPayload,
+  updateData: EditableGigFields
+) => {
+  //  Validate Gig ID
+  if (!mongoose.Types.ObjectId.isValid(gigId)) {
+    const err: HttpError = new Error("Invalid gig ID");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  //  Ensure user role is INFLUENCER
+  if (user.role !== "INFLUENCER") {
+    const err: HttpError = new Error("Only influencers can edit gigs");
+    err.statusCode = 403;
+    throw err;
+  }
+
+  //  Find influencer profile using userId from JWT
+  const influencerProfile = await InfluencerProfile.findOne({
+    userId: user.userId
+  });
+
+  if (!influencerProfile) {
+    const err: HttpError = new Error("Influencer profile not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  //  Find gig (must not be deleted)
+  const gig = await GigModel.findOne({
+    _id: gigId,
+    isDeleted: false
+  });
+
+  if (!gig) {
+    const err: HttpError = new Error("Gig not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  //  Ownership check
+  if (
+    gig.primaryInfluencerId.toString() !==
+    influencerProfile._id.toString()
+  ) {
+    const err: HttpError = new Error(
+      "You are not allowed to edit this gig"
+    );
+    err.statusCode = 403;
+    throw err;
+  }
+
+  //  Safe field updates (no any, no unsafe casting)
+
+  if (updateData.title !== undefined) {
+    gig.title = updateData.title;
+  }
+
+  if (updateData.description !== undefined) {
+    gig.description = updateData.description;
+  }
+
+  if (updateData.category !== undefined) {
+    gig.category = updateData.category;
+  }
+
+  if (updateData.tags !== undefined) {
+    gig.tags = updateData.tags;
+  }
+
+  if (updateData.deliverables !== undefined) {
+    gig.deliverables = updateData.deliverables;
+  }
+if (updateData.pricing !== undefined) {
+  if (updateData.pricing.basePrice !== undefined) {
+    gig.pricing.basePrice = updateData.pricing.basePrice;
+  }
+
+  if (updateData.pricing.currency !== undefined) {
+    gig.pricing.currency = updateData.pricing.currency;
+  }
+
+  if (updateData.pricing.negotiationAllowed !== undefined) {
+    gig.pricing.negotiationAllowed =
+      updateData.pricing.negotiationAllowed;
+  }
+}
+
+  if (updateData.maxBookingsPerSlot !== undefined) {
+    gig.maxBookingsPerSlot = updateData.maxBookingsPerSlot;
+  }
+
+  if (updateData.status !== undefined) {
+    gig.status = updateData.status;
+  }
+
+  await gig.save();
+
+  return gig;
+};
+
+
+
+//* ================= DELETE GIG =================
+
+
+interface HttpError extends Error {
+  statusCode?: number;
+}
+
+export const deleteGigService = async (
+  gigId: string,
+  user: JwtPayload
+): Promise<void> => {
+  //  Validate ObjectId
+  if (!mongoose.Types.ObjectId.isValid(gigId)) {
+    const err: HttpError = new Error("Invalid gig ID");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  //  Only influencers allowed
+  if (user.role !== "INFLUENCER") {
+    const err: HttpError = new Error("Only influencers can delete gigs");
+    err.statusCode = 403;
+    throw err;
+  }
+
+  //  Find influencer profile
+  const influencerProfile: IInfluencerProfile | null =
+    await InfluencerProfile.findOne({
+      userId: user.userId
+    });
+
+  if (!influencerProfile) {
+    const err: HttpError = new Error("Influencer profile not found");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  //  Find gig
+ const gig = await GigModel.findOne({
+  _id: gigId,
+  isDeleted: false
+});
+
+
+  if (!gig) {
+    const err: HttpError = new Error("Gig not found or already deleted");
+    err.statusCode = 404;
+    throw err;
+  }
+
+  //  Ownership check
+  if (
+    gig.primaryInfluencerId.toString() !==
+    influencerProfile._id.toString()
+  ) {
+    const err: HttpError = new Error(
+      "You are not allowed to delete this gig"
+    );
+    err.statusCode = 403;
+    throw err;
+  }
+
+  //  Soft delete
+  gig.isDeleted = true;
+  gig.status = "archived";
+
+  await gig.save();
 };
