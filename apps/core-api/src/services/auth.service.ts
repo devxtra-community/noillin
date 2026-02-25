@@ -4,7 +4,7 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../modules/auth/auth.utils.js";
-import type { HttpError } from "../modules/auth/http-error.js";
+import { createHttpError } from "../modules/auth/http-error.js";
 import { userRepository } from "../repositories/user.repository.js"
 import { pendingSignupRepository } from "../repositories/Signup.repository.js";
 import { logger } from "../utils/logger.js";
@@ -24,18 +24,14 @@ interface SignupInput {
 export const signupService = async (data: SignupInput) => {
   const existingUser = await userRepository.findEmailWithPassword(data.email);
   if (existingUser) {
-    const err: HttpError = new Error("User already exists");
-    err.statusCode = 409;
-    throw err;
+    throw createHttpError("User already exists", 409);
   }
 
   const existingRequest =
     await pendingSignupRepository.findByEmail(data.email);
 
   if (existingRequest) {
-    const err: HttpError = new Error("Signup request already submitted");
-    err.statusCode = 409;
-    throw err;
+    throw createHttpError("Sign up request already submitted", 409);
   }
 
   const passwordHash = await bcrypt.hash(data.password, 10);
@@ -92,21 +88,15 @@ export const loginService = async(
     logger.info(`EMAIL: ${email}`);
 
   if (!user) {
-    const err: HttpError = new Error("Invalid credentialss")
-    err.statusCode = 401
-    throw err
+    throw createHttpError("Invalid credentials", 409);
   }
 
   if (user.status !== "ACTIVE") {
-    const err: HttpError = new Error("User is not active")
-    err.statusCode = 403
-    throw err
+    throw createHttpError("User is not active", 409);
   }
 
   if (!user.isEmailVerified) {
-    const err: HttpError = new Error("User email is not verified")
-    err.statusCode = 403
-    throw err
+    throw createHttpError("User email is not verified", 409);
   }
 
 
@@ -114,9 +104,7 @@ export const loginService = async(
   console.log("PASSWORD FROM DB:", user.password);
 
   if (!isMatch) {
-    const err: HttpError = new Error("Invalid credentials")
-    err.statusCode = 401
-    throw err
+    throw createHttpError("Invalid credentials", 409);
   }
 
   const payload = {
@@ -217,35 +205,31 @@ export const refreshTokenService = async (
   refreshToken: string
 ): Promise<RefreshResult> => {
   if (!refreshToken) {
-    const err: HttpError = new Error("Refresh token required");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("Refresh token required", 409);
   }
 
   let payload;
   try {
     payload = verifyRefreshToken(refreshToken);
   } catch {
-    const err: HttpError = new Error("Invalid refresh token");
-    err.statusCode = 401;
-    throw err;
+    
+    throw createHttpError("Invalid refresh token", 409);
   }
 
   const user = await userRepository.findById(payload.userId);
 
   //  FIRST check user existence
   if (!user || !user.refreshToken) {
-    const err: HttpError = new Error("Refresh token mismatch");
-    err.statusCode = 401;
-    throw err;
+    
+    throw createHttpError("Refresh token mismatch", 409);
   }
 
 
   //  Compare after narrowing
   if (user.refreshToken.trim() !== refreshToken.trim()) {
-    const err: HttpError = new Error("Refresh token mismatch");
-    err.statusCode = 401;
-    throw err;
+    
+    throw createHttpError("Refresh token mismatch", 409);
   }
 
   const newPayload = {
@@ -277,9 +261,8 @@ export const refreshTokenService = async (
 
 export const logoutService = async (userId: string) => {
   if (!userId) {
-    const err: HttpError = new Error("User not authenticated");
-    err.statusCode = 401;
-    throw err;
+    
+    throw createHttpError("User not authenticated", 409);
   }
 
   // Invalidate refresh token
@@ -298,27 +281,23 @@ export const verifySignupOtpService = async (
   const pending = await pendingSignupRepository.findByEmail(email);
 
   if (!pending) {
-    const err: HttpError = new Error("Signup request not found");
-    err.statusCode = 404;
-    throw err;
+    
+    throw createHttpError("Signup request not found", 409);
   }
 
   if (pending.isEmailVerified) {
-    const err: HttpError = new Error("Email already verified");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("Email already verified", 409);
   }
 
   if (!pending.emailOtpHash || !pending.emailOtpExpiresAt) {
-    const err: HttpError = new Error("OTP not found");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("OTP not found", 409);
   }
 
   if (pending.emailOtpExpiresAt < new Date()) {
-    const err: HttpError = new Error("OTP expired");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("OTP expired", 409);
   }
 
   const isMatch = await bcrypt.compare(
@@ -327,9 +306,8 @@ export const verifySignupOtpService = async (
   );
 
   if (!isMatch) {
-    const err: HttpError = new Error("Invalid OTP");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("Invalid OTP", 409);
   }
 
   //  SUCCESS
@@ -377,23 +355,20 @@ export const verifyOtpService = async (
   const user = await userRepository.findByEmailWithResetFields(email);
 
   if (!user || !user.resetOtp || !user.resetOtpExpiry) {
-    const err: HttpError = new Error("Invalid request");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("Invalid request", 409);
   }
 
   if (user.resetOtpExpiry < new Date()) {
-    const err: HttpError = new Error("OTP expired");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("OTP expired", 409);
   }
 
   const isMatch = await bcrypt.compare(otp, user.resetOtp);
 
   if (!isMatch) {
-    const err: HttpError = new Error("Invalid OTP");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("Invalid OTP", 409);
   }
 
   const resetSessionToken = crypto.randomBytes(32).toString("hex");
@@ -424,21 +399,18 @@ export const resetPasswordService = async (
     !user.resetSessionToken ||
     !user.resetSessionExpiry
   ) {
-    const err: HttpError = new Error("Invalid request");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("Invalid request", 409);
   }
 
   if (user.resetSessionToken !== resetSessionToken) {
-    const err: HttpError = new Error("Invalid session");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("Invalid session", 409);
   }
 
   if (user.resetSessionExpiry < new Date()) {
-    const err: HttpError = new Error("Session expired");
-    err.statusCode = 400;
-    throw err;
+    
+    throw createHttpError("Session expired", 409);
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
