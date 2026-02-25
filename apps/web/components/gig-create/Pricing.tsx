@@ -70,7 +70,7 @@ export function Pricing({ onBack, onNext }: PricingProps) {
                         </div>
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                             <FaInfoCircle className="text-gray-400" />
-                            <span>You'll receive payment after booking is confirmed.</span>
+                            <span>You&apos;ll receive payment after booking is confirmed.</span>
                         </div>
                     </div>
 
@@ -178,7 +178,7 @@ export function Pricing({ onBack, onNext }: PricingProps) {
                     </div>
 
                     <p className="text-[10px] text-gray-400 leading-relaxed">
-                        Noillin charges 0% commission for creators. The price you set is exactly what you'll receive upon successful completion.
+                        Noillin charges 0% commission for creators. The price you set is exactly what you&apos;ll receive upon successful completion.
                     </p>
                 </div>
             </div>
