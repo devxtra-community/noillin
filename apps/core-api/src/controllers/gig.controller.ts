@@ -1,11 +1,14 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { channel } from "../queue/rabbit.js";
 import { createGigService, deleteGigService, editGigService, getGigDetailsService, listGigsService } from "../services/gig.service.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
 
 
 
 // ================= CREATE GIG =================
+
+export const GIG_CREATED_QUEUE = "gig.created";
 
 export const createGigController = async (
   req: Request,
@@ -20,6 +23,24 @@ export const createGigController = async (
       role,
       req.body
     );
+
+    if (channel) {
+      await channel.assertQueue(GIG_CREATED_EVENT, { durable: true });
+
+      channel.sendToQueue(
+        GIG_CREATED_EVENT,
+        Buffer.from(JSON.stringify({
+          gigId: result.gig._id.toString(),
+          title: result.gig.title,
+          category: result.gig.category,
+          pricing: result.gig.pricing.basePrice,
+          influencerId: result.gig.primaryInfluencerId.toString(),
+          createdAt: result.gig.createdAt,
+        })),
+        { persistent: true }
+      );
+    }
+
 
     return res.status(201).json({
       success: true,
