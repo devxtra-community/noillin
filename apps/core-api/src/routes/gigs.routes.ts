@@ -1,9 +1,8 @@
 import { Router } from "express";
 
-import { createGigController, getGigDetailsController, listGigsController, publishGigController, updateGigDeliverablesController, updateGigPricingController } from "../controllers/gig.controller.js";
-import { createGigController, deleteGigController, editGigController, getGigDetailsController, listGigsController } from "../controllers/gig.controller.js";
 import { authenticate, authorizePermission } from "../middlewares/auth.middleware.js";
 import { Permission } from "../rbac/permission.js";
+import { createGigController, deleteGigController, editGigController, getGigDetailsController, listGigsController, publishGigController, updateGigDeliverablesController, updateGigPricingController } from "../controllers/gig.controller.js";
 
 
 
