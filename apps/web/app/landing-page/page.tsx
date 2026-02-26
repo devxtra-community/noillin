@@ -295,7 +295,7 @@ export default function Home() {
               <div className="flex text-emerald-400 mb-4">
                 {[...Array(5)].map((_, i) => <span key={i}>★</span>)}
               </div>
-              <p className="text-gray-600 text-sm italic mb-8 leading-relaxed">"{story.quote}"</p>
+              <p className="text-gray-600 text-sm italic mb-8 leading-relaxed">{story.quote}</p>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
                   <img src={story.img} alt={story.name} className="w-full h-full object-cover" />
