@@ -30,6 +30,7 @@ export interface GigPricing {
 }
 
 export interface GigDocument {
+  _id: Types.ObjectId;
   title: string;
   shortDescription: string;
 
@@ -55,3 +56,8 @@ export interface GigDocument {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type CreateGigDBInput = Omit<
+  GigDocument,
+  "_id" | "createdAt" | "updatedAt"
+>;

@@ -1,9 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { createGigService, getGigDetailsService, listGigsService, publishGigService, updateGigDeliverablesService, updateGigPricingService } from "../services/gig.service.js";
+import { getGigDetailsService, listGigsService, publishGigService, updateGigDeliverablesService, updateGigPricingService } from "../services/gig.service.js";
 import type { GigDeliverable } from "../types/gig.type.js";
 import { channel } from "../queue/rabbit.js";
-import { createGigService, deleteGigService, editGigService, getGigDetailsService, listGigsService } from "../services/gig.service.js";
+import { createGigService, deleteGigService, editGigService } from "../services/gig.service.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
 
 
@@ -11,6 +11,9 @@ import type { AuthRequest } from "../middlewares/auth.middleware.js";
 // ================= CREATE GIG =================
 
 export const GIG_CREATED_QUEUE = "gig.created";
+
+/* ================= CREATE GIG ================= */
+
 
 export const createGigController = async (
   req: Request,
@@ -27,10 +30,10 @@ export const createGigController = async (
     );
 
     if (channel) {
-      await channel.assertQueue(GIG_CREATED_EVENT, { durable: true });
+      await channel.assertQueue(GIG_CREATED_QUEUE, { durable: true });
 
       channel.sendToQueue(
-        GIG_CREATED_EVENT,
+        GIG_CREATED_QUEUE,
         Buffer.from(JSON.stringify({
           gigId: result.gig._id.toString(),
           title: result.gig.title,
@@ -106,14 +109,6 @@ export const getGigDetailsController = async (
   }
 };
 
-export const GIG_CREATED_EVENT = "gig.created";
-
-/* ================= CREATE GIG ================= */
-
-export const createGigController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
 
 // ================= EDIT GIG =================
 export const editGigController = async (
@@ -122,17 +117,29 @@ export const editGigController = async (
 ) => {
   try {
     const { id } = req.params;
+    // 1️⃣ Validate ID
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({
+        message: "Invalid Gig ID"
+      });
+    }
 
-    const gig = await createGigService(
-      userId,
-      role,
+    // 2️⃣ Validate user
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
+    }
+
+    const { userId } = req.user;
+
+    const gig = await editGigService(
+      id,
+      req.user,
       req.body
     );
 
-    return res.status(201).json({
-      success: true,
-      message: "Gig draft created successfully.",
-      data: gig
+    
     // 1️⃣ Check if ID exists AND is string
     if (!id || Array.isArray(id)) {
       return res.status(400).json({
@@ -171,6 +178,7 @@ export const editGigController = async (
     });
   }
 };
+
 
 
 
