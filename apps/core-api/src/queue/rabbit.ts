@@ -1,10 +1,11 @@
 import amqp, { type Channel } from "amqplib";
 
 import { logger } from "../utils/logger.js";
+import type { HttpError } from "../modules/auth/http-error.js";
 
 const rabbitUrl = process.env.RABBIT_URL as string;
 
-export let channel: Channel;
+let channel: Channel | null = null; 
 
 
 export const connectRabbit = async () => {
@@ -31,3 +32,11 @@ export const connectRabbit = async () => {
     logger.error(`RabbitMQ connection failed ${String(err)}`);
   }
 };
+
+export function getChannel():Channel{
+  if(!channel){
+    const err =new Error("RabbitMQ channel not initialized") as HttpError;
+    throw err;
+  }
+  return channel;
+}

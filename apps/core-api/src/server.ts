@@ -15,8 +15,8 @@ import router from "./routes/index.js";
 import { connectDB } from "./db/connect.js";
 import { cleanupExpiredSignups } from "./services/verification.service.js";
 import { setupMeili } from "./search/setup.js";
-
-
+import { GIG_CREATED_EVENT } from "./controllers/gig.controller.js";
+import { getChannel } from "./queue/rabbit.js";
 
 const app = express()
 const PORT = Number(process.env.PORT) || 5000
@@ -36,7 +36,7 @@ app.use(express.json());
 
 //  Connect Database
 connectDB();
- await connectRabbit();
+await connectRabbit();
 
 //  CRON JOB (Runs every hour)
 cron.schedule("0 * * * *", async () => {
@@ -55,6 +55,9 @@ app.get("/health", (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 await setupMeili();
+
+// Ensure gig.created queue exists
+await getChannel().assertQueue(GIG_CREATED_EVENT,{durable: true});
 
 
 app.listen(PORT, "127.0.0.1", () => {

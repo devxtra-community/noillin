@@ -4,7 +4,7 @@ import type { JwtPayload } from "jsonwebtoken";
 
 import { GigModel } from "../models/gig.model.js";
 import { create_gig } from "../repositories/gig.repository.js";
-import { type GigDocument, type GigStatus } from "../types/gig.type.js";
+import {  type GigStatus } from "../types/gig.type.js";
 import { InfluencerProfile, type IInfluencerProfile } from "../models/influencer.model.js";
 import { UserRole } from "../models/user.model.js";
 
