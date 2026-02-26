@@ -3,7 +3,7 @@
 // }
 
 export interface HttpError extends Error {
-  statusCode: number;
+  statusCode?: number;
 }
 
 export const createHttpError = (
