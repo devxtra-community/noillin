@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
@@ -15,6 +16,7 @@ export default function LoginPage() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const router = useRouter()
   const setAuth = useAuthStore((state)=>state.setAuth)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +45,8 @@ export default function LoginPage() {
       if (response.data.data?.accessToken) {
         const {accessToken, user} = response.data.data
         setAuth(accessToken, user)
-        window.location.href = "/dashboard";
+        router.push("/home")
+        // window.location.href = "/home";
       }
 
     } catch (error) {

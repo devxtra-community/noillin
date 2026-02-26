@@ -2,6 +2,25 @@ import { Schema, model } from "mongoose";
 
 import type { GigDocument } from "../types/gig.type.js";
 
+const DeliverableSchema = new Schema(
+  {
+    contentType: {
+      type: String,
+      required: true
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1
+    },
+    includedItems: [
+      {
+        type: String
+      }
+    ]
+  },
+  { _id: false }
+);
 
 const GigSchema = new Schema<GigDocument>(
   {
@@ -11,9 +30,24 @@ const GigSchema = new Schema<GigDocument>(
       trim: true
     },
 
-    description: {
+    shortDescription: {
       type: String,
-      required: true
+      required: true,
+      maxlength: 180
+    },
+
+    platform: {
+      type: String,
+      enum: ["instagram", "youtube", "tiktok"],
+      required: true,
+      index: true
+    },
+
+    gigType: {
+      type: String,
+      enum: ["solo", "collaboration"],
+      required: true,
+      index: true
     },
 
     influencerIds: [
@@ -44,10 +78,16 @@ const GigSchema = new Schema<GigDocument>(
       }
     ],
 
+    deliverables: {
+      type: [DeliverableSchema],
+      default: []
+    },
+
     pricing: {
       basePrice: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
       },
       currency: {
         type: String,
@@ -57,17 +97,22 @@ const GigSchema = new Schema<GigDocument>(
       negotiationAllowed: {
         type: Boolean,
         default: false
+      },
+      deliveryTimeInDays: {
+        type: Number,
+        required: true,
+        min: 1
+      },
+      revisionsIncluded: {
+        type: Number,
+        required: true,
+        min: 0
       }
     },
 
-    deliverables: [
-      {
-        type: String
-      }
-    ],
-
     maxBookingsPerSlot: {
-      type: Number
+      type: Number,
+      min: 1
     },
 
     status: {
@@ -77,7 +122,6 @@ const GigSchema = new Schema<GigDocument>(
       index: true
     },
 
-  
     isDeleted: {
       type: Boolean,
       default: false,

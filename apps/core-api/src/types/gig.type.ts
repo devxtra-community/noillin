@@ -6,36 +6,58 @@ export type GigStatus =
   | "paused"
   | "archived";
 
+export type Platform =
+  | "instagram"
+  | "youtube"
+  | "tiktok";
+
+export type GigType =
+  | "solo"
+  | "collaboration";
+
+export interface GigDeliverable {
+  contentType: string;
+  quantity: number;
+  includedItems: string[];
+}
+
 export interface GigPricing {
   basePrice: number;
   currency: "INR" | "USD";
   negotiationAllowed: boolean;
+  deliveryTimeInDays: number;
+  revisionsIncluded: number;
 }
 
 export interface GigDocument {
+  _id: Types.ObjectId;
   title: string;
-  description: string;
+  shortDescription: string;
 
-  // Only ACCEPTED collaborators go here
+  platform: Platform;
+  gigType: GigType;
+
   influencerIds: Types.ObjectId[];
-
-  // Owner of the gig
   primaryInfluencerId: Types.ObjectId;
 
   category: string;
   tags: string[];
 
-  pricing: GigPricing;
+  deliverables: GigDeliverable[];
 
-  deliverables: string[];
+  pricing: GigPricing;
 
   maxBookingsPerSlot?: number;
 
   status: GigStatus;
-
 
   isDeleted: boolean;
 
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type CreateGigDBInput = Omit<
+  GigDocument,
+  "_id" | "createdAt" | "updatedAt"
+>;
