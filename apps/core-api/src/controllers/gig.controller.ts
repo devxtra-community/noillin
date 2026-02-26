@@ -1,11 +1,19 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { createGigService, deleteGigService, editGigService, getGigDetailsService, listGigsService } from "../services/gig.service.js";
+import { getGigDetailsService, listGigsService, publishGigService, updateGigDeliverablesService, updateGigPricingService } from "../services/gig.service.js";
+import type { GigDeliverable } from "../types/gig.type.js";
+import { getChannel } from "../queue/rabbit.js";
+import { createGigService, deleteGigService, editGigService } from "../services/gig.service.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
 
 
 
 // ================= CREATE GIG =================
+
+export const GIG_CREATED_EVENT = "gig.created";
+
+/* ================= CREATE GIG ================= */
+
 
 export const createGigController = async (
   req: Request,
@@ -20,6 +28,23 @@ export const createGigController = async (
       role,
       req.body
     );
+
+   
+      
+      getChannel().sendToQueue(
+        GIG_CREATED_EVENT,
+        Buffer.from(JSON.stringify({
+          gigId: result.gig._id.toString(),
+          title: result.gig.title,
+          category: result.gig.category,
+          pricing: result.gig.pricing.basePrice,
+          influencerId: result.gig.primaryInfluencerId.toString(),
+          createdAt: result.gig.createdAt,
+        })),
+        { persistent: true }
+      );
+    
+
 
     return res.status(201).json({
       success: true,
@@ -84,8 +109,6 @@ export const getGigDetailsController = async (
 };
 
 
-
-
 // ================= EDIT GIG =================
 export const editGigController = async (
   req: AuthRequest,
@@ -93,7 +116,29 @@ export const editGigController = async (
 ) => {
   try {
     const { id } = req.params;
+    // 1️⃣ Validate ID
+    if (!id || Array.isArray(id)) {
+      return res.status(400).json({
+        message: "Invalid Gig ID"
+      });
+    }
 
+    // 2️⃣ Validate user
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Unauthorized"
+      });
+    }
+
+    const { userId } = req.user;
+
+    const gig = await editGigService(
+      id,
+      req.user,
+      req.body
+    );
+
+    
     // 1️⃣ Check if ID exists AND is string
     if (!id || Array.isArray(id)) {
       return res.status(400).json({
@@ -132,6 +177,7 @@ export const editGigController = async (
     });
   }
 };
+
 
 
 
@@ -179,5 +225,106 @@ export const deleteGigController = async (
     return res.status(500).json({
       message: "Internal server error"
     });
+  }
+};
+
+/* ================= PUBLISH GIG ================= */
+
+export const publishGigController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.user!;
+
+    const id = req.params.id as string;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Gig id is required"
+      });
+    }
+
+    const gig = await publishGigService(id, userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Gig published successfully",
+      data: gig
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+/* ================= UPDATE DELIVERABLES ================= */
+
+export const updateGigDeliverablesController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.user!;
+    const id = req.params.id as string;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Gig id is required"
+      });
+    }
+
+    const deliverables = req.body as GigDeliverable[];
+
+    const gig = await updateGigDeliverablesService(
+      id,
+      userId,
+      deliverables
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Deliverables updated successfully",
+      data: gig
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* ================= UPDATE PRICING ================= */
+
+export const updateGigPricingController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { userId } = req.user!;
+    const id = req.params.id as string;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Gig id is required"
+      });
+    }
+
+    const gig = await updateGigPricingService(
+      id,
+      userId,
+      req.body
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Pricing updated successfully",
+      data: gig
+    });
+  } catch (error) {
+    next(error);
   }
 };

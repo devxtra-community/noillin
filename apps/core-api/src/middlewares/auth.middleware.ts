@@ -52,7 +52,7 @@ export const authorizePermission = (permission: Permission) => {
     }
 
     const permissions = RolePermissions[req.user.role] ?? [];
-
+    
     if (!permissions.includes(permission)) {
       return next(Object.assign(new Error("Forbidden"), { statusCode: 403 }));
     }

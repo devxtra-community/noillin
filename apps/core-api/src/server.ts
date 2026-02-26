@@ -15,8 +15,8 @@ import router from "./routes/index.js";
 import { connectDB } from "./db/connect.js";
 import { cleanupExpiredSignups } from "./services/verification.service.js";
 import { setupMeili } from "./search/setup.js";
-
-
+import { GIG_CREATED_EVENT } from "./controllers/gig.controller.js";
+import { getChannel } from "./queue/rabbit.js";
 
 const app = express()
 const PORT = Number(process.env.PORT) || 5000
@@ -30,12 +30,13 @@ app.use(cors({
 
 connectDB()
 app.use(httpLogger);
-app.use(express.json());
 
 app.use("/api", router);
+app.use(express.json());
 
 //  Connect Database
 connectDB();
+await connectRabbit();
 
 //  CRON JOB (Runs every hour)
 cron.schedule("0 * * * *", async () => {
@@ -55,7 +56,9 @@ app.use(notFound);
 app.use(errorHandler);
 await setupMeili();
 
-connectRabbit();
+// Ensure gig.created queue exists
+await getChannel().assertQueue(GIG_CREATED_EVENT,{durable: true});
+
 
 app.listen(PORT, "127.0.0.1", () => {
   logger.info(`Core API is running at http://localhost:${PORT}`);
