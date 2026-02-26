@@ -1,8 +1,8 @@
 import { GigModel } from "../models/gig.model.js";
-import type { GigDocument } from "../types/gig.type.js";
+import type { CreateGigDBInput } from "../types/gig.type.js";
 
-export const create_gig = async(
-    data: Omit<GigDocument, "createdAt" | "updatedAt" >
+export const create_gig = async (
+  data: CreateGigDBInput
 ) => {
-    return GigModel.create(data)
-}
+  return GigModel.create(data);
+};
