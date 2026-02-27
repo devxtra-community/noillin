@@ -276,7 +276,7 @@ export default function BrandProfilePage() {
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-slate-900 text-sm">Rahul Verma <span className="text-slate-400 font-medium text-xs ml-1">@rahullifestyle</span></h4>
-                                            <p className="text-xs text-slate-500 mt-0.5">Men's Grooming Essentials</p>
+                                            <p className="text-xs text-slate-500 mt-0.5">Men&apos;s Grooming Essentials</p>
                                         </div>
                                     </div>
                                     <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center w-full sm:w-auto mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-0 border-slate-100 gap-2">
@@ -351,7 +351,7 @@ export default function BrandProfilePage() {
                                         <span className="text-[11px] font-medium text-slate-400">2 weeks ago</span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">
-                                        "Amazing experience working with Glow Cosmetics! They were professional, clear about deliverables, and paid on time. The products were high quality and my audience loved them. Highly recommend collaborating with this brand!"
+                                        &quot;Amazing experience working with Glow Cosmetics! They were professional, clear about deliverables, and paid on time. The products were high quality and my audience loved them. Highly recommend collaborating with this brand!&quot;
                                     </p>
                                 </div>
 
@@ -373,7 +373,7 @@ export default function BrandProfilePage() {
                                         <span className="text-[11px] font-medium text-slate-400">1 month ago</span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">
-                                        "Great communication throughout the campaign. The team was responsive and provided all the creative assets I needed. Payment was processed within 48 hours of campaign completion. Will definitely work with them again!"
+                                        &quot;Great communication throughout the campaign. The team was responsive and provided all the creative assets I needed. Payment was processed within 48 hours of campaign completion. Will definitely work with them again!&quot;
                                     </p>
                                 </div>
 
@@ -394,7 +394,7 @@ export default function BrandProfilePage() {
                                         <span className="text-[11px] font-medium text-slate-400">2 months ago</span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">
-                                        "One of the best brands I've collaborated with on Noillin. They value influencer creativity and give creative freedom. The escrow payment system gave me peace of mind. Looking forward to more campaigns!"
+                                        &quot;One of the best brands I&apos;ve collaborated with on Noillin. They value influencer creativity and give creative freedom. The escrow payment system gave me peace of mind. Looking forward to more campaigns!&quot;
                                     </p>
                                 </div>
                             </div>
@@ -448,7 +448,7 @@ export default function BrandProfilePage() {
                                         <h4 className="text-xs font-bold text-emerald-900">Platform Protection</h4>
                                     </div>
                                     <p className="text-[11px] text-emerald-700 leading-relaxed">
-                                        All collaborations are protected by Noillin's secure payment system. Funds are held in escrow until you complete your deliverables.
+                                        All collaborations are protected by Noillin&apos;s secure payment system. Funds are held in escrow until you complete your deliverables.
                                     </p>
                                 </div>
                             </div>
