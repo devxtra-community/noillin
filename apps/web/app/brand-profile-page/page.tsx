@@ -1,4 +1,4 @@
-
+import Link from 'next/link';
 import {
     BadgeCheck,
     Globe,
@@ -45,7 +45,7 @@ export default function BrandProfilePage() {
                                 <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 font-medium pt-1">
                                     <div className="flex items-center gap-1.5">
                                         <span className="w-4 h-4 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
-                                            <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+                                            <span className="w-2 h-2 rounded-full bg-slate-400"></span>
                                         </span>
                                         Beauty & Skincare
                                     </div>
@@ -54,9 +54,9 @@ export default function BrandProfilePage() {
                                     </div>
                                 </div>
                                 <div>
-                                    <a href="#" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
+                                    <Link href="#" className="inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
                                         <Globe className="w-4 h-4" /> www.glowcosmetics.com
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
@@ -188,9 +188,9 @@ export default function BrandProfilePage() {
                                         <div className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-slate-400" /> 10K+ followers</div>
                                     </div>
 
-                                    <a href="#" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
+                                    <Link href="#" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
                                         View Details <ArrowRight className="w-3.5 h-3.5" />
-                                    </a>
+                                    </Link>
                                 </div>
 
                                 {/* Campaign 2 */}
@@ -211,9 +211,9 @@ export default function BrandProfilePage() {
                                         <div className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-slate-400" /> 5K+ followers</div>
                                     </div>
 
-                                    <a href="#" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
+                                    <Link href="#" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
                                         View Details <ArrowRight className="w-3.5 h-3.5" />
-                                    </a>
+                                    </Link>
                                 </div>
 
                                 {/* Campaign 3 */}
@@ -234,9 +234,9 @@ export default function BrandProfilePage() {
                                         <div className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-slate-400" /> 50K+ followers</div>
                                     </div>
 
-                                    <a href="#" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
+                                    <Link href="#" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
                                         View Details <ArrowRight className="w-3.5 h-3.5" />
-                                    </a>
+                                    </Link>
                                 </div>
                             </div>
                         </section>
@@ -249,8 +249,8 @@ export default function BrandProfilePage() {
                                 {/* Collab 1 */}
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-slate-100 rounded-xl hover:border-slate-200 transition-colors cursor-pointer">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-slate-100">
-                                            <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Priya Sharma" className="w-full h-full object-cover" />
+                                        <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
+                                            PS
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-slate-900 text-sm">Priya Sharma <span className="text-slate-400 font-medium text-xs ml-1">@priyabeauty</span></h4>
@@ -271,8 +271,8 @@ export default function BrandProfilePage() {
                                 {/* Collab 2 */}
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-slate-100 rounded-xl hover:border-slate-200 transition-colors cursor-pointer">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-slate-100">
-                                            <img src="https://i.pravatar.cc/150?img=11" alt="Rahul Verma" className="w-full h-full object-cover" />
+                                        <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg">
+                                            RV
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-slate-900 text-sm">Rahul Verma <span className="text-slate-400 font-medium text-xs ml-1">@rahullifestyle</span></h4>
@@ -293,8 +293,8 @@ export default function BrandProfilePage() {
                                 {/* Collab 3 */}
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border border-slate-100 rounded-xl hover:border-slate-200 transition-colors cursor-pointer">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border border-slate-100">
-                                            <img src="https://i.pravatar.cc/150?img=5" alt="Ananya Iyer" className="w-full h-full object-cover" />
+                                        <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg">
+                                            AI
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-slate-900 text-sm">Ananya Iyer <span className="text-slate-400 font-medium text-xs ml-1">@ananyaskincare</span></h4>
@@ -338,7 +338,9 @@ export default function BrandProfilePage() {
                                 <div className="border-b border-slate-100 pb-8 last:border-0 last:pb-0">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            <img src="https://i.pravatar.cc/150?img=32" alt="Reviewer" className="w-10 h-10 rounded-full object-cover" />
+                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-pink-100 text-pink-600 flex items-center justify-center font-bold">
+                                                MK
+                                            </div>
                                             <div>
                                                 <h4 className="font-bold text-sm text-slate-900">Meera Kapoor</h4>
                                                 <div className="flex gap-0.5 text-yellow-400 mt-0.5">
@@ -349,7 +351,7 @@ export default function BrandProfilePage() {
                                         <span className="text-[11px] font-medium text-slate-400">2 weeks ago</span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">
-                                        Amazing experience working with Glow Cosmetics! They were professional, clear about deliverables, and paid on time. The products were high quality and my audience loved them. Highly recommend collaborating with this brand!
+                                        "Amazing experience working with Glow Cosmetics! They were professional, clear about deliverables, and paid on time. The products were high quality and my audience loved them. Highly recommend collaborating with this brand!"
                                     </p>
                                 </div>
 
@@ -357,7 +359,9 @@ export default function BrandProfilePage() {
                                 <div className="border-b border-slate-100 pb-8 last:border-0 last:pb-0">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            <img src="https://i.pravatar.cc/150?img=12" alt="Reviewer" className="w-10 h-10 rounded-full object-cover" />
+                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
+                                                AM
+                                            </div>
                                             <div>
                                                 <h4 className="font-bold text-sm text-slate-900">Arjun Mehta</h4>
                                                 <div className="flex gap-0.5 text-yellow-400 mt-0.5">
@@ -369,7 +373,7 @@ export default function BrandProfilePage() {
                                         <span className="text-[11px] font-medium text-slate-400">1 month ago</span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">
-                                        Great communication throughout the campaign. The team was responsive and provided all the creative assets I needed. Payment was processed within 48 hours of campaign completion. Will definitely work with them again!
+                                        "Great communication throughout the campaign. The team was responsive and provided all the creative assets I needed. Payment was processed within 48 hours of campaign completion. Will definitely work with them again!"
                                     </p>
                                 </div>
 
@@ -377,7 +381,9 @@ export default function BrandProfilePage() {
                                 <div className="border-b border-slate-100 pb-8 last:border-0 last:pb-0">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3">
-                                            <img src="https://i.pravatar.cc/150?img=40" alt="Reviewer" className="w-10 h-10 rounded-full object-cover" />
+                                            <div className="w-10 h-10 rounded-full overflow-hidden bg-teal-100 text-teal-600 flex items-center justify-center font-bold">
+                                                SR
+                                            </div>
                                             <div>
                                                 <h4 className="font-bold text-sm text-slate-900">Sneha Reddy</h4>
                                                 <div className="flex gap-0.5 text-yellow-400 mt-0.5">
@@ -388,7 +394,7 @@ export default function BrandProfilePage() {
                                         <span className="text-[11px] font-medium text-slate-400">2 months ago</span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">
-                                        One of the best brands I've collaborated with on Noillin. They value influencer creativity and give creative freedom. The escrow payment system gave me peace of mind. Looking forward to more campaigns!
+                                        "One of the best brands I've collaborated with on Noillin. They value influencer creativity and give creative freedom. The escrow payment system gave me peace of mind. Looking forward to more campaigns!"
                                     </p>
                                 </div>
                             </div>
@@ -455,7 +461,7 @@ export default function BrandProfilePage() {
                                 <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl text-sm transition-colors shadow-sm mb-4">
                                     <Send className="w-4 h-4" /> Send Proposal
                                 </button>
-                                <div className="w-full h-px bg-slate-100  mb-4"></div>
+                                <div className="w-full h-px bg-slate-100 w-full mb-4"></div>
                                 <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-slate-600 font-semibold rounded-lg text-sm transition-colors">
                                     <Bookmark className="w-4 h-4" /> Save Brand
                                 </button>
@@ -472,7 +478,7 @@ export default function BrandProfilePage() {
                         <section className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)]">
                             <h2 className="text-base font-bold text-slate-900 tracking-tight mb-5">Similar Brands</h2>
                             <div className="space-y-4">
-                                <a href="#" className="flex items-center justify-between group">
+                                <Link href="#" className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-lg bg-pink-500 text-white flex items-center justify-center font-bold text-sm">RS</div>
                                         <div>
@@ -481,9 +487,9 @@ export default function BrandProfilePage() {
                                         </div>
                                     </div>
                                     <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
-                                </a>
+                                </Link>
 
-                                <a href="#" className="flex items-center justify-between group">
+                                <Link href="#" className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-lg bg-indigo-500 text-white flex items-center justify-center font-bold text-sm">PB</div>
                                         <div>
@@ -492,9 +498,9 @@ export default function BrandProfilePage() {
                                         </div>
                                     </div>
                                     <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
-                                </a>
+                                </Link>
 
-                                <a href="#" className="flex items-center justify-between group">
+                                <Link href="#" className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-lg bg-orange-500 text-white flex items-center justify-center font-bold text-sm">LH</div>
                                         <div>
@@ -503,7 +509,7 @@ export default function BrandProfilePage() {
                                         </div>
                                     </div>
                                     <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-emerald-500 transition-colors" />
-                                </a>
+                                </Link>
                             </div>
                         </section>
 
@@ -518,9 +524,9 @@ export default function BrandProfilePage() {
                         Noillin <span className="font-medium text-slate-400">© 2024. All rights reserved.</span>
                     </div>
                     <div className="flex items-center gap-4">
-                        <a href="#" className="hover:text-slate-600 transition-colors">Privacy Policy</a>
-                        <a href="#" className="hover:text-slate-600 transition-colors">Terms of Service</a>
-                        <a href="#" className="hover:text-slate-600 transition-colors">Support</a>
+                        <Link href="#" className="hover:text-slate-600 transition-colors">Privacy Policy</Link>
+                        <Link href="#" className="hover:text-slate-600 transition-colors">Terms of Service</Link>
+                        <Link href="#" className="hover:text-slate-600 transition-colors">Support</Link>
                     </div>
                 </div>
             </div>
