@@ -18,8 +18,6 @@ import {
     Flag,
     ChevronRight,
     ArrowRight,
-    Instagram,
-    Youtube,
     Video,
     FileImage,
     Building2
@@ -351,7 +349,7 @@ export default function BrandProfilePage() {
                                         <span className="text-[11px] font-medium text-slate-400">2 weeks ago</span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">
-                                        "Amazing experience working with Glow Cosmetics! They were professional, clear about deliverables, and paid on time. The products were high quality and my audience loved them. Highly recommend collaborating with this brand!"
+                                        Amazing experience working with Glow Cosmetics! They were professional, clear about deliverables, and paid on time. The products were high quality and my audience loved them. Highly recommend collaborating with this brand!
                                     </p>
                                 </div>
 
@@ -371,7 +369,7 @@ export default function BrandProfilePage() {
                                         <span className="text-[11px] font-medium text-slate-400">1 month ago</span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">
-                                        "Great communication throughout the campaign. The team was responsive and provided all the creative assets I needed. Payment was processed within 48 hours of campaign completion. Will definitely work with them again!"
+                                        Great communication throughout the campaign. The team was responsive and provided all the creative assets I needed. Payment was processed within 48 hours of campaign completion. Will definitely work with them again!
                                     </p>
                                 </div>
 
@@ -390,7 +388,7 @@ export default function BrandProfilePage() {
                                         <span className="text-[11px] font-medium text-slate-400">2 months ago</span>
                                     </div>
                                     <p className="text-sm text-slate-600 leading-relaxed">
-                                        "One of the best brands I've collaborated with on Noillin. They value influencer creativity and give creative freedom. The escrow payment system gave me peace of mind. Looking forward to more campaigns!"
+                                        One of the best brands I've collaborated with on Noillin. They value influencer creativity and give creative freedom. The escrow payment system gave me peace of mind. Looking forward to more campaigns!
                                     </p>
                                 </div>
                             </div>
@@ -457,7 +455,7 @@ export default function BrandProfilePage() {
                                 <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl text-sm transition-colors shadow-sm mb-4">
                                     <Send className="w-4 h-4" /> Send Proposal
                                 </button>
-                                <div className="w-full h-px bg-slate-100 w-full mb-4"></div>
+                                <div className="w-full h-px bg-slate-100  mb-4"></div>
                                 <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 hover:bg-slate-50 text-slate-600 font-semibold rounded-lg text-sm transition-colors">
                                     <Bookmark className="w-4 h-4" /> Save Brand
                                 </button>
