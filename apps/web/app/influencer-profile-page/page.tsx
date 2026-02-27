@@ -345,7 +345,7 @@ export default function ProfilePage() {
                 </div>
               </div>
               <p className="text-sm text-slate-600 leading-relaxed">
-                "Sarah was incredibly professional and delivered the content ahead of schedule. The Reels performed above our expectations."
+                &quot;Sarah was incredibly professional and delivered the content ahead of schedule. The Reels performed above our expectations.&quot;
               </p>
             </div>
 
@@ -366,7 +366,7 @@ export default function ProfilePage() {
                 </div>
               </div>
               <p className="text-sm text-slate-600 leading-relaxed">
-                "Great communication throughout the process. Our audience loved the styling tips she incorporated."
+                &quot;Great communication throughout the process. Our audience loved the styling tips she incorporated.&quot;
               </p>
             </div>
           </div>
