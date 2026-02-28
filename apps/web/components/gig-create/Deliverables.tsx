@@ -15,7 +15,6 @@ interface DeliverablesProps {
 
 export function Deliverables({ onBack, onNext }: DeliverablesProps) {
     const { gigId, setDeliverables, deliverables } = useGigCreateStore();
-
     const initialDeliverable = deliverables[0] || {};
     const [contentType, setcontentType] = useState<
   "video" | "image" | "text"
