@@ -6,9 +6,7 @@ import { getAvailabilityController, setAvailabilityController } from "../control
 
 const router: Router = Router();
 
-/**
- * Create or update availability (Step 4)
- */
+
 router.post(
   "/",
   authenticate,
@@ -16,9 +14,7 @@ router.post(
   setAvailabilityController
 );
 
-/**
- * Get availability by influencer profile id
- */
+
 router.get(
   "/:influencerProfileId",
   getAvailabilityController
