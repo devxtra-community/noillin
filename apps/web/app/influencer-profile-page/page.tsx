@@ -1,4 +1,5 @@
 
+import Image from 'next/image';
 import {
   CheckCircle2,
   MapPin,
@@ -54,7 +55,7 @@ export default function ProfilePage() {
         <div className="bg-white rounded-3xl p-6 md:p-10 border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden">
           <div className="relative shrink-0">
             <div className="w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden border-2 border-slate-100 shadow-sm relative">
-              <img src="https://i.pravatar.cc/300?img=5" alt="Sarah Jenkins" className="w-full h-full object-cover" />
+              <Image fill src="https://i.pravatar.cc/300?img=5" alt="Sarah Jenkins" className="object-cover" />
             </div>
             <div className="absolute bottom-1 right-1 bg-emerald-500 text-white p-1 rounded-full border-4 border-white">
               <span className="flex items-center justify-center w-5 h-5">

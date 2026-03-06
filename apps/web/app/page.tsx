@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function HomePage() {
   const router = useRouter();
@@ -7,7 +8,7 @@ export default function HomePage() {
     router.push("/login");
   }
   return (
-        <div className="min-h-screen bg-white text-gray-900 font-sans">
+    <div className="min-h-screen bg-white text-gray-900 font-sans">
       {/* Navigation */}
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -28,7 +29,7 @@ export default function HomePage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="px-4 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors hover:cursor-pointer">
+          <button onClick={handleLoginClick} className="px-4 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors hover:cursor-pointer">
             Sign In
           </button>
           <button className="px-4 py-2 text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 rounded-md transition-colors shadow-sm shadow-emerald-200 hover:cursor-pointer">
@@ -39,7 +40,7 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        
+
         {/* Left Column - Text Content */}
         <div>
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6">
@@ -49,7 +50,7 @@ export default function HomePage() {
           <p className="text-lg text-gray-500 mb-10 max-w-lg leading-relaxed">
             Discover, schedule, and collaborate with verified creators — all in one place.
           </p>
-          
+
           <div className="flex flex-wrap items-center gap-4 mb-10">
             <button className="px-6 py-3 text-base font-semibold text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-colors shadow-lg hover:cursor-pointer">
               Explore Gigs
@@ -63,7 +64,7 @@ export default function HomePage() {
             <div className="flex -space-x-3">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
-                  <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="avatar" className="object-cover" />
+                  <Image fill src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="avatar" className="object-cover" />
                 </div>
               ))}
             </div>
@@ -75,10 +76,10 @@ export default function HomePage() {
         <div className="relative w-full max-w-md mx-auto lg:ml-auto">
           {/* Decorative Green Background Shape */}
           <div className="absolute inset-0 bg-emerald-100 rounded-[2rem] transform rotate-3 translate-x-4 translate-y-4 -z-10"></div>
-          
+
           {/* Main Card */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 relative">
-            
+
             {/* Lock Icon */}
             <div className="absolute top-4 right-4 w-8 h-8 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -88,8 +89,8 @@ export default function HomePage() {
 
             {/* Profile Info */}
             <div className="flex items-center gap-4 mb-8 mt-2">
-              <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
-                <img src="https://i.pravatar.cc/150?img=5" alt="Sarah Jenkins" className="w-full h-full object-cover" />
+              <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 relative">
+                <Image fill src="https://i.pravatar.cc/150?img=5" alt="Sarah Jenkins" className="object-cover" />
               </div>
               <div>
                 <h3 className="font-bold text-gray-900 text-lg">Sarah Jenkins</h3>
@@ -303,8 +304,8 @@ export default function HomePage() {
               </div>
               <p className="text-gray-600 text-sm italic mb-8 leading-relaxed">{story.quote}</p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-                  <img src={story.img} alt={story.name} className="w-full h-full object-cover" />
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 relative">
+                  <Image fill src={story.img} alt={story.name} className="object-cover" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-gray-900">{story.name}</h4>
@@ -340,12 +341,12 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-[#0F172A] text-gray-400 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-8">
-          
+
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 text-white">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
             <span className="text-white font-bold text-lg">Noillin</span>
@@ -374,7 +375,7 @@ export default function HomePage() {
               <span>REAL-TIME CHAT</span>
             </div>
           </div>
-          
+
         </div>
       </footer>
 

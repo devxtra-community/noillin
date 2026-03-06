@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
-    Star, MapPin, CheckCircle2, ChevronRight, Play, Heart,
-    MessageSquare, BarChart2, StarHalf, Check,
-    Share, MoreHorizontal, ShieldCheck, Clock, CheckCircle,
+    Star, CheckCircle2, ChevronRight, Play, Heart,
+    MessageSquare, Check,
+    Share, ShieldCheck, CheckCircle,
     BarChart, Users, Instagram, Info
 } from "lucide-react";
 
@@ -111,7 +111,7 @@ export default function GigDetailsPage() {
                         <div className="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
                             <h3 className="text-xl font-bold text-gray-900 mb-4">About this Gig</h3>
                             <p className="text-gray-600 leading-relaxed font-medium">
-                                Are you looking to skyrocket your brand's presence on Instagram? Look no further! I specialize in creating highly engaging, trendy, and authentic content tailored for the fashion and beauty industry. With over 245K active followers, I guarantee your product will be showcased to a vibrant and responsive audience.
+                                Are you looking to skyrocket your brand&apos;s presence on Instagram? Look no further! I specialize in creating highly engaging, trendy, and authentic content tailored for the fashion and beauty industry. With over 245K active followers, I guarantee your product will be showcased to a vibrant and responsive audience.
                             </p>
 
                             <h4 className="font-bold text-gray-900 mt-6 mb-3">What You Will Receive:</h4>
@@ -124,7 +124,7 @@ export default function GigDetailsPage() {
 
                             <h4 className="font-bold text-gray-900 mt-6 mb-3">Custom Offers:</h4>
                             <p className="text-gray-600 leading-relaxed font-medium">
-                                Need more reels or a long-term partnership? I am open to discussing custom packages that suit your brand's specific needs. Feel free to shoot me a message before placing an order to discuss your strategy and goals.
+                                Need more reels or a long-term partnership? I am open to discussing custom packages that suit your brand&apos;s specific needs. Feel free to shoot me a message before placing an order to discuss your strategy and goals.
                             </p>
                         </div>
 
@@ -336,7 +336,7 @@ export default function GigDetailsPage() {
                                         A vibrant fashion and lifestyle content creator based in London. My mission is to empower individuals to express their authentic selves through style. I blend high-street finds with luxury statement pieces to create accessible yet aspirational looks. My content is bright, energetic, and highly interactive.
                                     </p>
                                     <p className="text-gray-600 font-medium leading-relaxed">
-                                        I believe in genuine partnerships. When I recommend a product, it's because I truly use and love it, which reflects directly on the engagement and trust my audience places in my sponsored content. Let's create something beautiful together!
+                                        I believe in genuine partnerships. When I recommend a product, it&apos;s because I truly use and love it, which reflects directly on the engagement and trust my audience places in my sponsored content. Let&apos;s create something beautiful together!
                                     </p>
                                 </div>
                                 <div className="md:w-64 space-y-4">
