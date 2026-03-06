@@ -17,10 +17,12 @@ export default function GigCreatePage() {
     const totalSteps = 6;
     const reset = useGigCreateStore((s) => s.reset);
     const setMode = useGigCreateStore((s) => s.setMode);
+
     useEffect(() => {
         reset();
         setMode("create");
-    }, []);
+    }, [reset, setMode]);
+
     const nextStep = () => {
         if (currentStep < totalSteps) {
             setCurrentStep((prev) => prev + 1);
@@ -103,5 +105,5 @@ export default function GigCreatePage() {
                 </div>
             </div>
         </div>
-    )
+    );
 }

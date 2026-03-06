@@ -18,7 +18,7 @@ export default function EditGigPage() {
   const params = useParams();
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 6;
-    const setMode = useGigCreateStore((s) => s.setMode);
+  const setMode = useGigCreateStore((s) => s.setMode);
   const {
     setGigId,
     setDetails,
@@ -26,7 +26,7 @@ export default function EditGigPage() {
     setPricing,
     setAvailability
   } = useGigCreateStore();
-  
+
   useEffect(() => {
     setMode("edit");
     const fetchGig = async () => {
@@ -47,21 +47,21 @@ export default function EditGigPage() {
       setPricing(gig.pricing);
       console.log(gig.primaryInfluencerId)
       const influencerId =
-      typeof gig.primaryInfluencerId === "string"
-        ? gig.primaryInfluencerId
-        : gig.primaryInfluencerId?._id;
+        typeof gig.primaryInfluencerId === "string"
+          ? gig.primaryInfluencerId
+          : gig.primaryInfluencerId?._id;
 
-    if (influencerId) {
-      const availabilityRes = await api.get(
-        `/availability/${influencerId}`
-      );
+      if (influencerId) {
+        const availabilityRes = await api.get(
+          `/availability/${influencerId}`
+        );
 
-      setAvailability(availabilityRes.data.data);
-    }
+        setAvailability(availabilityRes.data.data);
+      }
     };
 
     fetchGig();
-  }, [params.id]);
+  }, [params.id, setAvailability, setDeliverables, setDetails, setGigId, setMode, setPricing]);
 
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -118,22 +118,22 @@ export default function EditGigPage() {
               />
             )}
             {currentStep === 6 && (
-                                        <div className="p-16 text-center space-y-6">
-                                            <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                                <FaCheck size={40} />
-                                            </div>
-                                            <h2 className="text-3xl font-bold text-gray-900">Gig Published Successfully!</h2>
-                                            <p className="text-gray-500 max-w-md mx-auto">
-                                                Your gig is now live and visible to brands. You can manage it from your dashboard.
-                                            </p>
-                                            <button
-                                                onClick={() => window.location.href = "/dashboard"}
-                                                className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-all mt-6"
-                                            >
-                                                Go to Dashboard
-                                            </button>
-                                        </div>
-                                    )}
+              <div className="p-16 text-center space-y-6">
+                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FaCheck size={40} />
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900">Gig Published Successfully!</h2>
+                <p className="text-gray-500 max-w-md mx-auto">
+                  Your gig is now live and visible to brands. You can manage it from your dashboard.
+                </p>
+                <button
+                  onClick={() => window.location.href = "/dashboard"}
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-all mt-6"
+                >
+                  Go to Dashboard
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
