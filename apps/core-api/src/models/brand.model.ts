@@ -19,6 +19,7 @@ export interface IBrandProfile extends Document {
 
   isProfileComplete: boolean;
   isVerified: boolean;
+  profileImageUrl?: string,
 }
 
 const BrandProfileSchema = new Schema<IBrandProfile>(
@@ -65,7 +66,10 @@ const BrandProfileSchema = new Schema<IBrandProfile>(
       type: [String], // store S3 keys
       default: [],
     },
-
+    profileImageUrl: {
+      type: String,
+      default: ""
+    },
     isProfileComplete: {
       type: Boolean,
       default: false,
