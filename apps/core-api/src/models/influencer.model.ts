@@ -20,6 +20,7 @@ export interface IInfluencerProfile extends Document {
 
   isProfileComplete: boolean;
   isVerified: boolean;
+  profileImageUrl?: string,
 }
 
 const InfluencerProfileSchema = new Schema<IInfluencerProfile>(
@@ -49,6 +50,10 @@ const InfluencerProfileSchema = new Schema<IInfluencerProfile>(
     bio: {
       type: String,
       maxlength: 500,
+    },
+    profileImageUrl: {
+      type: String,
+      default: ""
     },
 
     instagramUrl: String,

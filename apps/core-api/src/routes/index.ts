@@ -1,5 +1,7 @@
 import { Router } from "express";
 
+import mediaRoutes from "../routes/media.routes.js";
+
 import userRoutes from "./users.routes.js";
 import authRoutes from "./auth.routes.js";
 import profileRoutes from "./profile.routes.js";
@@ -24,5 +26,6 @@ router.use("/bookings", bookingRoutes);
 router.use("/orders", orderRoutes);
 router.use("/payments", paymentRoutes);
 router.use("/search", searchRoutes);
+router.use("/media", mediaRoutes);
 
 export default router

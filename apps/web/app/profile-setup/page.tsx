@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+import { uploadToS3 } from "@/lib/s3-uploads";
 import Navbar from "@/components/Navbar";
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
@@ -188,38 +189,7 @@ export default function ProfileSetupPage() {
             <main className="pt-24 pb-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-3xl mx-auto">
                     {/* Header */}
-                    <div className="text-center mb-10">
-                        {/* <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-4">
-                            Setup your profile
-                        </h1>
-                        <p className="max-w-2xl mx-auto text-xl text-gray-500">
-                            Join thousands of creators and brands building the future of influencer marketing.
-                        </p> */}
-                    </div>
 
-                    {/* Type Switcher */}
-                    {/* <div className="flex justify-center mb-10">
-                        <div className="bg-white p-1.5 rounded-xl shadow-sm border border-gray-200 inline-flex ring-1 ring-black/5">
-                            <button
-                                onClick={() => setUserType("INFLUENCER")}
-                                className={`px-8 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${userType === "INFLUENCER"
-                                        ? "bg-[#10B981] text-white shadow-md transform scale-[1.02]"
-                                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                                    }`}
-                            >
-                                I'm an Influencer
-                            </button>
-                            <button
-                                onClick={() => setUserType("BRAND")}
-                                className={`px-8 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${userType === "BRAND"
-                                        ? "bg-[#10B981] text-white shadow-md transform scale-[1.02]"
-                                        : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
-                                    }`}
-                            >
-                                I'm a Brand
-                            </button>
-                        </div>
-                    </div> */}
 
                     {/* Main Card */}
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
