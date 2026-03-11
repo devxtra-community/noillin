@@ -187,21 +187,23 @@ export function ReviewAndPublish({ onBack, onNext, goToStep }: ReviewAndPublishP
     }));
 
     const handlePublish = async () => {
-        if (!gigId || isLoading) {
-            if (!gigId) console.error("Gig ID missing");
-            return;
-        }
+  if (!gigId) {
+    console.error("Gig ID missing");
+    return;
+  }
 
-        setIsLoading(true);
-        try {
-            await api.post(`/gigs/${gigId}/publish`);
-            onNext();
-        } catch (error) {
-            console.error("Error publishing gig:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+  try {
+    await api.post(`/gigs/${gigId}/publish`);
+
+    console.log("Published successfully");
+
+    onNext?.();   // clean optional chaining
+  } catch (error) {
+    console.error("Publish failed:", error);
+  }finally {
+    setIsLoading(false);
+  }
+};
 
     return (
         <div className="p-8 sm:p-10">

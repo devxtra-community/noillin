@@ -9,6 +9,10 @@ export class ProfileRepository {
     return InfluencerProfile.findOne({ userId });
   }
 
+  async findInfluencerById(id: string): Promise<IInfluencerProfile | null> {
+    return InfluencerProfile.findById(id);
+  }
+
   async findBrandByUserId(userId: string): Promise<IBrandProfile | null> {
     return BrandProfile.findOne({ userId });
   }

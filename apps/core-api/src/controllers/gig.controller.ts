@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { getGigDetailsService, listGigsService, publishGigService, updateGigDeliverablesService, updateGigPricingService } from "../services/gig.service.js";
+import { getGigDetailsService, getMyGigsService, listGigsService, publishGigService, updateGigDeliverablesService, updateGigPricingService } from "../services/gig.service.js";
 import type { GigDeliverable } from "../types/gig.type.js";
 import { getChannel } from "../queue/rabbit.js";
 import { createGigService, deleteGigService, editGigService } from "../services/gig.service.js";
@@ -112,35 +112,14 @@ export const getGigDetailsController = async (
 // ================= EDIT GIG =================
 export const editGigController = async (
   req: AuthRequest,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const { id } = req.params;
-    // 1️⃣ Validate ID
-    if (!id || Array.isArray(id)) {
-      return res.status(400).json({
-        message: "Invalid Gig ID"
-      });
-    }
 
-    // 2️⃣ Validate user
-    if (!req.user) {
-      return res.status(401).json({
-        message: "Unauthorized"
-      });
-    }
-
-    const { userId } = req.user;
-
-    const gig = await editGigService(
-      id,
-      req.user,
-      req.body
-    );
-
-    
-    // 1️⃣ Check if ID exists AND is string
-    if (!id || Array.isArray(id)) {
+    // 🔥 Type-safe ID guard
+    if (typeof id !== "string") {
       return res.status(400).json({
         message: "Invalid Gig ID"
       });
@@ -158,23 +137,13 @@ export const editGigController = async (
       req.body
     );
 
-    return res.status(200).json(updatedGig);
-
-  } catch (error: unknown) {
-    console.error("Error editing gig:", error);
-
-    if (error instanceof Error) {
-      const statusCode =
-        (error as { statusCode?: number }).statusCode || 500;
-
-      return res.status(statusCode).json({
-        message: error.message
-      });
-    }
-
-    return res.status(500).json({
-      message: "Internal server error"
+    return res.status(200).json({
+      success: true,
+      data: updatedGig
     });
+
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -324,6 +293,32 @@ export const updateGigPricingController = async (
       message: "Pricing updated successfully",
       data: gig
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getGigController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        message: "Invalid Gig ID"
+      });
+    }
+
+    const gig = await getMyGigsService(id);
+
+    res.status(200).json({
+      success: true,
+      data: gig
+    });
+
   } catch (error) {
     next(error);
   }

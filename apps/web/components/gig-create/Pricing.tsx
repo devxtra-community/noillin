@@ -19,7 +19,6 @@ export function Pricing({ onBack, onNext }: PricingProps) {
     const [revisionsIncluded, setRevisionsIncluded] = useState<number>(pricing?.revisionsIncluded || 0);
     const [currency] = useState<"USD" | "INR">(pricing?.currency || "USD");
     const [isLoading, setIsLoading] = useState(false);
-
     const handleSubmit = async () => {
         if (!gigId || isLoading) {
             if (!gigId) console.error("Gig ID missing");

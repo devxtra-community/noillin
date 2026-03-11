@@ -38,8 +38,10 @@ export interface AvailabilityState {
 }
 
 interface GigCreateState {
+  mode: "create" | "edit";
+  setMode: (mode: "create" | "edit") => void;
   gigId: string | null;
-
+  
   details: {
     title: string;
     shortDescription: string;
@@ -62,6 +64,8 @@ interface GigCreateState {
 }
 
 export const useGigCreateStore = create<GigCreateState>((set) => ({
+  mode: "create",
+  setMode: (mode) => set({ mode }),
   gigId: null,
 
   details: {
@@ -94,20 +98,21 @@ export const useGigCreateStore = create<GigCreateState>((set) => ({
     set({ availability: data }),
 
   reset: () =>
-    set({
-      gigId: null,
-      details: {
-        title: "",
-        shortDescription: "",
-        platform: "instagram",
-        gigType: "solo",
-        category: "",
-        tags: []
-      },
-      deliverables: [],
-      pricing: null,
-      availability: null
-    })
+  set({
+    mode: "create",
+    gigId: null,
+    details: {
+      title: "",
+      shortDescription: "",
+      platform: "instagram",
+      gigType: "solo",
+      category: "",
+      tags: []
+    },
+    deliverables: [],
+    pricing: null,
+    availability: null
+  })
 }));
 
 
