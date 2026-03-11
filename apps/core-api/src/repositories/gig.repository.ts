@@ -49,8 +49,9 @@ export const findPublishedGigs = async (
   const [gigs, total] = await Promise.all([
     GigModel.find(filter)
       .select(
-        "title category pricing.basePrice pricing.currency primaryInfluencerId createdAt"
+        "title category pricing.basePrice pricing.currency primaryInfluencerId createdAt influencer"
       )
+      .populate("primaryInfluencerId", "displayName profileImage availableFrom platforms")
       .sort(sort)
       .skip(skip)
       .limit(limit)
