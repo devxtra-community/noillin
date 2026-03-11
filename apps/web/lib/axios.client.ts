@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/auth.store';
 
 
 const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api",
     withCredentials: true, // Required to send cookies automatically!
     headers: {
         "Content-Type": "application/json"

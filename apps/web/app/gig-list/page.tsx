@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 
+import api from "@/lib/axios.client";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Platform = "IG" | "YT" | "TT" | "PT";
@@ -46,7 +48,7 @@ interface ApiResponse {
 const LIMIT = 9;
 
 // Replace with your actual API base URL
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 const platformColors: Record<Platform, string> = {
   IG: "bg-pink-100 text-pink-600",
@@ -219,13 +221,13 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
         <div className="flex gap-1.5 mb-4 flex-wrap">
           {platforms.length > 0
             ? platforms.map((p) => (
-                <span key={p} className={`text-xs font-medium px-2 py-0.5 rounded-md ${platformColors[p]}`}>
-                  {platformIcons[p]} {p}
-                </span>
-              ))
+              <span key={p} className={`text-xs font-medium px-2 py-0.5 rounded-md ${platformColors[p]}`}>
+                {platformIcons[p]} {p}
+              </span>
+            ))
             : (
-                <span className="text-xs text-gray-300">—</span>
-              )}
+              <span className="text-xs text-gray-300">—</span>
+            )}
         </div>
 
         <div className="flex items-end justify-between mb-4">
@@ -308,14 +310,17 @@ export default function ExploreGigs() {
       if (opts.sort !== "recommended") params.set("sort", opts.sort);
       if (opts.search) params.set("search", opts.search);
 
-      const res = await fetch(`${API_BASE}/gigs?${params.toString()}`);
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-
-      const json: ApiResponse = await res.json();
+      const res = await api.get(`/gigs?${params.toString()}`);
+      const json: ApiResponse = res.data;
       setGigs(json.data);
       setPagination(json.pagination);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } } };
+      if (errorObj.response?.data?.message) {
+        setError(errorObj.response.data.message);
+      } else {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -388,9 +393,9 @@ export default function ExploreGigs() {
     <div className="min-h-screen bg-[#f5f5f3] font-sans" style={{ colorScheme: "light" }}>
       {/* Navbar */}
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-50" style={{ colorScheme: "light" }}>
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 h-18 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm">
               N
             </div>
             <span className="font-semibold text-gray-900 text-lg tracking-tight">Noillin</span>
@@ -402,17 +407,19 @@ export default function ExploreGigs() {
             <a href="#" className="hover:text-gray-900 transition-colors">Support</a>
           </div>
           <div className="flex items-center gap-3">
-            <button className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium hover:cursor-pointer">Sign In</button>
-            <button className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium hover:cursor-pointer">
-              Get Started
-            </button>
+            <Link href="/signup" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium hover:cursor-pointer">
+              Sign Up
+            </Link>
+            <Link href="/login" className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium hover:cursor-pointer">
+              Login
+            </Link>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 flex gap-8">
+      <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 py-10 flex flex-col lg:flex-row gap-8 lg:gap-12">
         {/* Sidebar */}
-        <aside className="w-52 shrink-0 space-y-8">
+        <aside className="w-full lg:w-64 shrink-0 space-y-8">
           {/* Platform */}
           <div>
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Platform</p>
@@ -421,11 +428,10 @@ export default function ExploreGigs() {
                 <li key={p}>
                   <button
                     onClick={() => handlePlatformChange(p)}
-                    className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${
-                      activePlatform === p
-                        ? "bg-emerald-50 text-emerald-700 font-medium"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                    className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${activePlatform === p
+                      ? "bg-emerald-50 text-emerald-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-100"
+                      }`}
                   >
                     {p}
                   </button>
@@ -442,11 +448,10 @@ export default function ExploreGigs() {
                 <li key={c}>
                   <button
                     onClick={() => handleCategoryChange(c)}
-                    className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${
-                      activeCategory === c
-                        ? "bg-emerald-50 text-emerald-700 font-medium"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                    className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${activeCategory === c
+                      ? "bg-emerald-50 text-emerald-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-100"
+                      }`}
                   >
                     {c}
                   </button>
@@ -481,14 +486,12 @@ export default function ExploreGigs() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => { setAvailableOnly(!availableOnly); setPage(1); }}
-              className={`relative w-10 h-6 rounded-full transition-colors ${
-                availableOnly ? "bg-emerald-600" : "bg-gray-200"
-              }`}
+              className={`relative w-10 h-6 shrink-0 rounded-full transition-colors cursor-pointer ${availableOnly ? "bg-emerald-600" : "bg-gray-200"
+                }`}
             >
               <span
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                  availableOnly ? "translate-x-5" : "translate-x-1"
-                }`}
+                className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ease-in-out ${availableOnly ? "translate-x-4" : "translate-x-0"
+                  }`}
               />
             </button>
             <span className="text-sm text-gray-600">Available this week</span>
@@ -634,17 +637,16 @@ export default function ExploreGigs() {
 
           {/* Cards */}
           <div
-            className={`grid gap-4 ${
-              view === "grid"
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                : "grid-cols-1"
-            }`}
+            className={`grid gap-6 ${view === "grid"
+              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              : "grid-cols-1"
+              }`}
           >
             {loading
               ? Array.from({ length: LIMIT }).map((_, i) => <SkeletonCard key={i} />)
               : gigs.map((gig) => (
-                  <GigCard key={gig._id} gig={gig} view={view} />
-                ))}
+                <GigCard key={gig._id} gig={gig} view={view} />
+              ))}
           </div>
 
           {/* Empty state */}
@@ -690,11 +692,10 @@ export default function ExploreGigs() {
                   <button
                     key={n}
                     onClick={() => setPage(n as number)}
-                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-                      n === page
-                        ? "bg-emerald-600 text-white"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${n === page
+                      ? "bg-emerald-600 text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                      }`}
                   >
                     {n}
                   </button>

@@ -15,6 +15,6 @@ export const setupMeili=async ()=>{
 
     } catch (error) {
         logger.error("Meili setup failed",error)
-        process.exit(1);
+        // process.exit(1); // prevent server from crashing during local dev if Meili is down
     }
 }

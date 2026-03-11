@@ -325,7 +325,7 @@ export const verifySignupOtpService = async (
 export const forgotPasswordService = async (email: string) => {
   const user = await userRepository.findEmailWithPassword(email);
 
-  if (!user) return; 
+  if (!user) return;  
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   console.log("RESET OTP:", otp); 
