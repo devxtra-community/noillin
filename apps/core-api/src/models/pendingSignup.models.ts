@@ -2,21 +2,26 @@ import { Schema, model } from "mongoose";
 
 const PendingSignupSchema = new Schema(
   {
-    email: { 
-      type: String, 
-      required: true, 
-      unique: true 
+    email: {
+      type: String,
+      required: true,
+      unique: true
     },
 
-    passwordHash: { 
-      type: String, 
-      required: true 
+    passwordHash: {
+      type: String,
+      required: true
     },
 
     role: {
       type: String,
-      enum: ["INFLUENCER", "BRAND"],
+      enum: ["INFLUENCER", "BRAND", "ADMIN"],
       required: true,
+    },
+    adminLevel: {
+      type: String,
+      enum: ["SUPER", "NORMAL"],
+      default: null,
     },
     documents: { type: String },
 
@@ -29,12 +34,12 @@ const PendingSignupSchema = new Schema(
 
     //  OTP FIELDS START HERE
 
- emailOtpHash: {
-  type: String,
-  select: false,
-  default: null,
+    emailOtpHash: {
+      type: String,
+      select: false,
+      default: null,
 
-},
+    },
 
 
     emailOtpExpiresAt: {
@@ -59,7 +64,7 @@ const PendingSignupSchema = new Schema(
 
     otpLockedUntil: {
       type: Date,
-      default: null,  
+      default: null,
     },
 
     isEmailVerified: {

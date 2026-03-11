@@ -22,6 +22,7 @@ export const signupController = async (
   next: NextFunction
 ) => {
   try {
+
     const { email, password, role, documents: businessInfo } = req.body;
 
     if (!email || !password || !role) {

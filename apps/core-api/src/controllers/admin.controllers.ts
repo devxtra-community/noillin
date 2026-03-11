@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 
-import { approveSignupService, rejectSignupService } from "../services/verification.service.js";
+import { approveSignupService, getAllPendingSignupService, rejectSignupService } from "../services/verification.service.js";
 
 export const approveSignupController = async (
   req: Request,
@@ -29,6 +29,19 @@ export const rejectSignupController = async (
     const result = await rejectSignupService(email, reason);
 
     res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getAllpendingSignupController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const requests = await getAllPendingSignupService(req.query);
+    res.status(200).json({ success: true, data: requests });
   } catch (error) {
     next(error);
   }

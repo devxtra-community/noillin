@@ -4,6 +4,7 @@ import type { HttpError } from "../modules/auth/http-error.js";
 import { pendingSignupRepository } from "../repositories/Signup.repository.js";
 import { userRepository } from "../repositories/user.repository.js";
 import { profileRepository } from "../repositories/profile.repository.js";
+import type { PendingSignupFilter, PendingSignupQuery } from "../types/pendingSignup.types.js";
 
 // ================= VERIFY OTP =================
 export const verifyOtpService = async (
@@ -141,10 +142,20 @@ export const approveSignupService = async (email: string) => {
     throw err;
   }
 
+  // Check if user already exists
+  const existingUser = await userRepository.findByEmail(pending.email);
+  if (existingUser) {
+    const err: HttpError = new Error("User with this email already exists");
+    err.statusCode = 409;
+    throw err;
+  }
+
   const user = await userRepository.create({
     email: pending.email,
     password: pending.passwordHash,
     role: pending.role,
+    // @ts-expect-error - adminLevel not in user create type yet
+    adminLevel: pending.adminLevel || null,
     isEmailVerified: true,
     status: "ACTIVE",
   });
@@ -164,9 +175,9 @@ export const approveSignupService = async (email: string) => {
   if (user.role === "BRAND") {
     await profileRepository.createBrand({
       userId: user._id,
-      companyName: "",
-      industry: "",
-      contactPersonName: "",
+      companyName: "Pending Setup",
+      industry: "Not Specified",
+      contactPersonName: user.email?.split("@")[0] || "Pending",
       contactEmail: user.email,
       documents: [],
       isProfileComplete: false,
@@ -175,7 +186,7 @@ export const approveSignupService = async (email: string) => {
   }
 
 
-  await pendingSignupRepository.deleteByEmail(email);
+  await pendingSignupRepository.updateStatus(email, "APPROVED");
 
   return { message: "Signup approved successfully" };
 };
@@ -193,16 +204,35 @@ export const rejectSignupService = async (
     throw err;
   }
 
-  await pendingSignupRepository.deleteByEmail(email);
+  await pendingSignupRepository.updateStatus(email, "REJECTED");
 
   return { message: "Signup rejected successfully" };
 };
 
 export const cleanupExpiredSignups = async () => {
-  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000); 
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
   await pendingSignupRepository.deleteMany({
     isEmailVerified: false,
     createdAt: { $lt: cutoff },
   });
+};
+
+
+export const getAllPendingSignupService = async (query: PendingSignupQuery = {}) => {
+  const { search, role, status = "PENDING" } = query;
+  const filter: PendingSignupFilter = { status };
+
+  if (role) {
+    filter.role = role.toUpperCase();
+  }
+
+  if (search) {
+    filter.$or = [
+      { email: { $regex: search, $options: "i" } },
+      { documents: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  return pendingSignupRepository.getAllPendingSignups(filter);
 };

@@ -38,8 +38,7 @@ export const signupService = async (data: SignupInput) => {
 
   //  Generate OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  await sendOtpEmail(data.email, otp);
-  // const hashedOtp = await bcrypt.hash(otp, 10);
+
 
   //  Hash OTP before saving
   const hashedOtp = await bcrypt.hash(otp, 10);
@@ -64,6 +63,7 @@ export const signupService = async (data: SignupInput) => {
   await sendOtpEmail(data.email, otp);
 
   return { message: "OTP sent to your email" };
+  
 };
 
 
@@ -73,19 +73,20 @@ interface LoginResult {
   accessToken: string,
   refreshToken: string,
   user: {
-    id: string, 
-    role: string, 
+    id: string,
+    email: string,
+    role: string,
     adminLevel: string | null
   }
 }
 
-export const loginService = async(
-  email : string,
-  password : string
+export const loginService = async (
+  email: string,
+  password: string
 ): Promise<LoginResult> => {
-  
+
   const user = await userRepository.findEmailWithPassword(email)
-    logger.info(`EMAIL: ${email}`);
+  logger.info(`EMAIL: ${email}`);
 
   if (!user) {
     throw createHttpError("Invalid credentials", 409);
@@ -108,21 +109,22 @@ export const loginService = async(
   }
 
   const payload = {
-    userId : user._id.toString(),
-    role : user.role,
-    adminLevel : user.adminLevel ?? null
+    userId: user._id.toString(),
+    role: user.role,
+    adminLevel: user.adminLevel ?? null
   }
 
   const accessToken = signAccessToken(payload)
   const refreshToken = signRefreshToken(payload)
 
-  await userRepository.saveRefreshToken(user._id.toString(),refreshToken)
+  await userRepository.saveRefreshToken(user._id.toString(), refreshToken)
 
   return {
     accessToken,
     refreshToken,
     user: {
       id: user._id.toString(),
+      email: user.email,
       role: user.role,
       adminLevel: user.adminLevel ?? null
     }
@@ -205,7 +207,7 @@ export const refreshTokenService = async (
   refreshToken: string
 ): Promise<RefreshResult> => {
   if (!refreshToken) {
-    
+
     throw createHttpError("Refresh token required", 409);
   }
 
@@ -213,7 +215,7 @@ export const refreshTokenService = async (
   try {
     payload = verifyRefreshToken(refreshToken);
   } catch {
-    
+
     throw createHttpError("Invalid refresh token", 409);
   }
 
@@ -221,14 +223,14 @@ export const refreshTokenService = async (
 
   //  FIRST check user existence
   if (!user || !user.refreshToken) {
-    
+
     throw createHttpError("Refresh token mismatch", 409);
   }
 
 
   //  Compare after narrowing
   if (user.refreshToken.trim() !== refreshToken.trim()) {
-    
+
     throw createHttpError("Refresh token mismatch", 409);
   }
 
@@ -261,7 +263,7 @@ export const refreshTokenService = async (
 
 export const logoutService = async (userId: string) => {
   if (!userId) {
-    
+
     throw createHttpError("User not authenticated", 409);
   }
 
@@ -281,22 +283,22 @@ export const verifySignupOtpService = async (
   const pending = await pendingSignupRepository.findByEmail(email);
 
   if (!pending) {
-    
+
     throw createHttpError("Signup request not found", 409);
   }
 
   if (pending.isEmailVerified) {
-    
+
     throw createHttpError("Email already verified", 409);
   }
 
   if (!pending.emailOtpHash || !pending.emailOtpExpiresAt) {
-    
+
     throw createHttpError("OTP not found", 409);
   }
 
   if (pending.emailOtpExpiresAt < new Date()) {
-    
+
     throw createHttpError("OTP expired", 409);
   }
 
@@ -306,7 +308,7 @@ export const verifySignupOtpService = async (
   );
 
   if (!isMatch) {
-    
+
     throw createHttpError("Invalid OTP", 409);
   }
 
@@ -325,10 +327,10 @@ export const verifySignupOtpService = async (
 export const forgotPasswordService = async (email: string) => {
   const user = await userRepository.findEmailWithPassword(email);
 
-  if (!user) return; 
+  if (!user) return;
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  console.log("RESET OTP:", otp); 
+  console.log("RESET OTP:", otp);
 
   const hashedOtp = await bcrypt.hash(otp, 10);
 
@@ -355,19 +357,19 @@ export const verifyOtpService = async (
   const user = await userRepository.findByEmailWithResetFields(email);
 
   if (!user || !user.resetOtp || !user.resetOtpExpiry) {
-    
+
     throw createHttpError("Invalid request", 409);
   }
 
   if (user.resetOtpExpiry < new Date()) {
-    
+
     throw createHttpError("OTP expired", 409);
   }
 
   const isMatch = await bcrypt.compare(otp, user.resetOtp);
 
   if (!isMatch) {
-    
+
     throw createHttpError("Invalid OTP", 409);
   }
 
@@ -399,17 +401,17 @@ export const resetPasswordService = async (
     !user.resetSessionToken ||
     !user.resetSessionExpiry
   ) {
-    
+
     throw createHttpError("Invalid request", 409);
   }
 
   if (user.resetSessionToken !== resetSessionToken) {
-    
+
     throw createHttpError("Invalid session", 409);
   }
 
   if (user.resetSessionExpiry < new Date()) {
-    
+
     throw createHttpError("Session expired", 409);
   }
 
