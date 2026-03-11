@@ -67,7 +67,7 @@ export default function HomePage() {
             <div className="flex -space-x-3">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
-                  <Image unoptimized width={100} height={100} src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="avatar" className="object-cover" />
+                  <Image fill src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="avatar" className="object-cover" />
                 </div>
               ))}
             </div>
@@ -92,8 +92,8 @@ export default function HomePage() {
 
             {/* Profile Info */}
             <div className="flex items-center gap-4 mb-8 mt-2">
-              <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100">
-                <Image unoptimized width={150} height={150} src="https://i.pravatar.cc/150?img=5" alt="Sarah Jenkins" className="w-full h-full object-cover" />
+              <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 relative">
+                <Image fill src="https://i.pravatar.cc/150?img=5" alt="Sarah Jenkins" className="object-cover" />
               </div>
               <div>
                 <h3 className="font-bold text-gray-900 text-lg">Sarah Jenkins</h3>
@@ -307,8 +307,8 @@ export default function HomePage() {
               </div>
               <p className="text-gray-600 text-sm italic mb-8 leading-relaxed">{story.quote}</p>
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
-                  <Image unoptimized width={100} height={100} src={story.img} alt={story.name} className="w-full h-full object-cover" />
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 relative">
+                  <Image fill src={story.img} alt={story.name} className="object-cover" />
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-gray-900">{story.name}</h4>

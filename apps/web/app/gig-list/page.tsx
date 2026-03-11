@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 
-import RoleGuard from "@/components/rbac/RoleGuard";
 import { useAuthStore } from "@/store/auth.store";
-
+import api from "@/lib/axios.client";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type Platform = "IG" | "YT" | "TT" | "PT";
@@ -49,7 +49,7 @@ interface ApiResponse {
 const LIMIT = 9;
 
 // Replace with your actual API base URL
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 const platformColors: Record<Platform, string> = {
   IG: "bg-pink-100 text-pink-600",
@@ -312,14 +312,17 @@ export default function ExploreGigs() {
       if (opts.sort !== "recommended") params.set("sort", opts.sort);
       if (opts.search) params.set("search", opts.search);
 
-      const res = await fetch(`${API_BASE}/gigs?${params.toString()}`);
-      if (!res.ok) throw new Error(`Request failed: ${res.status}`);
-
-      const json: ApiResponse = await res.json();
+      const res = await api.get(`/gigs?${params.toString()}`);
+      const json: ApiResponse = res.data;
       setGigs(json.data);
       setPagination(json.pagination);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+    } catch (err: unknown) {
+      const errorObj = err as { response?: { data?: { message?: string } } };
+      if (errorObj.response?.data?.message) {
+        setError(errorObj.response.data.message);
+      } else {
+        setError(err instanceof Error ? err.message : "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -389,329 +392,327 @@ export default function ExploreGigs() {
   };
 
   return (
-    <RoleGuard allowedRoles={["INFLUENCER", "BRAND"]}>
-      <div className="min-h-screen bg-[#f5f5f3] font-sans" style={{ colorScheme: "light" }}>
-        {/* Navbar */}
-        <nav className="bg-white border-b border-gray-100 sticky top-0 z-50" style={{ colorScheme: "light" }}>
-          <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                N
-              </div>
-              <span className="font-semibold text-gray-900 text-lg tracking-tight">Noillin</span>
+    <div className="min-h-screen bg-[#f5f5f3] font-sans" style={{ colorScheme: "light" }}>
+      {/* Navbar */}
+      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50" style={{ colorScheme: "light" }}>
+        <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 h-18 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm">
+              N
             </div>
-            <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
-              <a href="#" className="hover:text-gray-900 transition-colors">About</a>
-              <a href="#" className="hover:text-gray-900 transition-colors">Influencers</a>
-              <a href="#" className="text-emerald-600 font-medium">Gigs</a>
-              <a href="#" className="hover:text-gray-900 transition-colors">Support</a>
-            </div>
-            <div className="flex items-center gap-3">
-              <button className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium hover:cursor-pointer">Sign In</button>
-              <button className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium hover:cursor-pointer">
-                Get Started
-              </button>
+            <span className="font-semibold text-gray-900 text-lg tracking-tight">Noillin</span>
+          </div>
+          <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
+            <a href="#" className="hover:text-gray-900 transition-colors">About</a>
+            <a href="#" className="hover:text-gray-900 transition-colors">Influencers</a>
+            <a href="#" className="text-emerald-600 font-medium">Gigs</a>
+            <a href="#" className="hover:text-gray-900 transition-colors">Support</a>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/signup" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium hover:cursor-pointer">
+              Sign Up
+            </Link>
+            <Link href="/login" className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium hover:cursor-pointer">
+              Login
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 py-10 flex flex-col lg:flex-row gap-8 lg:gap-12">
+        {/* Sidebar */}
+        <aside className="w-full lg:w-64 shrink-0 space-y-8">
+          {/* Platform */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Platform</p>
+            <ul className="space-y-1">
+              {platformList.map((p) => (
+                <li key={p}>
+                  <button
+                    onClick={() => handlePlatformChange(p)}
+                    className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${activePlatform === p
+                      ? "bg-emerald-50 text-emerald-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                  >
+                    {p}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Category */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Category</p>
+            <ul className="space-y-1">
+              {categories.map((c) => (
+                <li key={c}>
+                  <button
+                    onClick={() => handleCategoryChange(c)}
+                    className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${activeCategory === c
+                      ? "bg-emerald-50 text-emerald-700 font-medium"
+                      : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                  >
+                    {c}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Price Range */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Price Range</p>
+            <input
+              type="range"
+              min={1000}
+              max={MAX_PRICE_LIMIT}
+              step={1000}
+              value={maxPrice}
+              onChange={handleMaxPriceChange}
+              onMouseUp={handleMaxPriceCommit}
+              onTouchEnd={handleMaxPriceCommit}
+              className="w-full accent-emerald-600"
+            />
+            <div className="flex justify-between text-xs text-gray-400 mt-1">
+              <span>₹1k</span>
+              <span className={maxPrice < MAX_PRICE_LIMIT ? "text-emerald-600 font-medium" : "text-gray-400"}>
+                {maxPrice >= MAX_PRICE_LIMIT ? "₹50k+" : `₹${(maxPrice / 1000).toFixed(0)}k`}
+              </span>
             </div>
           </div>
-        </nav>
 
-        <div className="max-w-7xl mx-auto px-6 py-8 flex gap-8">
-          {/* Sidebar */}
-          <aside className="w-52 shrink-0 space-y-8">
-            {/* Platform */}
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Platform</p>
-              <ul className="space-y-1">
-                {platformList.map((p) => (
-                  <li key={p}>
-                    <button
-                      onClick={() => handlePlatformChange(p)}
-                      className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${activePlatform === p
-                        ? "bg-emerald-50 text-emerald-700 font-medium"
-                        : "text-gray-600 hover:bg-gray-100"
-                        }`}
-                    >
-                      {p}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Category */}
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Category</p>
-              <ul className="space-y-1">
-                {categories.map((c) => (
-                  <li key={c}>
-                    <button
-                      onClick={() => handleCategoryChange(c)}
-                      className={`w-full text-left text-sm px-3 py-1.5 rounded-lg transition-colors ${activeCategory === c
-                        ? "bg-emerald-50 text-emerald-700 font-medium"
-                        : "text-gray-600 hover:bg-gray-100"
-                        }`}
-                    >
-                      {c}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Price Range */}
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Price Range</p>
-              <input
-                type="range"
-                min={1000}
-                max={MAX_PRICE_LIMIT}
-                step={1000}
-                value={maxPrice}
-                onChange={handleMaxPriceChange}
-                onMouseUp={handleMaxPriceCommit}
-                onTouchEnd={handleMaxPriceCommit}
-                className="w-full accent-emerald-600"
-              />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>₹1k</span>
-                <span className={maxPrice < MAX_PRICE_LIMIT ? "text-emerald-600 font-medium" : "text-gray-400"}>
-                  {maxPrice >= MAX_PRICE_LIMIT ? "₹50k+" : `₹${(maxPrice / 1000).toFixed(0)}k`}
-                </span>
-              </div>
-            </div>
-
-            {/* Available toggle */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => { setAvailableOnly(!availableOnly); setPage(1); }}
-                className={`relative w-10 h-6 rounded-full transition-colors ${availableOnly ? "bg-emerald-600" : "bg-gray-200"
-                  }`}
-              >
-                <span
-                  className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${availableOnly ? "translate-x-5" : "translate-x-1"
-                    }`}
-                />
-              </button>
-              <span className="text-sm text-gray-600">Available this week</span>
-            </div>
-
-            {/* Active filters summary */}
-            {(activeCategory || activePlatform || maxPrice < MAX_PRICE_LIMIT) && (
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Active Filters</p>
-                  <button
-                    onClick={() => {
-                      setActiveCategory(null);
-                      setActivePlatform(null);
-                      setMaxPrice(MAX_PRICE_LIMIT);
-                      setCommittedMaxPrice(MAX_PRICE_LIMIT);
-                      setPage(1);
-                    }}
-                    className="text-xs text-emerald-600 hover:underline"
-                  >
-                    Clear all
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {activeCategory && (
-                    <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      {activeCategory.split(" & ")[0]}
-                      <button onClick={() => setActiveCategory(null)} className="hover:opacity-60">×</button>
-                    </span>
-                  )}
-                  {activePlatform && (
-                    <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      {activePlatform}
-                      <button onClick={() => setActivePlatform(null)} className="hover:opacity-60">×</button>
-                    </span>
-                  )}
-                  {maxPrice < MAX_PRICE_LIMIT && (
-                    <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      ≤₹{(maxPrice / 1000).toFixed(0)}k
-                      <button onClick={() => { setMaxPrice(MAX_PRICE_LIMIT); setCommittedMaxPrice(MAX_PRICE_LIMIT); }} className="hover:opacity-60">×</button>
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-          </aside>
-
-          {/* Main */}
-          <main className="flex-1 min-w-0">
-            {/* Header */}
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Explore Influencer Gigs</h1>
-              <p className="text-gray-500 mt-1 text-sm">Browse verified creators and book based on real availability.</p>
-            </div>
-
-            {/* Search */}
-            <div className="relative mb-6">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110 2.5a7.5 7.5 0 016.65 14.15z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search by name, niche, or keyword… press Enter"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={handleSearchKeyDown}
-                onBlur={handleSearchBlur}
-                className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
-              />
-              {search && (
-                <button
-                  onClick={handleSearchClear}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-
-            {/* Toolbar */}
-            <div className="flex items-center justify-between mb-5">
-              <div className="text-sm text-gray-500">
-                {loading ? (
-                  <span className="inline-block w-24 h-4 bg-gray-200 rounded animate-pulse" />
-                ) : pagination ? (
-                  <>
-                    Showing{" "}
-                    <span className="font-semibold text-gray-900">{gigs.length}</span>{" "}
-                    of{" "}
-                    <span className="font-semibold text-gray-900">{pagination.total}</span>{" "}
-                    verified gigs
-                  </>
-                ) : null}
-              </div>
-              <div className="flex items-center gap-3">
-                {/* Grid/List toggle */}
-                <div className="flex bg-white border border-gray-200 rounded-lg p-0.5 shadow-sm">
-                  <button
-                    onClick={() => setView("grid")}
-                    className={`p-1.5 rounded-md transition-colors ${view === "grid" ? "bg-gray-100" : "hover:bg-gray-50"}`}
-                  >
-                    <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 16 16">
-                      <rect x="1" y="1" width="6" height="6" rx="1" />
-                      <rect x="9" y="1" width="6" height="6" rx="1" />
-                      <rect x="1" y="9" width="6" height="6" rx="1" />
-                      <rect x="9" y="9" width="6" height="6" rx="1" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => setView("list")}
-                    className={`p-1.5 rounded-md transition-colors ${view === "list" ? "bg-gray-100" : "hover:bg-gray-50"}`}
-                  >
-                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                  </button>
-                </div>
-
-                <select
-                  value={sort}
-                  onChange={handleSortChange}
-                  className="text-sm bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  {sortOptions.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Error state */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 mb-5 flex items-center justify-between">
-                <span className="text-sm">{error}</span>
-                <button
-                  onClick={() => fetchGigs({ page, category: activeCategory, maxPrice: committedMaxPrice, sort, search: committedSearch })}
-                  className="text-sm font-medium bg-red-100 hover:bg-red-200 transition-colors px-3 py-1.5 rounded-lg"
-                >
-                  Retry
-                </button>
-              </div>
-            )}
-
-            {/* Cards */}
-            <div
-              className={`grid gap-4 ${view === "grid"
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                : "grid-cols-1"
+          {/* Available toggle */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => { setAvailableOnly(!availableOnly); setPage(1); }}
+              className={`relative w-10 h-6 shrink-0 rounded-full transition-colors cursor-pointer ${availableOnly ? "bg-emerald-600" : "bg-gray-200"
                 }`}
             >
-              {loading
-                ? Array.from({ length: LIMIT }).map((_, i) => <SkeletonCard key={i} />)
-                : gigs.map((gig) => (
-                  <GigCard key={gig._id} gig={gig} view={view} />
-                ))}
-            </div>
-
-            {/* Empty state */}
-            {!loading && !error && gigs.length === 0 && (
-              <div className="text-center py-20">
-                <div className="text-5xl mb-4">🔍</div>
-                <h3 className="text-lg font-semibold text-gray-700 mb-1">No gigs found</h3>
-                <p className="text-sm text-gray-400 mb-5">Try adjusting your filters or search query.</p>
+              <span
+                className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ease-in-out ${availableOnly ? "translate-x-4" : "translate-x-0"
+                  }`}
+              />
+            </button>
+            <span className="text-sm text-gray-600">Available this week</span>
+          </div>
+          {/* Active filters summary */}
+          {(activeCategory || activePlatform || maxPrice < MAX_PRICE_LIMIT) && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Active Filters</p>
                 <button
                   onClick={() => {
-                    setSearch("");
-                    setCommittedSearch("");
                     setActiveCategory(null);
                     setActivePlatform(null);
                     setMaxPrice(MAX_PRICE_LIMIT);
                     setCommittedMaxPrice(MAX_PRICE_LIMIT);
                     setPage(1);
                   }}
-                  className="text-sm font-medium bg-emerald-600 text-white px-5 py-2.5 rounded-xl hover:bg-emerald-700 transition-colors"
+                  className="text-xs text-emerald-600 hover:underline"
                 >
-                  Clear filters
+                  Clear all
                 </button>
               </div>
-            )}
-
-            {/* Pagination */}
-            {!loading && totalPages > 1 && (
-              <div className="flex items-center justify-center gap-1 mt-10">
-                <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition-colors text-sm disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  ‹
-                </button>
-
-                {pageNumbers().map((n, i) =>
-                  n === "…" ? (
-                    <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">
-                      …
-                    </span>
-                  ) : (
-                    <button
-                      key={n}
-                      onClick={() => setPage(n as number)}
-                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${n === page
-                        ? "bg-emerald-600 text-white"
-                        : "text-gray-600 hover:bg-gray-100"
-                        }`}
-                    >
-                      {n}
-                    </button>
-                  )
+              <div className="flex flex-wrap gap-1">
+                {activeCategory && (
+                  <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    {activeCategory.split(" & ")[0]}
+                    <button onClick={() => setActiveCategory(null)} className="hover:opacity-60">×</button>
+                  </span>
                 )}
+                {activePlatform && (
+                  <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    {activePlatform}
+                    <button onClick={() => setActivePlatform(null)} className="hover:opacity-60">×</button>
+                  </span>
+                )}
+                {maxPrice < MAX_PRICE_LIMIT && (
+                  <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    ≤₹{(maxPrice / 1000).toFixed(0)}k
+                    <button onClick={() => { setMaxPrice(MAX_PRICE_LIMIT); setCommittedMaxPrice(MAX_PRICE_LIMIT); }} className="hover:opacity-60">×</button>
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </aside>
 
+        {/* Main */}
+        <main className="flex-1 min-w-0">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Explore Influencer Gigs</h1>
+            <p className="text-gray-500 mt-1 text-sm">Browse verified creators and book based on real availability.</p>
+          </div>
+
+          {/* Search */}
+          <div className="relative mb-6">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110 2.5a7.5 7.5 0 016.65 14.15z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search by name, niche, or keyword… press Enter"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
+              onBlur={handleSearchBlur}
+              className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent shadow-sm"
+            />
+            {search && (
+              <button
+                onClick={handleSearchClear}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg leading-none"
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          {/* Toolbar */}
+          <div className="flex items-center justify-between mb-5">
+            <div className="text-sm text-gray-500">
+              {loading ? (
+                <span className="inline-block w-24 h-4 bg-gray-200 rounded animate-pulse" />
+              ) : pagination ? (
+                <>
+                  Showing{" "}
+                  <span className="font-semibold text-gray-900">{gigs.length}</span>{" "}
+                  of{" "}
+                  <span className="font-semibold text-gray-900">{pagination.total}</span>{" "}
+                  verified gigs
+                </>
+              ) : null}
+            </div>
+            <div className="flex items-center gap-3">
+              {/* Grid/List toggle */}
+              <div className="flex bg-white border border-gray-200 rounded-lg p-0.5 shadow-sm">
                 <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition-colors text-sm disabled:opacity-30 disabled:cursor-not-allowed"
+                  onClick={() => setView("grid")}
+                  className={`p-1.5 rounded-md transition-colors ${view === "grid" ? "bg-gray-100" : "hover:bg-gray-50"}`}
                 >
-                  ›
+                  <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 16 16">
+                    <rect x="1" y="1" width="6" height="6" rx="1" />
+                    <rect x="9" y="1" width="6" height="6" rx="1" />
+                    <rect x="1" y="9" width="6" height="6" rx="1" />
+                    <rect x="9" y="9" width="6" height="6" rx="1" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setView("list")}
+                  className={`p-1.5 rounded-md transition-colors ${view === "list" ? "bg-gray-100" : "hover:bg-gray-50"}`}
+                >
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
                 </button>
               </div>
-            )}
-          </main>
-        </div>
+
+              <select
+                value={sort}
+                onChange={handleSortChange}
+                className="text-sm bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                {sortOptions.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Error state */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-4 mb-5 flex items-center justify-between">
+              <span className="text-sm">{error}</span>
+              <button
+                onClick={() => fetchGigs({ page, category: activeCategory, maxPrice: committedMaxPrice, sort, search: committedSearch })}
+                className="text-sm font-medium bg-red-100 hover:bg-red-200 transition-colors px-3 py-1.5 rounded-lg"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Cards */}
+          <div
+            className={`grid gap-6 ${view === "grid"
+              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+              : "grid-cols-1"
+              }`}
+          >
+            {loading
+              ? Array.from({ length: LIMIT }).map((_, i) => <SkeletonCard key={i} />)
+              : gigs.map((gig) => (
+                <GigCard key={gig._id} gig={gig} view={view} />
+              ))}
+          </div>
+
+          {/* Empty state */}
+          {!loading && !error && gigs.length === 0 && (
+            <div className="text-center py-20">
+              <div className="text-5xl mb-4">🔍</div>
+              <h3 className="text-lg font-semibold text-gray-700 mb-1">No gigs found</h3>
+              <p className="text-sm text-gray-400 mb-5">Try adjusting your filters or search query.</p>
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setCommittedSearch("");
+                  setActiveCategory(null);
+                  setActivePlatform(null);
+                  setMaxPrice(MAX_PRICE_LIMIT);
+                  setCommittedMaxPrice(MAX_PRICE_LIMIT);
+                  setPage(1);
+                }}
+                className="text-sm font-medium bg-emerald-600 text-white px-5 py-2.5 rounded-xl hover:bg-emerald-700 transition-colors"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+          {/* Pagination */}
+          {!loading && totalPages > 1 && (
+            <div className="flex items-center justify-center gap-1 mt-10">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition-colors text-sm disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ‹
+              </button>
+
+              {pageNumbers().map((n, i) =>
+                n === "…" ? (
+                  <span key={`ellipsis-${i}`} className="w-8 h-8 flex items-center justify-center text-gray-400 text-sm">
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={n}
+                    onClick={() => setPage(n as number)}
+                    className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${n === page
+                      ? "bg-emerald-600 text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                      }`}
+                  >
+                    {n}
+                  </button>
+                )
+              )}
+
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 transition-colors text-sm disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                ›
+              </button>
+            </div>
+          )}
+        </main>
       </div>
-    </RoleGuard>
+    </div>
   );
 }

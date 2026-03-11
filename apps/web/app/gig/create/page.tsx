@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaCheck } from "react-icons/fa";
 
 import { StepIndicator } from "@/components/gig-create/StepIndicator";
@@ -10,10 +10,18 @@ import { Deliverables } from "@/components/gig-create/Deliverables";
 import { Pricing } from "@/components/gig-create/Pricing";
 import { Availability } from "@/components/gig-create/Availability";
 import { ReviewAndPublish } from "@/components/gig-create/ReviewAndPublish";
+import { useGigCreateStore } from "@/store/gigCreate.store";
 
 export default function GigCreatePage() {
     const [currentStep, setCurrentStep] = useState(1);
     const totalSteps = 6;
+    const reset = useGigCreateStore((s) => s.reset);
+    const setMode = useGigCreateStore((s) => s.setMode);
+
+    useEffect(() => {
+        reset();
+        setMode("create");
+    }, [reset, setMode]);
 
     const nextStep = () => {
         if (currentStep < totalSteps) {
@@ -36,6 +44,7 @@ export default function GigCreatePage() {
         }
     };
     return (
+
         <div className="min-h-screen bg-gray-50/50">
             <Navbar />
 

@@ -2,15 +2,11 @@ import mongoose from "mongoose";
 import { Types } from "mongoose";
 import type { JwtPayload } from "jsonwebtoken";
 
-import { GigModel } from "../models/gig.model.js";
-import { create_gig } from "../repositories/gig.repository.js";
+import { create_gig, findActiveGigById, findGigById, findGigsByInfluencer, findPublishedGigById, findPublishedGigs, softDeleteGig } from "../repositories/gig.repository.js";
 import { type GigDeliverable, type GigType, type Platform } from "../types/gig.type.js";
-import { type GigDocument, type GigStatus } from "../types/gig.type.js";
+import { type GigDocument } from "../types/gig.type.js";
 import { InfluencerProfile, type IInfluencerProfile } from "../models/influencer.model.js";
 import { UserRole } from "../models/user.model.js";
-import { findAvailabilityByInfluencer } from "../repositories/availability.repository.js";
-import { GigCollaborationModel } from "../models/collaboration.model.js";
-import type { WeeklyRule } from "../types/availability.types.js";
 
 
 /* ================= TYPES ================= */
@@ -75,17 +71,12 @@ export const listGigsService = async (
     sort = { "pricing.basePrice": -1 };
   }
 
-  const [gigs, total] = await Promise.all([
-    GigModel.find(filter)
-      .select(
-        "title category pricing.basePrice pricing.currency primaryInfluencerId createdAt"
-      )
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    GigModel.countDocuments(filter)
-  ]);
+  const { gigs, total } = await findPublishedGigs(
+  filter,
+  sort,
+  skip,
+  limit
+);
 
   return {
     data: gigs,
@@ -107,17 +98,7 @@ export const getGigDetailsService = async (gigId: string) => {
     throw err;
   }
 
-  const gig = await GigModel.findOne({
-    _id: gigId,
-    status: "published",
-    isDeleted: false
-  })
-    .populate({
-      path: "primaryInfluencerId",
-      select: "displayName profileImage followersCount ratingAvg"
-    })
-    .lean();
-
+  const gig = await findPublishedGigById(gigId);
   if (!gig) {
     const err = new Error("Gig not found") as HttpError;
     err.statusCode = 404;
@@ -213,8 +194,7 @@ export const updateGigDeliverablesService = async (
   userId: string,
   deliverables: GigDeliverable[]
 ) => {
-  const gig = await GigModel.findById(gigId);
-
+  const gig = await findGigById(gigId);
   if (!gig) {
     throw Object.assign(new Error("Gig not found"), { statusCode: 404 });
   }
@@ -252,8 +232,7 @@ export const updateGigPricingService = async (
     revisionsIncluded: number;
   }
 ) => {
-  const gig = await GigModel.findById(gigId);
-
+const gig = await findGigById(gigId);
   if (!gig) {
     throw Object.assign(new Error("Gig not found"), { statusCode: 404 });
   }
@@ -289,8 +268,7 @@ export const publishGigService = async (
   gigId: string,
   userId: string
 ) => {
-  const gig = await GigModel.findById(gigId);
-
+const gig = await findGigById(gigId);
   if (!gig) {
     throw Object.assign(new Error("Gig not found"), { statusCode: 404 });
   }
@@ -332,15 +310,13 @@ export const editGigService = async (
   updateData: EditableGigFields
 ) => {
   if (!mongoose.Types.ObjectId.isValid(gigId)) {
-    const err: HttpError = new Error("Invalid gig ID");
-    err.statusCode = 400;
-    throw err;
+    throw Object.assign(new Error("Invalid gig ID"), { statusCode: 400 });
   }
 
   if (user.role !== "INFLUENCER") {
-    const err: HttpError = new Error("Only influencers can edit gigs");
-    err.statusCode = 403;
-    throw err;
+    throw Object.assign(new Error("Only influencers can edit gigs"), {
+      statusCode: 403
+    });
   }
 
   const influencerProfile = await InfluencerProfile.findOne({
@@ -348,105 +324,33 @@ export const editGigService = async (
   });
 
   if (!influencerProfile) {
-    const err: HttpError = new Error("Influencer profile not found");
-    err.statusCode = 404;
-    throw err;
+    throw Object.assign(new Error("Influencer profile not found"), {
+      statusCode: 404
+    });
   }
 
-  const gig = await GigModel.findOne({
-    _id: gigId,
-    isDeleted: false
-  });
+  const gig = await findActiveGigById(gigId);
 
   if (!gig) {
-    const err: HttpError = new Error("Gig not found");
-    err.statusCode = 404;
-    throw err;
+    throw Object.assign(new Error("Gig not found"), { statusCode: 404 });
   }
 
   if (
     gig.primaryInfluencerId.toString() !==
     influencerProfile._id.toString()
   ) {
-    throw Object.assign(new Error("Unauthorized"), { statusCode: 403 });
+    throw Object.assign(new Error("Unauthorized"), {
+      statusCode: 403
+    });
   }
 
-  if (gig.status === "published") {
-    throw Object.assign(new Error("Gig already published"), {
+  if (gig.status === "archived") {
+    throw Object.assign(new Error("Archived gig cannot be edited"), {
       statusCode: 400
     });
   }
 
-  if (!gig.deliverables || gig.deliverables.length === 0) {
-    throw Object.assign(new Error("Deliverables required"), {
-      statusCode: 400
-    });
-  }
-
-  if (
-    !gig.pricing ||
-    gig.pricing.basePrice <= 0 ||
-    gig.pricing.deliveryTimeInDays <= 0
-  ) {
-    throw Object.assign(new Error("Valid pricing required"), {
-      statusCode: 400
-    });
-  }
-
-  const availability = await findAvailabilityByInfluencer(
-    influencerProfile._id
-  );
-
-  if (!availability) {
-    throw Object.assign(
-      new Error("Availability must be set before publishing"),
-      { statusCode: 400 }
-    );
-  }
-
-  const hasEnabledDay = availability.weeklyRules.some(
-    (rule: WeeklyRule) =>
-      rule.isEnabled && rule.slots.length > 0
-  );
-
-  if (!hasEnabledDay) {
-    throw Object.assign(
-      new Error("At least one available slot required"),
-      { statusCode: 400 }
-    );
-  }
-
-  if (gig.gigType === "collaboration") {
-    const pending = await GigCollaborationModel.findOne({
-      gigId: new Types.ObjectId(gigId),
-      status: "pending"
-    });
-
-    if (pending) {
-      throw Object.assign(
-        new Error("All collaborators must accept before publishing"),
-        { statusCode: 400 }
-      );
-    }
-
-    const rejected = await GigCollaborationModel.findOne({
-      gigId: new Types.ObjectId(gigId),
-      status: "rejected"
-    });
-
-    if (rejected) {
-      throw Object.assign(
-        new Error("One or more collaborators rejected"),
-        { statusCode: 400 }
-      );
-    }
-  }
-
-  // gig.status = "published";
-  
-
-
-  //  Safe field updates (no any, no unsafe casting)
+  // 🔥 SAFE FIELD UPDATES
 
   if (updateData.title !== undefined) {
     gig.title = updateData.title;
@@ -467,20 +371,21 @@ export const editGigService = async (
   if (updateData.deliverables !== undefined) {
     gig.deliverables = updateData.deliverables;
   }
-if (updateData.pricing !== undefined) {
-  if (updateData.pricing.basePrice !== undefined) {
-    gig.pricing.basePrice = updateData.pricing.basePrice;
-  }
 
-  if (updateData.pricing.currency !== undefined) {
-    gig.pricing.currency = updateData.pricing.currency;
-  }
+  if (updateData.pricing !== undefined) {
+    if (updateData.pricing.basePrice !== undefined) {
+      gig.pricing.basePrice = updateData.pricing.basePrice;
+    }
 
-  if (updateData.pricing.negotiationAllowed !== undefined) {
-    gig.pricing.negotiationAllowed =
-      updateData.pricing.negotiationAllowed;
+    if (updateData.pricing.currency !== undefined) {
+      gig.pricing.currency = updateData.pricing.currency;
+    }
+
+    if (updateData.pricing.negotiationAllowed !== undefined) {
+      gig.pricing.negotiationAllowed =
+        updateData.pricing.negotiationAllowed;
+    }
   }
-}
 
   if (updateData.maxBookingsPerSlot !== undefined) {
     gig.maxBookingsPerSlot = updateData.maxBookingsPerSlot;
@@ -489,13 +394,11 @@ if (updateData.pricing !== undefined) {
   if (updateData.status !== undefined) {
     gig.status = updateData.status;
   }
-    gig.status = "published";
 
   await gig.save();
 
   return gig;
 };
-
 
 
 //* ================= DELETE GIG =================
@@ -533,10 +436,7 @@ export const deleteGigService = async (
   }
 
   //  Find gig
- const gig = await GigModel.findOne({
-  _id: gigId,
-  isDeleted: false
-});
+ const gig = await findActiveGigById(gigId);
 
 
   if (!gig) {
@@ -558,8 +458,15 @@ export const deleteGigService = async (
   }
 
   //  Soft delete
-  gig.isDeleted = true;
-  gig.status = "archived";
+ await softDeleteGig(gigId);
+};
 
-  await gig.save();
+export const getMyGigsService = async (userId: string) => {
+  const influencerProfile = await InfluencerProfile.findOne({ userId });
+
+  if (!influencerProfile) {
+    throw Object.assign(new Error("Influencer profile not found"), { statusCode: 404 });
+  }
+
+  return findGigsByInfluencer(influencerProfile._id);
 };

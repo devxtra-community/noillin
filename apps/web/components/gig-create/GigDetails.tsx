@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaInstagram, FaYoutube, FaTiktok, FaUser, FaUsers } from "react-icons/fa";
 
 import api from "@/lib/axios.client";
@@ -23,18 +23,28 @@ type GigDetailsForm = {
     tags: string[];
 };
 
+
 export function GigDetails({ onNext }: GigDetailsProps) {
-    const { setGigId, setDetails, details } = useGigCreateStore();
+    const { gigId, mode, setGigId, setDetails, details } = useGigCreateStore();
 
     const [form, setForm] = useState<GigDetailsForm>({
-        title: details.title || "",
-        shortDescription: details.shortDescription || "",
-        platform: details.platform || "instagram",
-        gigType: details.gigType || "solo",
-        category: details.category || "",
-        tags: details.tags || []
+        title: "",
+        shortDescription: "",
+        platform: "instagram",
+        gigType: "solo",
+        category: "",
+        tags: []
     });
-
+    useEffect(() => {
+        setForm({
+            title: details.title || "",
+            shortDescription: details.shortDescription || "",
+            platform: details.platform || "instagram",
+            gigType: details.gigType || "solo",
+            category: details.category || "",
+            tags: details.tags || []
+        });
+    }, [details]);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = <K extends keyof GigDetailsForm>(
@@ -50,22 +60,32 @@ export function GigDetails({ onNext }: GigDetailsProps) {
     const handleSubmit = async () => {
         if (isLoading) return;
         setIsLoading(true);
+
         try {
-            const response = await api.post("gigs/create_gig", form);
+            if (mode === "create") {
+                const response = await api.post("/gigs/create_gig", form);
 
-            const gigId = response.data.data._id;
+                const createdGigId = response.data.data._id;
 
-            setGigId(gigId);
+                setGigId(createdGigId);
+            } else {
+                if (!gigId) {
+                    console.error("Gig ID missing for edit");
+                    return;
+                }
+
+                await api.patch(`/gigs/${gigId}`, form);
+            }
+
             setDetails(form);
-
             onNext();
+
         } catch (err) {
             console.error(err);
         } finally {
             setIsLoading(false);
         }
     };
-
 
     return (
         <div className="p-8 sm:p-10 space-y-8">

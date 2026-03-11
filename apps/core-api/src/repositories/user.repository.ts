@@ -17,7 +17,7 @@ class UserRepository {
     const normalizedEmail = email.trim().toLowerCase();
 
     return User.findOne({ email: normalizedEmail })
-      .select("+password +resetSessionExpiry +resetSessionToken");
+      .select("+password +resetOtp +resetOtpExpiry +resetSessionExpiry +resetSessionToken");
   }
 
 
@@ -75,10 +75,8 @@ class UserRepository {
     return User.findByIdAndUpdate(
       userId,
       {
-        resetOtp: undefined,
-        resetOtpExpiry: undefined,
-        resetSessionToken: token,
-        resetSessionExpiry: expiry,
+        $unset: { resetOtp: 1, resetOtpExpiry: 1 },
+        $set: { resetSessionToken: token, resetSessionExpiry: expiry },
       },
       { new: true }
     );
@@ -108,8 +106,7 @@ class UserRepository {
     return User.findByIdAndUpdate(
       userId,
       {
-        resetSessionToken: undefined,
-        resetSessionExpiry: undefined,
+        $unset: { resetSessionToken: 1, resetSessionExpiry: 1 }
       },
       { new: true }
     );
