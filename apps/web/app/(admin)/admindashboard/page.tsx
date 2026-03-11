@@ -1,18 +1,12 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import {
     Users,
     UserCheck,
     Briefcase,
-    DollarSign,
-    Search,
-    Bell,
-    Download,
-    Plus,
-    Menu
+    DollarSign
 } from "lucide-react";
 
-import Sidebar from "@/components/admindashboard/Sidebar";
 import MetricCard from "@/components/admindashboard/MetricCard";
 import ActivityTable from "@/components/admindashboard/ActivityTable";
 import StatsChart from "@/components/admindashboard/StatsChart";

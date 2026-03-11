@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Eye, Check, X, FileText, ImageIcon, UserCheck } from "lucide-react";
+import { Eye, Check, X, FileText, UserCheck } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

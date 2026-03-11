@@ -1,10 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import {
     Search,
-    Bell,
-    Download,
-    Menu,
     CheckCircle,
     Clock,
     DollarSign,
@@ -12,7 +9,6 @@ import {
     Filter
 } from "lucide-react";
 
-import Sidebar from "@/components/admindashboard/Sidebar";
 import MetricCard from "@/components/admindashboard/MetricCard";
 import BookingsTabs from "@/components/admindashboard/BookingsTabs";
 import BookingsTable from "@/components/admindashboard/BookingsTable";

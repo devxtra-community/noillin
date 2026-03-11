@@ -1,17 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import {
     Search,
-    Bell,
-    Download,
-    Menu,
     Clock,
     CheckCircle2,
     Users,
     Filter
 } from "lucide-react";
 
-import Sidebar from "@/components/admindashboard/Sidebar";
 import MetricCard from "@/components/admindashboard/MetricCard";
 import DisputeTabs from "@/components/admindashboard/DisputeTabs";
 import DisputeTable from "@/components/admindashboard/DisputeTable";

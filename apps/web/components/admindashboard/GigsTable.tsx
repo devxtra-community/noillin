@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { Eye, Info, Trash2, Instagram, Youtube } from "lucide-react";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
@@ -72,7 +73,7 @@ export default function GigsTable({ onDeleteClick }: GigsTableProps) {
                                 <td className="px-6 py-5 whitespace-nowrap">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0">
-                                            <img src={`https://picsum.photos/seed/${gig.id}/100/100`} alt="" className="w-full h-full object-cover" />
+                                            <Image unoptimized width={100} height={100} src={`https://picsum.photos/seed/${gig.id}/100/100`} alt="" className="w-full h-full object-cover" />
                                         </div>
                                         <div>
                                             <p className="text-sm font-bold text-[#111827]">{gig.title}</p>
@@ -83,7 +84,7 @@ export default function GigsTable({ onDeleteClick }: GigsTableProps) {
                                 <td className="px-6 py-5 whitespace-nowrap">
                                     <div className="flex items-center gap-3">
                                         <div className="w-7 h-7 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white">
-                                            <img src={gig.avatar} alt="" className="w-full h-full object-cover" />
+                                            <Image unoptimized width={100} height={100} src={gig.avatar} alt="" className="w-full h-full object-cover" />
                                         </div>
                                         <span className="text-sm font-bold text-gray-700">{gig.influencer}</span>
                                     </div>

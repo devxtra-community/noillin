@@ -5,14 +5,9 @@ import {
     UserCheck,
     Briefcase,
     DollarSign,
-    Search,
-    Bell,
-    Download,
-    Plus,
-    Menu
+    Search
 } from "lucide-react";
 
-import Sidebar from "@/components/admindashboard/Sidebar";
 import MetricCard from "@/components/admindashboard/MetricCard";
 import VerificationTable from "@/components/admindashboard/VerificationTable";
 import VerificationTabs from "@/components/admindashboard/VerificationTabs";

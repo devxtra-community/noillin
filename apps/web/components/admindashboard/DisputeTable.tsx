@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { Eye, CreditCard, User, FileText } from "lucide-react";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
@@ -73,7 +74,7 @@ export default function DisputeTable() {
                                     <div className="flex items-center -space-x-2">
                                         {report.users.map((user, idx) => (
                                             <div key={idx} className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-gray-100 shadow-sm">
-                                                <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                                                <Image unoptimized width={50} height={50} src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                                             </div>
                                         ))}
                                     </div>

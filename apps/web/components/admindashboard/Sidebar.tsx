@@ -10,6 +10,7 @@ import {
     X
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -101,7 +102,7 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsO
 
                     <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50/50 mt-4">
                         <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white">
-                            <img src={`https://ui-avatars.com/api/?name=${user?.email || "Admin"}&background=random`} alt="Admin" className="w-full h-full object-cover" />
+                            <Image unoptimized width={100} height={100} src={`https://ui-avatars.com/api/?name=${user?.email || "Admin"}&background=random`} alt="Admin" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col overflow-hidden">
                             <span className="text-sm font-bold text-gray-900 leading-tight truncate">{user?.email?.split('@')[0] || "Admin"}</span>

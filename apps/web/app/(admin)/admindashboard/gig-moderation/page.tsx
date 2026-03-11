@@ -1,10 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import {
-    Bell,
-    Download,
-    Plus,
-    Menu,
     Briefcase,
     AlertCircle,
     PauseCircle,
@@ -13,7 +9,6 @@ import {
     Search
 } from "lucide-react";
 
-import Sidebar from "@/components/admindashboard/Sidebar";
 import MetricCard from "@/components/admindashboard/MetricCard";
 import GigsTabs from "@/components/admindashboard/GigsTabs";
 import GigsTable from "@/components/admindashboard/GigsTable";

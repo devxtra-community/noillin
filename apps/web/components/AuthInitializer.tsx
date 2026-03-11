@@ -17,7 +17,7 @@ export default function AuthInitializer() {
         const { accessToken, user } = response.data.data;
 
         setAuth(accessToken, user);
-      } catch (error) {
+      } catch {
         clearAuth();
       }
     };

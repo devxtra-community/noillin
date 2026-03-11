@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { MessageSquare, ShieldCheck, Info, CornerDownRight, AlertTriangle, ShieldAlert } from "lucide-react";
+import Image from "next/image";
 
 export default function DisputeInvestigation() {
     return (
@@ -35,7 +36,7 @@ export default function DisputeInvestigation() {
                         {/* Influencer Message */}
                         <div className="flex items-start gap-2 max-w-[85%]">
                             <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mt-1">
-                                <img src="https://i.pravatar.cc/150?u=sarah" alt="" className="w-full h-full object-cover" />
+                                <Image unoptimized width={100} height={100} src="https://i.pravatar.cc/150?u=sarah" alt="" className="w-full h-full object-cover" />
                             </div>
                             <div className="bg-gray-100 rounded-2xl p-3 rounded-tl-none">
                                 <p className="text-[11px] font-medium text-gray-700">I&apos;ve uploaded the video. Can you check?</p>
@@ -44,7 +45,7 @@ export default function DisputeInvestigation() {
                         {/* Brand Message */}
                         <div className="flex items-start gap-2 max-w-[85%] ml-auto flex-row-reverse text-right">
                             <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 mt-1">
-                                <img src="https://i.pravatar.cc/150?u=nike" alt="" className="w-full h-full object-cover" />
+                                <Image unoptimized width={100} height={100} src="https://i.pravatar.cc/150?u=nike" alt="" className="w-full h-full object-cover" />
                             </div>
                             <div className="bg-emerald-500 text-white rounded-2xl p-3 rounded-tr-none">
                                 <p className="text-[11px] font-medium leading-normal">Wait, you missed the 30s brand shoutout!</p>

@@ -2,182 +2,183 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import Navbar from "@/components/Navbar";
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
 
 export default function ProfileSetupPage() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
+    const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
-  const user = useAuthStore((state) => state.user);
+    const user = useAuthStore((state) => state.user);
 
-  const userType = user?.role as "INFLUENCER" | "BRAND" | undefined;
+    const userType = user?.role as "INFLUENCER" | "BRAND" | undefined;
 
-  const [commonData, setCommonData] = useState({
-    profilePicture: null as File | null,
-    bio: "",
-    location: "",
-    phoneNumber: "",
-  });
+    const [commonData, setCommonData] = useState({
+        profilePicture: null as File | null,
+        bio: "",
+        location: "",
+        phoneNumber: "",
+    });
 
-  const [influencerData, setInfluencerData] = useState({
-    fullName: "",
-    username: "",
-    niche: "",
-    gender: "",
-    dob: "",
-    instagram: "",
-    youtube: "",
-    tiktok: "",
-  });
+    const [influencerData, setInfluencerData] = useState({
+        fullName: "",
+        username: "",
+        niche: "",
+        gender: "",
+        dob: "",
+        instagram: "",
+        youtube: "",
+        tiktok: "",
+    });
 
-  const [brandData, setBrandData] = useState({
-    companyName: "",
-    industry: "",
-    website: "",
-    companySize: "",
-  });
+    const [brandData, setBrandData] = useState({
+        companyName: "",
+        industry: "",
+        website: "",
+        companySize: "",
+    });
 
-  useEffect(() => {
-    if (!userType) return;
+    useEffect(() => {
+        if (!userType) return;
 
-    const fetchProfile = async () => {
-      try {
-        const res = await api.get("/profile/get_profile");
-        const data = res.data.data;
+        const fetchProfile = async () => {
+            try {
+                const res = await api.get("/profile/get_profile");
+                const data = res.data.data;
 
-        if (userType === "INFLUENCER") {
-          setInfluencerData({
-            fullName: data.fullName || "",
-            username: data.username || "",
-            niche: data.categories?.[0] || "",
-            gender: "",
-            dob: "",
-            instagram: data.instagramUrl || "",
-            youtube: data.youtubeUrl || "",
-            tiktok: data.tiktokUrl || "",
-          });
+                if (userType === "INFLUENCER") {
+                    setInfluencerData({
+                        fullName: data.fullName || "",
+                        username: data.username || "",
+                        niche: data.categories?.[0] || "",
+                        gender: "",
+                        dob: "",
+                        instagram: data.instagramUrl || "",
+                        youtube: data.youtubeUrl || "",
+                        tiktok: data.tiktokUrl || "",
+                    });
 
-          setCommonData((prev) => ({
-            ...prev,
-            bio: data.bio || "",
-            location: data.location || "",
-          }));
-        }
+                    setCommonData((prev) => ({
+                        ...prev,
+                        bio: data.bio || "",
+                        location: data.location || "",
+                    }));
+                }
 
-        if (userType === "BRAND") {
-          setBrandData({
-            companyName: data.companyName || "",
-            industry: data.industry || "",
-            website: data.website || "",
-            companySize: data.companySize || "",
-          });
-        }
-      } catch (err) {
-        console.error(err);
-      }
+                if (userType === "BRAND") {
+                    setBrandData({
+                        companyName: data.companyName || "",
+                        industry: data.industry || "",
+                        website: data.website || "",
+                        companySize: data.companySize || "",
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchProfile();
+    }, [userType]);
+
+    const handleCommonChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+        const { name, value } = e.target;
+        setCommonData((prev) => ({ ...prev, [name]: value }));
     };
 
-    fetchProfile();
-  }, [userType]);
+    const handleInfluencerChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        const { name, value } = e.target;
+        setInfluencerData((prev) => ({ ...prev, [name]: value }));
+    };
 
-  const handleCommonChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setCommonData((prev) => ({ ...prev, [name]: value }));
-  };
+    const handleBrandChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        const { name, value } = e.target;
+        setBrandData((prev) => ({ ...prev, [name]: value }));
+    };
 
-  const handleInfluencerChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setInfluencerData((prev) => ({ ...prev, [name]: value }));
-  };
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
 
-  const handleBrandChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setBrandData((prev) => ({ ...prev, [name]: value }));
-  };
+        try {
+            if (!userType) return;
+            type InfluencerPayload = {
+                bio?: string;
+                location?: string;
+                fullName?: string;
+                username?: string;
+                categories?: string[];
+                instagramUrl?: string;
+                youtubeUrl?: string;
+                tiktokUrl?: string;
+                languages?: string[];
+            };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+            type BrandPayload = {
+                bio?: string;
+                location?: string;
+                companyName?: string;
+                industry?: string;
+                website?: string;
+                companySize?: string;
+            };
 
-    try {
-      if (!userType) return;
-        type InfluencerPayload = {
-  bio?: string;
-  location?: string;
-  fullName?: string;
-  username?: string;
-  categories?: string[];
-  instagramUrl?: string;
-  youtubeUrl?: string;
-  tiktokUrl?: string;
-  languages?: string[];
-};
+            let payload: InfluencerPayload | BrandPayload = {
 
-type BrandPayload = {
-  bio?: string;
-  location?: string;
-  companyName?: string;
-  industry?: string;
-  website?: string;
-  companySize?: string;
-};
 
-let payload: InfluencerPayload | BrandPayload = {
+                bio: commonData.bio,
+                location: commonData.location,
+            };
 
-      
-        bio: commonData.bio,
-        location: commonData.location,
-      };
+            if (userType === "INFLUENCER") {
+                payload = {
+                    ...payload,
+                    fullName: influencerData.fullName,
+                    username: influencerData.username,
+                    categories: influencerData.niche
+                        ? [influencerData.niche]
+                        : [],
+                    instagramUrl: influencerData.instagram,
+                    youtubeUrl: influencerData.youtube,
+                    tiktokUrl: influencerData.tiktok,
+                    languages: [],
+                };
+            }
 
-      if (userType === "INFLUENCER") {
-        payload = {
-          ...payload,
-          fullName: influencerData.fullName,
-          username: influencerData.username,
-          categories: influencerData.niche
-            ? [influencerData.niche]
-            : [],
-          instagramUrl: influencerData.instagram,
-          youtubeUrl: influencerData.youtube,
-          tiktokUrl: influencerData.tiktok,
-          languages: [],
-        };
-      }
+            if (userType === "BRAND") {
+                payload = {
+                    ...payload,
+                    companyName: brandData.companyName,
+                    industry: brandData.industry,
+                    website: brandData.website,
+                    companySize: brandData.companySize,
+                };
+            }
 
-      if (userType === "BRAND") {
-        payload = {
-          ...payload,
-          companyName: brandData.companyName,
-          industry: brandData.industry,
-          website: brandData.website,
-          companySize: brandData.companySize,
-        };
-      }
+            await api.patch("/profile/update_profile", payload);
 
-      await api.patch("/profile/update_profile", payload);
+            alert("Profile Updated Successfully");
+            router.push("/home");
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update profile");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      alert("Profile Updated Successfully");
-      router.push("/home");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update profile");
-    } finally {
-      setLoading(false);
+    if (!user) {
+        return <div className="p-6">Loading profile...</div>;
     }
-  };
-
-  if (!user) {
-    return <div className="p-6">Loading profile...</div>;
-  }
 
 
     return (
@@ -237,7 +238,7 @@ let payload: InfluencerPayload | BrandPayload = {
                                     <div className="shrink-0 group relative">
                                         <div className="relative h-32 w-32 rounded-full overflow-hidden bg-gray-50 border-2 border-dashed border-gray-300 group-hover:border-[#10B981] transition-all duration-300 flex items-center justify-center">
                                             {commonData.profilePicture ? (
-                                                <img src={URL.createObjectURL(commonData.profilePicture)} alt="Preview" className="h-full w-full object-cover" />
+                                                <Image unoptimized width={200} height={200} src={URL.createObjectURL(commonData.profilePicture)} alt="Preview" className="h-full w-full object-cover" />
                                             ) : (
                                                 <div className="text-center">
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 text-gray-400 group-hover:text-[#10B981] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">

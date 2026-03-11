@@ -1,4 +1,5 @@
 import React from "react";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
@@ -79,10 +80,13 @@ export default function ActivityTable() {
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-2">
                                         {activity.entity.avatar && (
-                                            <img
+                                            <Image
+                                                unoptimized
+                                                width={20}
+                                                height={20}
                                                 src={activity.entity.avatar}
                                                 className="w-5 h-5 rounded-full object-cover"
-                                                alt={activity.entity.name}
+                                                alt={activity.entity.name || ""}
                                             />
                                         )}
                                         <span className="text-sm text-gray-600">{activity.entity.name}</span>

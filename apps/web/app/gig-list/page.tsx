@@ -269,7 +269,7 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
 const MAX_PRICE_LIMIT = 50000;
 
 export default function ExploreGigs() {
-  const { user } = useAuthStore();
+  useAuthStore();
   const [search, setSearch] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activePlatform, setActivePlatform] = useState<string | null>(null);
