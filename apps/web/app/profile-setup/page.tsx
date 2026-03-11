@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import { uploadToS3 } from "@/lib/s3-uploads";
 import Navbar from "@/components/Navbar";
@@ -18,7 +19,6 @@ export default function ProfileSetupPage() {
 
     const [commonData, setCommonData] = useState({
         profilePicture: null as File | null,
-        profileImageUrl: "",
         bio: "",
         location: "",
         phoneNumber: "",
@@ -49,8 +49,6 @@ export default function ProfileSetupPage() {
             try {
                 const res = await api.get("/profile/get_profile");
                 const data = res.data.data;
-                console.log(data);
-
 
                 if (userType === "INFLUENCER") {
                     setInfluencerData({
@@ -68,8 +66,6 @@ export default function ProfileSetupPage() {
                         ...prev,
                         bio: data.bio || "",
                         location: data.location || "",
-                        profileImageUrl: data.profileImageUrl || ""
-
                     }));
                 }
 
@@ -109,17 +105,8 @@ export default function ProfileSetupPage() {
         const { name, value } = e.target;
         setBrandData((prev) => ({ ...prev, [name]: value }));
     };
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
 
-        if (!file) return;
-
-        setCommonData((prev) => ({
-            ...prev,
-            profilePicture: file,
-        }));
-    };
-const handleSubmit = async (e: React.SyntheticEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
@@ -135,7 +122,6 @@ const handleSubmit = async (e: React.SyntheticEvent) => {
                 youtubeUrl?: string;
                 tiktokUrl?: string;
                 languages?: string[];
-                profileImageUrl?: string;
             };
 
             type BrandPayload = {
@@ -145,26 +131,13 @@ const handleSubmit = async (e: React.SyntheticEvent) => {
                 industry?: string;
                 website?: string;
                 companySize?: string;
-                profileImageUrl?: string;
             };
-            let profileImageUrl = commonData.profileImageUrl;
-
-            if (commonData.profilePicture) {
-                profileImageUrl = await uploadToS3(
-                    commonData.profilePicture,
-                    userType === "INFLUENCER"
-                        ? "profiles/influencers"
-                        : "profiles/brands"
-                );
-            }
 
             let payload: InfluencerPayload | BrandPayload = {
 
 
                 bio: commonData.bio,
                 location: commonData.location,
-                profileImageUrl,
-
             };
 
             if (userType === "INFLUENCER") {
@@ -232,37 +205,20 @@ const handleSubmit = async (e: React.SyntheticEvent) => {
 
                                 <div className="flex flex-col sm:flex-row gap-8 items-start">
                                     {/* Avatar Upload */}
-                                    <div className="relative h-32 w-32 rounded-full overflow-hidden bg-gray-50 border-2 border-dashed border-gray-300 flex items-center justify-center">
-
-                                        {commonData.profilePicture || commonData.profileImageUrl ? (
-
-                                            <img
-                                                src={
-                                                    commonData.profilePicture
-                                                        ? URL.createObjectURL(commonData.profilePicture)
-                                                        : commonData.profileImageUrl
-                                                }
-                                                alt="profile"
-                                                className="h-full w-full object-cover"
-                                            />
-
-                                        ) : (
-
-                                            <div className="text-center">
-                                                <span className="text-xs text-gray-500">
-                                                    Upload Photo
-                                                </span>
-                                            </div>
-
-                                        )}
-
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                            onChange={handleImageChange}
-                                        />
-
+                                    <div className="shrink-0 group relative">
+                                        <div className="relative h-32 w-32 rounded-full overflow-hidden bg-gray-50 border-2 border-dashed border-gray-300 group-hover:border-[#10B981] transition-all duration-300 flex items-center justify-center">
+                                            {commonData.profilePicture ? (
+                                                <Image unoptimized width={200} height={200} src={URL.createObjectURL(commonData.profilePicture)} alt="Preview" className="h-full w-full object-cover" />
+                                            ) : (
+                                                <div className="text-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-10 w-10 text-gray-400 group-hover:text-[#10B981] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span className="mt-1 block text-xs font-medium text-gray-500">Upload Photo</span>
+                                                </div>
+                                            )}
+                                            {/* <input type="file" disabled accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={} /> */}
+                                        </div>
                                     </div>
 
                                     {/* Basic Inputs */}

@@ -93,7 +93,7 @@ export default function GigCreatePage() {
                                     Your gig is now live and visible to brands. You can manage it from your dashboard.
                                 </p>
                                 <button
-                                    onClick={() => window.location.href = "/dashboard"}
+                                    onClick={() => window.location.href = "/admindashboard"}
                                     className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-all mt-6"
                                 >
                                     Go to Dashboard

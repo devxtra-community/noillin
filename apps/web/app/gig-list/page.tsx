@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 
+import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -268,6 +269,7 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
 const MAX_PRICE_LIMIT = 50000;
 
 export default function ExploreGigs() {
+  useAuthStore();
   const [search, setSearch] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activePlatform, setActivePlatform] = useState<string | null>(null);
@@ -496,7 +498,6 @@ export default function ExploreGigs() {
             </button>
             <span className="text-sm text-gray-600">Available this week</span>
           </div>
-
           {/* Active filters summary */}
           {(activeCategory || activePlatform || maxPrice < MAX_PRICE_LIMIT) && (
             <div>
@@ -573,7 +574,7 @@ export default function ExploreGigs() {
 
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-5">
-            <p className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500">
               {loading ? (
                 <span className="inline-block w-24 h-4 bg-gray-200 rounded animate-pulse" />
               ) : pagination ? (
@@ -585,7 +586,7 @@ export default function ExploreGigs() {
                   verified gigs
                 </>
               ) : null}
-            </p>
+            </div>
             <div className="flex items-center gap-3">
               {/* Grid/List toggle */}
               <div className="flex bg-white border border-gray-200 rounded-lg p-0.5 shadow-sm">
@@ -671,7 +672,6 @@ export default function ExploreGigs() {
               </button>
             </div>
           )}
-
           {/* Pagination */}
           {!loading && totalPages > 1 && (
             <div className="flex items-center justify-center gap-1 mt-10">

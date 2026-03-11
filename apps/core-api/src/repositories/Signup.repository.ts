@@ -1,11 +1,12 @@
 import { PendingSignup } from "../models/pendingSignup.models.js";
-
+import type { PendingSignupFilter } from "../types/pendingSignup.types.js";
 
 interface CreatePendingSignupInput {
   email: string;
   passwordHash: string;
   documents: string;
-  role: "INFLUENCER" | "BRAND";
+  role: "INFLUENCER" | "BRAND" | "ADMIN";
+  adminLevel?: "SUPER" | "NORMAL";
 
   status: "PENDING" | "APPROVED" | "REJECTED";
 
@@ -19,18 +20,25 @@ interface CreatePendingSignupInput {
   isEmailVerified?: boolean;
 }
 
+
+
 class PendingSignupRepository {
   // ================= CREATE =================
   create(data: CreatePendingSignupInput) {
     return PendingSignup.create(data);
   }
 
+  //==================GET ALL PENDING SIGNUPS==================
+  getAllPendingSignups(filter:PendingSignupFilter={}) {
+    return PendingSignup.find(filter).sort({ createdAt: -1 });
+  }
+
   // ================= FIND =================
- findByEmail(email: string) {
-  return PendingSignup
-    .findOne({ email })
-    .select("+emailOtpHash");
-}
+  findByEmail(email: string) {
+    return PendingSignup
+      .findOne({ email })
+      .select("+emailOtpHash");
+  }
 
 
   // ================= UPDATE STATUS =================
@@ -48,9 +56,9 @@ class PendingSignupRepository {
   }
 
   // ================= DELETE MANY (FOR CLEANUP) =================
- deleteMany(filter: Record<string, unknown>): Promise<unknown> {
-  return PendingSignup.deleteMany(filter);
-}
+  deleteMany(filter: Record<string, unknown>): Promise<unknown> {
+    return PendingSignup.deleteMany(filter);
+  }
 
 }
 

@@ -6,6 +6,9 @@ export default function HomePage() {
   const router = useRouter();
   const handleLoginClick = () => {
     router.push("/login");
+  };
+  const handleSignupClick = () => {
+    router.push("/signup");
   }
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans">
@@ -32,7 +35,7 @@ export default function HomePage() {
           <button onClick={handleLoginClick} className="px-4 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors hover:cursor-pointer">
             Sign In
           </button>
-          <button className="px-4 py-2 text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 rounded-md transition-colors shadow-sm shadow-emerald-200 hover:cursor-pointer">
+          <button onClick={handleSignupClick} className="px-4 py-2 text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 rounded-md transition-colors shadow-sm shadow-emerald-200 hover:cursor-pointer">
             Get Started
           </button>
         </div>
