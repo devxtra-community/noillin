@@ -2,7 +2,8 @@ import type { Response, NextFunction } from "express";
 
 import {
     getMyProfileService,
-    updateProfileService
+    updateProfileService,
+    getPublicInfluencerProfileService
 } from "../services/profile.service.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
 
@@ -57,6 +58,33 @@ export const updateProfileController = async (
         res.status(200).json({
             success: true,
             data: profile
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getPublicInfluencerProfileController = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        const influencerId = req.params.id as string;
+
+        if (!influencerId) {
+            return res.status(400).json({
+                success: false,
+                message: "Influencer ID is required",
+            });
+        }
+
+        const data = await getPublicInfluencerProfileService(influencerId);
+
+        res.status(200).json({
+            success: true,
+            data
         });
 
     } catch (error) {

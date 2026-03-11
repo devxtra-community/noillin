@@ -9,7 +9,7 @@ import {
   verifyOtpService,
   resetPasswordService,
   verifySignupOtpService,
-  
+
 } from "../services/auth.service.js";
 import type { HttpError } from "../modules/auth/http-error.js";
 // import { log } from "winston";
@@ -120,7 +120,7 @@ export const refreshTokenController = async (
       data: {
         accessToken: result.accessToken,
         user: result.user,
-        
+
       },
     });
   } catch (error) {
@@ -209,9 +209,9 @@ export const forgotPasswordController = async (
     res.status(200).json({
       success: true,
       message: "If account exists, OTP sent",
-      
+
     });
-   
+
   } catch (error) {
     next(error);
   }

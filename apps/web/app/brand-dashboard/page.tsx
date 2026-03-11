@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -7,103 +10,149 @@ import {
   Clock,
   CircleDollarSign,
   ChevronRight,
-  Youtube,
-  Instagram,
   CheckCircle2,
   Calendar,
 } from "lucide-react";
 
+import { useAuthStore } from "@/store/auth.store";
+import api from "@/lib/axios.client";
+
+// Define the Gig interfaces similar to how gig-list works
+interface GigPricing {
+  basePrice: number;
+  currency: string;
+}
+
+interface Gig {
+  _id: string;
+  title: string;
+  category: string;
+  pricing: GigPricing;
+  primaryInfluencerId: {
+    _id: string;
+    displayName: string;
+    profileImage?: string;
+    availableFrom?: string;
+    platforms?: ("IG" | "YT" | "TT" | "PT")[];
+  };
+}
+
+const formatCurrency = (amount: number, currency = "INR") => {
+  if (currency === "INR") return `₹${amount.toLocaleString("en-IN")}`;
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
+};
+
 export default function Dashboard() {
+  const { user } = useAuthStore();
+  const isAuthenticated = !!user;
+  const [gigs, setGigs] = useState<Gig[]>([]);
+  const [loadingGigs, setLoadingGigs] = useState(true);
+
+  useEffect(() => {
+    // Fetch a few gigs for the "Explore Gigs" section
+    const fetchGigs = async () => {
+      try {
+        const res = await api.get("/gigs?limit=4");
+        setGigs(res.data.data);
+      } catch (error) {
+        console.error("Failed to fetch gigs:", error);
+      } finally {
+        setLoadingGigs(false);
+      }
+    };
+
+    fetchGigs();
+  }, []);
   return (
     <div className="min-h-screen bg-[#f8fafc] pb-20">
       {/* Navbar */}
-      <nav className="bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 h-20 relative">
-        {/* Left: Logo */}
-        <div className="flex items-center w-1/3">
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 bg-[#059669] rounded-lg flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-12">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-8 h-8 bg-[#059669] rounded-lg flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2.5}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+              <span className="text-xl font-bold text-gray-900 tracking-tight">
+                Noillin
+              </span>
+            </Link>
+            </div>
+
+            {/* Nav Links */}
+            <div className="hidden md:flex gap-8 h-full items-center">
+              <Link
+                href="#"
+                className="text-sm font-semibold text-[#059669] border-b-2 border-[#059669] h-20 flex items-center"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2.5}
-                  d="M13 10V3L4 14h7v7l9-11h-7z"
-                />
-              </svg>
+                Dashboard
+              </Link>
+              <Link
+                href="#"
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
+              >
+                Gigs
+              </Link>
+              <Link
+                href="#"
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
+              >
+                Bookings
+              </Link>
+              <Link
+                href="#"
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
+              >
+                Messages
+              </Link>
+              <Link
+                href="#"
+                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
+              >
+                Transactions
+              </Link>
             </div>
-            <span className="text-xl font-bold text-gray-900 tracking-tight">
-              Noillin
-            </span>
-          </Link>
-        </div>
+          
 
-        {/* Center: Nav Links */}
-        <div className="hidden md:flex gap-8 h-full items-center justify-center absolute left-1/2 -translate-x-1/2">
-          <Link
-            href="#"
-            className="text-sm font-semibold text-[#059669] border-b-2 border-[#059669] h-20 flex items-center"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="#"
-            className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-          >
-            Gigs
-          </Link>
-          <Link
-            href="#"
-            className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-          >
-            Bookings
-          </Link>
-          <Link
-            href="#"
-            className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-          >
-            Messages
-          </Link>
-          <Link
-            href="#"
-            className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-          >
-            Transactions
-          </Link>
-        </div>
-
-        {/* Right side nav */}
-        <div className="flex items-center gap-6 w-1/3 justify-end">
-          <button className="text-gray-400 hover:text-gray-600 transition-colors relative">
-            <Bell size={20} />
-            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-          </button>
-          <div className="flex items-center gap-3 cursor-pointer">
-            <div className="w-10 h-10 rounded-full bg-red-100 overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
-                alt="Jane Doe"
-                className="w-full h-full object-cover"
-              />
+          {/* Right side nav */}
+          <div className="flex items-center gap-6">
+            <button className="text-gray-400 hover:text-gray-600 transition-colors relative">
+              <Bell size={20} />
+              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+            </button>
+            <div className="flex items-center gap-3 cursor-pointer">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 overflow-hidden flex items-center justify-center text-emerald-700 font-bold border border-emerald-200">
+                {/* Show avatar or initials */}
+                {user?.email?.charAt(0).toUpperCase() || "B"}
+              </div>
+              <div className="hidden md:block">
+                <p className="text-sm font-semibold text-gray-900 leading-tight">
+                  {isAuthenticated ? (user?.email?.split('@')[0] || "Brand User") : "Guest User"}
+                </p>
+                <p className="text-xs text-gray-500">Brand</p>
+              </div>
+              <ChevronDown size={16} className="text-gray-400" />
             </div>
-            <div className="hidden md:block">
-              <p className="text-sm font-semibold text-gray-900 leading-tight">
-                Jane Doe
-              </p>
-              <p className="text-xs text-gray-500">Influencer</p>
-            </div>
-            <ChevronDown size={16} className="text-gray-400" />
           </div>
         </div>
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+      <main className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 mt-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -285,373 +334,87 @@ export default function Dashboard() {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Gig Card 1 */}
-            <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full">
-              <div className="flex flex-col flex-grow">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop"
-                    alt="Sarah Jenkins"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1">
-                      Sarah Jenkins <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
-                    </h4>
-                    <p className="text-xs text-gray-500">Lifestyle & Beauty</p>
+            {loadingGigs ? (
+              // Simple skeleton
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] h-64 animate-pulse">
+                  <div className="flex gap-3 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-gray-200" />
+                    <div className="flex-1 space-y-2 py-1">
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      <div className="h-3 bg-gray-100 rounded w-1/2" />
+                    </div>
+                  </div>
+                  <div className="space-y-3 mt-8">
+                    <div className="h-4 bg-gray-200 rounded" />
+                    <div className="h-4 bg-gray-200 rounded w-5/6" />
                   </div>
                 </div>
-                <h3 className="font-semibold text-gray-900 text-sm mb-4 line-clamp-2">
-                  I will promote your brand with an Instagram story& reel
-                </h3>
+              ))
+            ) : gigs.length === 0 ? (
+              <div className="col-span-full text-center py-10 text-gray-500">
+                No gigs available right now.
               </div>
+            ) : (
+              gigs.map((gig) => {
+                const influencer = gig.primaryInfluencerId;
+                const name = influencer?.displayName || "Unknown Creator";
+                const platforms = influencer?.platforms || [];
+                const availableLabel = influencer?.availableFrom
+                  ? new Date(influencer.availableFrom).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                  : "Available";
 
-              <div className="mt-auto">
-                <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
-                  <span className="text-xs text-gray-500">Starting at</span>
-                  <span className="font-bold text-gray-900">₹5,000</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
-                  <Calendar size={12} className="text-[#059669]" />
-                  <span>Next available:</span>
-                  <span className="font-semibold text-gray-900">May 13</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
-                  <p className="text-[10px] text-gray-400 leading-tight w-24">
-                    Booking confirmed after payment
-                  </p>
-                  <button className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    View Gig
-                  </button>
-                </div>
-              </div>
-            </div>
+                return (
+                  <div key={gig._id} className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full hover:-translate-y-1 transition-transform cursor-pointer">
+                    <div className="flex flex-col flex-grow">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold shrink-0">
+                          {name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1 line-clamp-1">
+                            {name} <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
+                          </h4>
+                          <p className="text-xs text-gray-500 line-clamp-1">{gig.category}</p>
+                        </div>
+                      </div>
+                      <h3 className="font-semibold text-gray-900 text-sm mb-4 line-clamp-2">
+                        {gig.title}
+                      </h3>
+                      {platforms.length > 0 && (
+                        <div className="flex items-center gap-2 mb-4 flex-wrap">
+                          {platforms.map(p => (
+                            <div key={p} className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
+                              {p}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
-            {/* Gig Card 2 */}
-            <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full">
-              <div className="flex flex-col flex-grow">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
-                    alt="Marc Alistair"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1">
-                      Marc Alistair <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
-                    </h4>
-                    <p className="text-xs text-gray-500">Tech & Gaming</p>
+                    <div className="mt-auto">
+                      <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
+                        <span className="text-xs text-gray-500">Starting at</span>
+                        <span className="font-bold text-gray-900">{formatCurrency(gig.pricing.basePrice, gig.pricing.currency)}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
+                        <Calendar size={12} className="text-[#059669]" />
+                        <span>Next available:</span>
+                        <span className="font-semibold text-gray-900">{availableLabel}</span>
+                      </div>
+                      <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
+                        <p className="text-[10px] text-gray-400 leading-tight w-24">
+                          Booking confirmed after payment
+                        </p>
+                        <Link href={`/gig-details?id=${gig._id}`} className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                          View Gig
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    <Youtube size={10} /> YT
-                  </div>
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    TT
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto">
-                <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
-                  <span className="text-xs text-gray-500">Starting at</span>
-                  <span className="font-bold text-gray-900">₹12,000</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
-                  <Calendar size={12} className="text-[#059669]" />
-                  <span>Next available:</span>
-                  <span className="font-semibold text-gray-900">May 15</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
-                  <p className="text-[10px] text-gray-400 leading-tight w-24">
-                    Booking confirmed after payment
-                  </p>
-                  <button className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    View Gig
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Gig Card 3 */}
-            <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full">
-              <div className="flex flex-col flex-grow">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop"
-                    alt="Elena Rodriguez"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1">
-                      Elena Rodriguez <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
-                    </h4>
-                    <p className="text-xs text-gray-500">Fitness & Wellness</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    <Instagram size={10} /> IG
-                  </div>
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    TT
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto">
-                <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
-                  <span className="text-xs text-gray-500">Starting at</span>
-                  <span className="font-bold text-gray-900">₹8,500</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
-                  <Calendar size={12} className="text-[#059669]" />
-                  <span>Next available:</span>
-                  <span className="font-semibold text-gray-900">May 20</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
-                  <p className="text-[10px] text-gray-400 leading-tight w-24">
-                    Booking confirmed after payment
-                  </p>
-                  <button className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    View Gig
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Gig Card 4 */}
-            <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full">
-              <div className="flex flex-col flex-grow">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop"
-                    alt="Elena Rodriguez"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1">
-                      Elena Rodriguez <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
-                    </h4>
-                    <p className="text-xs text-gray-500">Fitness & Wellness</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    <Instagram size={10} /> IG
-                  </div>
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    TT
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto">
-                <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
-                  <span className="text-xs text-gray-500">Starting at</span>
-                  <span className="font-bold text-gray-900">₹8,500</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
-                  <Calendar size={12} className="text-[#059669]" />
-                  <span>Next available:</span>
-                  <span className="font-semibold text-gray-900">May 20</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
-                  <p className="text-[10px] text-gray-400 leading-tight w-24">
-                    Booking confirmed after payment
-                  </p>
-                  <button className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    View Gig
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Row 2, Card 1 */}
-            <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full">
-              <div className="flex flex-col flex-grow">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
-                    alt="David Chen"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1">
-                      David Chen <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
-                    </h4>
-                    <p className="text-xs text-gray-500">Finance & Crypto</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    <Youtube size={10} /> YT
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto">
-                <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
-                  <span className="text-xs text-gray-500">Starting at</span>
-                  <span className="font-bold text-gray-900">₹25,000</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
-                  <Calendar size={12} className="text-[#059669]" />
-                  <span>Next available:</span>
-                  <span className="font-semibold text-gray-900">Jun 01</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
-                  <p className="text-[10px] text-gray-400 leading-tight w-24">
-                    Booking confirmed after payment
-                  </p>
-                  <button className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    View Gig
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Row 2, Card 2 */}
-            <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full">
-              <div className="flex flex-col flex-grow">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop"
-                    alt="Chloe Styles"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1">
-                      Chloe Styles <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
-                    </h4>
-                    <p className="text-xs text-gray-500">Fashion & Travel</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    <Instagram size={10} /> IG
-                  </div>
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    PT
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto">
-                <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
-                  <span className="text-xs text-gray-500">Starting at</span>
-                  <span className="font-bold text-gray-900">₹7,000</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
-                  <Calendar size={12} className="text-[#059669]" />
-                  <span>Next available:</span>
-                  <span className="font-semibold text-gray-900">May 10</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
-                  <p className="text-[10px] text-gray-400 leading-tight w-24">
-                    Booking confirmed after payment
-                  </p>
-                  <button className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    View Gig
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Row 2, Card 3 */}
-            <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full">
-              <div className="flex flex-col flex-grow">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop"
-                    alt="James Miller"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1">
-                      James Miller <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
-                    </h4>
-                    <p className="text-xs text-gray-500">Food & Dining</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    <Instagram size={10} /> IG
-                  </div>
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    <Youtube size={10} /> YT
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto">
-                <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
-                  <span className="text-xs text-gray-500">Starting at</span>
-                  <span className="font-bold text-gray-900">₹6,500</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
-                  <Calendar size={12} className="text-[#059669]" />
-                  <span>Next available:</span>
-                  <span className="font-semibold text-gray-900">May 12</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
-                  <p className="text-[10px] text-gray-400 leading-tight w-24">
-                    Booking confirmed after payment
-                  </p>
-                  <button className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    View Gig
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Row 2, Card 4 */}
-            <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full">
-              <div className="flex flex-col flex-grow">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop"
-                    alt="James Miller"
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1">
-                      James Miller <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
-                    </h4>
-                    <p className="text-xs text-gray-500">Food & Dining</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    <Instagram size={10} /> IG
-                  </div>
-                  <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                    <Youtube size={10} /> YT
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-auto">
-                <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
-                  <span className="text-xs text-gray-500">Starting at</span>
-                  <span className="font-bold text-gray-900">₹6,500</span>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
-                  <Calendar size={12} className="text-[#059669]" />
-                  <span>Next available:</span>
-                  <span className="font-semibold text-gray-900">May 12</span>
-                </div>
-                <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
-                  <p className="text-[10px] text-gray-400 leading-tight w-24">
-                    Booking confirmed after payment
-                  </p>
-                  <button className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                    View Gig
-                  </button>
-                </div>
-              </div>
-            </div>
+                );
+              })
+            )}
 
           </div>
         </div>
