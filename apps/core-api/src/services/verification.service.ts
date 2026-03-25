@@ -5,6 +5,9 @@ import { pendingSignupRepository } from "../repositories/Signup.repository.js";
 import { userRepository } from "../repositories/user.repository.js";
 import { profileRepository } from "../repositories/profile.repository.js";
 import type { PendingSignupFilter, PendingSignupQuery } from "../types/pendingSignup.types.js";
+import { getChannel } from "../queue/rabbit.js";
+import { INFLUENCER_CREATED_EVENT } from "../queue/events.js";
+import { BRAND_CREATED_EVENT } from "../queue/events.js";
 
 // ================= VERIFY OTP =================
 export const verifyOtpService = async (
@@ -160,31 +163,63 @@ export const approveSignupService = async (email: string) => {
     status: "ACTIVE",
   });
 
-  if (user.role === "INFLUENCER") {
-    await profileRepository.createInfluencer({
-      userId: user._id,
-      fullName: "",
-      username: user.email?.split("@")[0] || user.email,
-      categories: [],
-      languages: [],
-      isProfileComplete: false,
-      isVerified: false,
-    });
-  }
+if (user.role === "INFLUENCER") {
+  const influencer = await profileRepository.createInfluencer({
+    userId: user._id,
+    fullName: "",
+    username: user.email?.split("@")[0] || user.email,
+    categories: [],
+    languages: [],
+    isProfileComplete: false,
+    isVerified: false,
+  });
 
-  if (user.role === "BRAND") {
-    await profileRepository.createBrand({
-      userId: user._id,
-      companyName: "Pending Setup",
-      industry: "Not Specified",
-      contactPersonName: user.email?.split("@")[0] || "Pending",
-      contactEmail: user.email,
-      documents: [],
-      isProfileComplete: false,
-      isVerified: false,
-    });
-  }
+  // 🔥 Send event AFTER creation
+  getChannel().sendToQueue(
+    INFLUENCER_CREATED_EVENT,
+    Buffer.from(
+      JSON.stringify({
+        id: influencer._id.toString(),
+        fullName: influencer.fullName,
+        username: influencer.username,
+        instagram: "",
+        youtube: "",
+        category: influencer.categories,
+        location: "",
+        languages: influencer.languages,
+        followersCount: 0,
+        engagementRate: 0,
+      })
+    ),
+    { persistent: true }
+  );
+}
 
+ if (user.role === "BRAND") {
+  const brand = await profileRepository.createBrand({
+    userId: user._id,
+    companyName: "Pending Setup",
+    industry: "Not Specified",
+    contactPersonName: user.email?.split("@")[0] || "Pending",
+    contactEmail: user.email,
+    documents: [],
+    isProfileComplete: false,
+    isVerified: false,
+  });
+
+  getChannel().sendToQueue(
+    BRAND_CREATED_EVENT,
+    Buffer.from(
+      JSON.stringify({
+        id: brand._id.toString(),
+        companyName: brand.companyName,
+        industry: brand.industry,
+        contactPersonName: brand.contactPersonName,
+      })
+    ),
+    { persistent: true }
+  );
+}
 
   await pendingSignupRepository.updateStatus(email, "APPROVED");
 

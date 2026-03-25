@@ -8,6 +8,7 @@ import type { AuthRequest } from "../middlewares/auth.middleware.js";
 
 
 
+
 // ================= CREATE GIG =================
 
 export const GIG_CREATED_EVENT = "gig.created";

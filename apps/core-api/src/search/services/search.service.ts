@@ -8,3 +8,4 @@ export const searchIndex = async (
   const index = meili.index(indexName);
   return await index.search(query || "", options);
 };
+ 
