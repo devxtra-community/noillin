@@ -13,4 +13,5 @@ router.get("/get_profile", authenticate, getMyProfileController);
 router.patch("/update_profile", authenticate, updateProfileController);
 router.get("/influencer/:id", getPublicInfluencerProfileController);
 
+
 export default router;
