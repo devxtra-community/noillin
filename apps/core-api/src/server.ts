@@ -30,7 +30,10 @@ app.use(cors({
 
 connectDB()
 app.use(httpLogger);
-
+app.use(
+  "/payments/webhook",
+  express.raw({ type: "application/json" })
+);
 app.use("/api", router);
 app.use(express.json());
 
