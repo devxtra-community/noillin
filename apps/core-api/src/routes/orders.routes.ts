@@ -3,7 +3,7 @@ import { approveWork, markCompleted, releasePayment } from "src/controllers/orde
 
 import { createOrderService } from "../services/order.service.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.post("/", async (req, res) => {
   const result = await createOrderService(req.body);

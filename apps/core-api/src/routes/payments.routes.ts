@@ -5,7 +5,7 @@ import {
   stripeWebhook,
 } from "../controllers/payment.controller.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.post("/checkout", createCheckout);
 router.post("/webhook", stripeWebhook);
