@@ -1,5 +1,13 @@
 import { Router } from "express";
 
-const router : Router = Router()
+import {
+  createCheckout,
+  stripeWebhook,
+} from "../controllers/payment.controller.js";
 
-export default router
+const router = Router();
+
+router.post("/checkout", createCheckout);
+router.post("/webhook", stripeWebhook);
+
+export default router;
