@@ -1,12 +1,18 @@
+import dotenv from "dotenv"
+
+dotenv.config()
 import { createServer } from "http";
 
 import express from "express";
 import cors from "cors";
 import { Server } from "socket.io";
 
+import {connectDB} from "../src/db/db"
+
 import { httpLogger } from "./middlewares/httpLogger";
 import { logger } from "./utils/logger";
 import { errorHandler, notFound } from "./middlewares/errorHandler";
+import { registerChatHandlers } from "./sockets/chat.socket";
 
 const app = express();
 app.use(cors())
@@ -29,7 +35,7 @@ app.get("/health", (req, res) => {
 
 io.on("connection", (socket) => {
   logger.info("Socket connected:", socket.id);
-
+  registerChatHandlers(io, socket);
   socket.on("disconnect", () => {
     logger.info("Socket disconnected:", socket.id);
   });
@@ -37,6 +43,18 @@ io.on("connection", (socket) => {
 app.use(notFound)
 app.use(errorHandler)
 const PORT = Number(process.env.PORT) || 6001;
-httpServer.listen(PORT, "127.0.0.1",() => {
-  logger.info(`Realtime service running at http://localhost:${PORT}`);
-});
+const startServer = async () => {
+  try {
+    await connectDB(); // ✅ FIRST
+
+    httpServer.listen(PORT, "0.0.0.0", () => {
+      logger.info(`Realtime service running at http://localhost:${PORT}`);
+    });
+
+  } catch (error) {
+    console.error("Failed to start realtime server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
