@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import api from "@/lib/axios.client";
 
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const router=useRouter();
 
   const isValidBusinessInfo = (info: string) => {
     const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
@@ -63,15 +65,21 @@ export default function LoginPage() {
 
       const response = await api.post("/auth/signup", payload);
 
+      if(response.data.role==="BRAND"){
+        router.push("/gig-list")
+      }else{
+        router.push("/")
+      }
+
       if (response.data.accessToken) {
         // localStorage.setItem("accessToken", response.data.accessToken);
-        // window.location.href = "/dashboard";
+        // window.location.href = "/admindashboard";
         setFormData({
           fullName: "",
           email: "",
           password: "",
           confirmPassword: "",
-          businessInfo: "",
+          businessInfo: ""
         });
       }
       setSuccess(true);

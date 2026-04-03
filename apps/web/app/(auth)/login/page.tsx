@@ -46,7 +46,7 @@ export default function LoginPage() {
       if (response.data.data?.accessToken) {
         const {accessToken, user} = response.data.data
         setAuth(accessToken, user)
-        router.push("/home") ;
+        router.push("/home"); ;
       }
 
     } catch (error) {

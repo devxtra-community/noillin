@@ -92,6 +92,12 @@ importers:
       nodemailer:
         specifier: ^8.0.1
         version: 8.0.1
+      razorpay:
+        specifier: ^2.9.6
+        version: 2.9.6
+      stripe:
+        specifier: ^21.0.1
+        version: 21.0.1(@types/node@25.0.10)
       winston:
         specifier: ^3.19.0
         version: 3.19.0
@@ -172,6 +178,9 @@ importers:
 
   apps/web:
     dependencies:
+      "@aws-sdk/client-s3":
+        specifier: ^3.1006.0
+        version: 3.1006.0
       axios:
         specifier: ^1.13.5
         version: 1.13.5
@@ -3546,10 +3555,10 @@ packages:
         integrity: sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==,
       }
 
-  fast-xml-builder@1.1.0:
+  fast-xml-builder@1.0.0:
     resolution:
       {
-        integrity: sha512-7mtITW/we2/wTUZqMyBOR2F8xP4CRxMiSEcQxPIqdRWdO2L/HZSOlzoNyghmyDwNB8BDxePooV1ZTJpkOUhdRg==,
+        integrity: sha512-fpZuDogrAgnyt9oDDz+5DBz0zgPdPZz6D4IR7iESxRXElrlGTRkHJ9eEt+SACRJwT0FNFrt71DFQIUFBJfX/uQ==,
       }
 
   fast-xml-parser@5.4.1:
@@ -4970,13 +4979,6 @@ packages:
       }
     engines: { node: ">=8" }
 
-  path-expression-matcher@1.1.2:
-    resolution:
-      {
-        integrity: sha512-LXWqJmcpp2BKOEmgt4CyuESFmBfPuhJlAHKJsFzuJU6CxErWk75BrO+Ni77M9OxHN6dCYKM4vj+21Z6cOL96YQ==,
-      }
-    engines: { node: ">=14.0.0" }
-
   path-key@3.1.1:
     resolution:
       {
@@ -5124,6 +5126,12 @@ packages:
         integrity: sha512-K5zQjDllxWkf7Z5xJdV0/B0WTNqx6vxG70zJE4N0kBs4LovmEYWJzQGxC9bS9RAKu3bgM40lrd5zoLJ12MQ5BA==,
       }
     engines: { node: ">= 0.10" }
+
+  razorpay@2.9.6:
+    resolution:
+      {
+        integrity: sha512-zsHAQzd6e1Cc6BNoCNZQaf65ElL6O6yw0wulxmoG5VQDr363fZC90Mp1V5EktVzG45yPyNomNXWlf4cQ3622gQ==,
+      }
 
   react-dom@19.2.3:
     resolution:
@@ -5607,6 +5615,18 @@ packages:
         integrity: sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig==,
       }
     engines: { node: ">=8" }
+
+  stripe@21.0.1:
+    resolution:
+      {
+        integrity: sha512-ocv0j7dWttswDWV2XL/kb6+yiLpDXNXL3RQAOB5OB2kr49z0cEatdQc12+zP/j5nrXk6rAsT4N3y/NUvBbK7Pw==,
+      }
+    engines: { node: ">=18" }
+    peerDependencies:
+      "@types/node": ">=18"
+    peerDependenciesMeta:
+      "@types/node":
+        optional: true
 
   strnum@2.2.0:
     resolution:
@@ -8600,13 +8620,11 @@ snapshots:
 
   fast-levenshtein@2.0.6: {}
 
-  fast-xml-builder@1.1.0:
-    dependencies:
-      path-expression-matcher: 1.1.2
+  fast-xml-builder@1.0.0: {}
 
   fast-xml-parser@5.4.1:
     dependencies:
-      fast-xml-builder: 1.1.0
+      fast-xml-builder: 1.0.0
       strnum: 2.2.0
 
   fastq@1.20.1:
@@ -9401,8 +9419,6 @@ snapshots:
 
   path-exists@4.0.0: {}
 
-  path-expression-matcher@1.1.2: {}
-
   path-key@3.1.1: {}
 
   path-parse@1.0.7: {}
@@ -9468,6 +9484,12 @@ snapshots:
       http-errors: 2.0.1
       iconv-lite: 0.7.2
       unpipe: 1.0.0
+
+  razorpay@2.9.6:
+    dependencies:
+      axios: 1.13.5
+    transitivePeerDependencies:
+      - debug
 
   react-dom@19.2.3(react@19.2.3):
     dependencies:
@@ -9854,6 +9876,10 @@ snapshots:
   strip-bom@3.0.0: {}
 
   strip-json-comments@3.1.1: {}
+
+  stripe@21.0.1(@types/node@25.0.10):
+    optionalDependencies:
+      "@types/node": 25.0.10
 
   strnum@2.2.0: {}
 

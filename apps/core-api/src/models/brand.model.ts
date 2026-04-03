@@ -4,6 +4,7 @@ export interface IBrandProfile extends Document {
   userId: Types.ObjectId;
 
   companyName: string;
+  slug?: string;
   industry: string;
   website?: string;
 
@@ -15,11 +16,15 @@ export interface IBrandProfile extends Document {
   gstNumber?: string;
   companySize?: string;
 
-  documents: string[]; // S3 keys
+  description?: string;
+  headquarters?: string;
+
+  documents: string[];
+
+  profileImageUrl?: string;
 
   isProfileComplete: boolean;
   isVerified: boolean;
-  profileImageUrl?: string,
 }
 
 const BrandProfileSchema = new Schema<IBrandProfile>(
@@ -36,40 +41,62 @@ const BrandProfileSchema = new Schema<IBrandProfile>(
       type: String,
       required: true,
       trim: true,
+      index: true,
+    },
+
+    slug: {
+      type: String,
+      unique: true,
+      index: true,
     },
 
     industry: {
       type: String,
       required: true,
+      trim: true,
     },
 
-    website: String,
+    website: {
+      type: String,
+      trim: true,
+    },
 
     contactPersonName: {
       type: String,
       required: true,
+      trim: true,
     },
 
     contactEmail: {
       type: String,
       required: true,
       lowercase: true,
+      trim: true,
     },
 
     contactPhone: String,
 
     businessRegistrationNumber: String,
     gstNumber: String,
-    companySize: String,
+
+    companySize: {
+      type: String,
+      trim: true,
+    },
+
+    description: String,
+    headquarters: String,
 
     documents: {
-      type: [String], // store S3 keys
+      type: [String],
       default: [],
     },
+
     profileImageUrl: {
       type: String,
-      default: ""
+      default: "",
     },
+
     isProfileComplete: {
       type: Boolean,
       default: false,

@@ -1,41 +1,71 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Document } from "mongoose";
 
-const PendingSignupSchema = new Schema(
+export enum PendingSignupStatus {
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
+
+export enum PendingSignupRole {
+  INFLUENCER = "INFLUENCER",
+  BRAND = "BRAND",
+}
+
+export interface IPendingSignup extends Document {
+  email: string;
+  passwordHash: string;
+  role: PendingSignupRole;
+  documents?: string;
+  status: PendingSignupStatus;
+
+  // OTP fields
+  emailOtpHash?: string | null;
+  emailOtpExpiresAt?: Date | null;
+  otpAttempts: number;
+  otpResendCount: number;
+  otpLastSentAt?: Date | null;
+  otpLockedUntil?: Date | null;
+  isEmailVerified: boolean;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const PendingSignupSchema = new Schema<IPendingSignup>(
   {
-    email: { 
-      type: String, 
-      required: true, 
-      unique: true 
+    email: {
+      type: String,
+      required: true,
+      unique: true,
     },
 
-    passwordHash: { 
-      type: String, 
-      required: true 
+    passwordHash: {
+      type: String,
+      required: true,
     },
 
     role: {
       type: String,
-      enum: ["INFLUENCER", "BRAND"],
+      enum: Object.values(PendingSignupRole),
       required: true,
     },
-    documents: { type: String },
 
+    documents: {
+      type: String,
+    },
 
     status: {
       type: String,
-      enum: ["PENDING", "APPROVED", "REJECTED"],
-      default: "PENDING",
+      enum: Object.values(PendingSignupStatus),
+      default: PendingSignupStatus.PENDING,
     },
 
-    //  OTP FIELDS START HERE
-
- emailOtpHash: {
-  type: String,
-  select: false,
-  default: null,
-
-},
-
+    // OTP fields
+    emailOtpHash: {
+      type: String,
+      select: false,
+      default: null,
+    },
 
     emailOtpExpiresAt: {
       type: Date,
@@ -59,19 +89,18 @@ const PendingSignupSchema = new Schema(
 
     otpLockedUntil: {
       type: Date,
-      default: null,  
+      default: null,
     },
 
     isEmailVerified: {
       type: Boolean,
       default: false,
     },
-
   },
-  { timestamps: true } // gives createdAt & updatedAt automatically
+  { timestamps: true }
 );
 
-export const PendingSignup = model(
+export const PendingSignup = model<IPendingSignup>(
   "PendingSignup",
   PendingSignupSchema
 );
