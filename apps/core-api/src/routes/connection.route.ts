@@ -3,7 +3,7 @@ import { Router } from "express";
 import { ConnectionController } from "../controllers/connection.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 
-const router = Router();
+const router: Router = Router();
 const controller = new ConnectionController();
 
 router.post("/request", authenticate, controller.sendRequest);
