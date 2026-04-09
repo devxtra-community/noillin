@@ -1,17 +1,12 @@
 "use client";
 import React, { useState, useCallback, useMemo } from "react";
 import {
-    Briefcase,
-    AlertCircle,
     PauseCircle,
-    DollarSign,
     Filter,
     Search,
     CheckCircle,
     Flag,
     TrendingUp,
-    Download,
-    Plus,
     ChevronDown
 } from "lucide-react";
 
@@ -41,6 +36,7 @@ export default function GigsModerationPage() {
         reported: allGigs.filter((g) => g.status === "reported").length,
         paused: allGigs.filter((g) => g.status === "paused").length,
     }), [allGigs]);
+
 
     const handleDeleteClick = (gig: Gig) => {
         setSelectedGig(gig);
@@ -127,7 +123,7 @@ export default function GigsModerationPage() {
             {/* Moderation Controls & Table Section */}
             <div className="bg-white rounded-[2.5rem] border border-gray-100 p-8 space-y-6 shadow-sm">
                 <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-                    <GigsTabs activeTab={activeTab} onChange={setActiveTab} />
+                    <GigsTabs activeTab={activeTab} onChange={setActiveTab} counts={tabCounts} />
 
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="relative group min-w-[280px]">

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-import { uploadToS3 } from "@/lib/s3-uploads";
+
 import Navbar from "@/components/Navbar";
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";

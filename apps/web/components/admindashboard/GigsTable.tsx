@@ -123,7 +123,7 @@ export default function GigsTable({ onDeleteClick, statusFilter = "all", searchQ
                 </div>
                 <div className="space-y-2">
                     <h3 className="text-xl font-extrabold text-[#111827]">No match found</h3>
-                    <p className="text-gray-400 text-sm max-w-xs mx-auto">Try adjusting your filters or search query to find what you're looking for.</p>
+                    <p className="text-gray-400 text-sm max-w-xs mx-auto">Try adjusting your filters or search query to find what you&apos;re looking for.</p>
                 </div>
             </div>
         );

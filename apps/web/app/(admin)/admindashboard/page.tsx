@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
     Users,
     UserCheck,
@@ -15,7 +15,6 @@ import SystemHealth from "@/components/admindashboard/SystemHealth";
 import TableSkeleton from "@/components/admindashboard/TableSkeleton";
 import StatsChartSkeleton from "@/components/admindashboard/StatsChartSkeleton";
 import SystemHealthSkeleton from "@/components/admindashboard/SystemHealthSkeleton";
-import api from "@/lib/axios.client";
 import { useAdminStats } from "@/hooks/useAdminStats";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { Button } from "@/components/ui/button";

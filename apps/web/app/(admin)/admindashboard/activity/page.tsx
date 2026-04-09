@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Info, ChevronLeft, Calendar, User, ShoppingBag, Briefcase } from "lucide-react";
+import { Info, ChevronLeft, User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import api from "@/lib/axios.client";

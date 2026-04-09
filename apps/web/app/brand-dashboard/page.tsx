@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   Bell,
   ChevronDown,
@@ -91,42 +92,42 @@ export default function Dashboard() {
                 Noillin
               </span>
             </Link>
-            </div>
+          </div>
 
-            {/* Nav Links */}
-            <div className="hidden md:flex gap-8 h-full items-center">
-              <Link
-                href="#"
-                className="text-sm font-semibold text-[#059669] border-b-2 border-[#059669] h-20 flex items-center"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="#"
-                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-              >
-                Gigs
-              </Link>
-              <Link
-                href="#"
-                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-              >
-                Bookings
-              </Link>
-              <Link
-                href="#"
-                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-              >
-                Messages
-              </Link>
-              <Link
-                href="#"
-                className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-              >
-                Transactions
-              </Link>
-            </div>
-          
+          {/* Nav Links */}
+          <div className="hidden md:flex gap-8 h-full items-center">
+            <Link
+              href="#"
+              className="text-sm font-semibold text-[#059669] border-b-2 border-[#059669] h-20 flex items-center"
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="#"
+              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
+            >
+              Gigs
+            </Link>
+            <Link
+              href="#"
+              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
+            >
+              Bookings
+            </Link>
+            <Link
+              href="#"
+              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
+            >
+              Messages
+            </Link>
+            <Link
+              href="#"
+              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
+            >
+              Transactions
+            </Link>
+          </div>
+
 
           {/* Right side nav */}
           <div className="flex items-center gap-6">
@@ -234,7 +235,10 @@ export default function Dashboard() {
               {/* Item 2 */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <img
+                  <Image
+                    unoptimized
+                    width={48}
+                    height={48}
                     src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=100&h=100&fit=crop"
                     alt="GreenLife"
                     className="w-12 h-12 rounded-full object-cover shrink-0"
@@ -277,7 +281,10 @@ export default function Dashboard() {
               {/* Msg 1 */}
               <div className="flex gap-4">
                 <div className="relative shrink-0">
-                  <img
+                  <Image
+                    unoptimized
+                    width={48}
+                    height={48}
                     src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=100&h=100&fit=crop"
                     alt="Marcus"
                     className="w-12 h-12 rounded-full object-cover"
@@ -302,7 +309,10 @@ export default function Dashboard() {
               {/* Msg 2 */}
               <div className="flex gap-4">
                 <div className="relative shrink-0">
-                  <img
+                  <Image
+                    unoptimized
+                    width={48}
+                    height={48}
                     src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop"
                     alt="Sarah"
                     className="w-12 h-12 rounded-full object-cover"
