@@ -1,7 +1,7 @@
-import Order from "../models/order.model.js";
+import { OrderModel } from "../models/order.model.js";
 
 export const createOrderService = async (data: Record<string, unknown>) => {
-  const order = await Order.create({
+  const order = await OrderModel.create({
     ...data,
     status: "PENDING",
   });

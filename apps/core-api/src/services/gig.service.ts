@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 import { Types } from "mongoose";
 import type { JwtPayload } from "jsonwebtoken";
 
-import { create_gig, findActiveGigById, findGigById, findGigsByInfluencer, findPublishedGigById, findPublishedGigs, softDeleteGig } from "../repositories/gig.repository.js";
+// import { GigModel } from "../models/gig.model.js";
+import { create_gig, findActiveGigById, findGigById, findGigsByInfluencer, findPublishedGigById, findPublishedGigs, getAllGigs, softDeleteGig } from "../repositories/gig.repository.js";
 import { type GigDeliverable, type GigType, type Platform } from "../types/gig.type.js";
 import { type GigDocument } from "../types/gig.type.js";
 import { InfluencerProfile, type IInfluencerProfile } from "../models/influencer.model.js";
@@ -16,10 +17,19 @@ interface GigQuery {
   minPrice?: string;
   maxPrice?: string;
   sort?: "price_asc" | "price_desc";
+  status?: string;
 }
 
 interface HttpError extends Error {
   statusCode?: number;
+}
+
+
+
+//=================GET TOTAL GIGS=================
+export const getTotalGigsService = async () => {
+  const gigCount = await getAllGigs();
+  return gigCount.length;
 }
 
 /* ================= LIST GIGS ================= */
@@ -32,10 +42,15 @@ export const listGigsService = async (
   const skip = (page - 1) * limit;
 
   const filter: Record<string, unknown> = {
-
-    status: "published",
     isDeleted: false
   };
+
+  if (query.status && query.status !== "all") {
+    filter.status = query.status;
+  } else if (!query.status) {
+    // Default for public marketplace
+    filter.status = "published";
+  }
 
   // Category filter
   if (query.category) {
@@ -72,11 +87,11 @@ export const listGigsService = async (
   }
 
   const { gigs, total } = await findPublishedGigs(
-  filter,
-  sort,
-  skip,
-  limit
-);
+    filter,
+    sort,
+    skip,
+    limit
+  );
 
   return {
     data: gigs,
@@ -141,7 +156,7 @@ export const createGigService = async (
 ): Promise<{
   gig: GigDocument;
   collaborators: string[];
- }> => {
+}> => {
   if (role !== UserRole.INFLUENCER) {
     throw Object.assign(new Error("only influencers can create gigs"), {
       statusCode: 403
@@ -180,13 +195,15 @@ export const createGigService = async (
     deliverables: [],
 
     status: "draft",
-    isDeleted: false
+    isDeleted: false,
+    reportCount: 0
   });
 
+
   return {
-  gig,
-  collaborators: input.collaboratorIds ?? []
-}
+    gig,
+    collaborators: input.collaboratorIds ?? []
+  }
 };
 
 export const updateGigDeliverablesService = async (
@@ -232,7 +249,7 @@ export const updateGigPricingService = async (
     revisionsIncluded: number;
   }
 ) => {
-const gig = await findGigById(gigId);
+  const gig = await findGigById(gigId);
   if (!gig) {
     throw Object.assign(new Error("Gig not found"), { statusCode: 404 });
   }
@@ -268,7 +285,7 @@ export const publishGigService = async (
   gigId: string,
   userId: string
 ) => {
-const gig = await findGigById(gigId);
+  const gig = await findGigById(gigId);
   if (!gig) {
     throw Object.assign(new Error("Gig not found"), { statusCode: 404 });
   }
@@ -416,49 +433,50 @@ export const deleteGigService = async (
     throw err;
   }
 
-  //  Only influencers allowed
-  if (user.role !== "INFLUENCER") {
-    const err: HttpError = new Error("Only influencers can delete gigs");
+  //  Only influencers and admins allowed
+  if (user.role !== UserRole.INFLUENCER && user.role !== UserRole.ADMIN) {
+    const err: HttpError = new Error("Only influencers and admins can delete gigs");
     err.statusCode = 403;
     throw err;
   }
 
-  //  Find influencer profile
-  const influencerProfile: IInfluencerProfile | null =
-    await InfluencerProfile.findOne({
-      userId: user.userId
-    });
-
-  if (!influencerProfile) {
-    const err: HttpError = new Error("Influencer profile not found");
-    err.statusCode = 404;
-    throw err;
-  }
-
-  //  Find gig
- const gig = await findActiveGigById(gigId);
-
-
+  // Find gig first
+  const gig = await findActiveGigById(gigId);
   if (!gig) {
     const err: HttpError = new Error("Gig not found or already deleted");
     err.statusCode = 404;
     throw err;
   }
 
-  //  Ownership check
-  if (
-    gig.primaryInfluencerId.toString() !==
-    influencerProfile._id.toString()
-  ) {
-    const err: HttpError = new Error(
-      "You are not allowed to delete this gig"
-    );
-    err.statusCode = 403;
-    throw err;
+  // If user is an influencer, check ownership
+  if (user.role === UserRole.INFLUENCER) {
+    //  Find influencer profile
+    const influencerProfile: IInfluencerProfile | null =
+      await InfluencerProfile.findOne({
+        userId: user.userId
+      });
+
+    if (!influencerProfile) {
+      const err: HttpError = new Error("Influencer profile not found");
+      err.statusCode = 404;
+      throw err;
+    }
+
+    //  Ownership check
+    if (
+      gig.primaryInfluencerId.toString() !==
+      influencerProfile._id.toString()
+    ) {
+      const err: HttpError = new Error(
+        "You are not allowed to delete this gig"
+      );
+      err.statusCode = 403;
+      throw err;
+    }
   }
 
-  //  Soft delete
- await softDeleteGig(gigId);
+  // Soft delete (influencer ownership confirmed or user is admin)
+  await softDeleteGig(gigId);
 };
 
 export const getMyGigsService = async (userId: string) => {
@@ -470,3 +488,6 @@ export const getMyGigsService = async (userId: string) => {
 
   return findGigsByInfluencer(influencerProfile._id);
 };
+
+
+

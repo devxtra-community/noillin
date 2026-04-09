@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import { Eye, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
-import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
@@ -69,9 +68,13 @@ export default function BookingsTable() {
                                 <td className="px-6 py-5 whitespace-nowrap">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center p-1 flex-shrink-0">
-                                            <Image unoptimized width={100} height={100} src={booking.brandLogo} alt="" className="w-full h-full object-contain brightness-0 invert"
+                                            <img width={100} height={100} src={booking.brandLogo} alt={booking.brand} className="w-full h-full object-contain brightness-0 invert"
                                                 onError={(e) => {
-                                                    (e.target as HTMLImageElement).parentElement!.innerText = booking.brand[0];
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.style.display = 'none';
+                                                    if (target.parentElement) {
+                                                        target.parentElement.textContent = booking.brand[0];
+                                                    }
                                                 }} />
                                         </div>
                                         <span className="text-sm font-bold text-[#111827]">{booking.brand}</span>
@@ -80,7 +83,7 @@ export default function BookingsTable() {
                                 <td className="px-6 py-5 whitespace-nowrap">
                                     <div className="flex items-center gap-3">
                                         <div className="w-7 h-7 rounded-full bg-gray-200 overflow-hidden ring-2 ring-white">
-                                            <Image unoptimized width={100} height={100} src={booking.influencerAvatar} alt="" className="w-full h-full object-cover" />
+                                            <img width={100} height={100} src={booking.influencerAvatar} alt={booking.influencer} className="w-full h-full object-cover" />
                                         </div>
                                         <span className="text-sm font-bold text-gray-700">{booking.influencer}</span>
                                     </div>

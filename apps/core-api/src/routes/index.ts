@@ -15,6 +15,7 @@ import healthRoutes from "./health.routes.js";
 import adminRoutes from "./admin.route.js"
 import chatRoutes from "./chat.routes.js"
 import brandRoutes from "./brand.route.js";
+import reportRoutes from "./report.route.js";
 import connectionRoutes from "./connection.route.js";
 
 
@@ -33,6 +34,7 @@ router.use("/search", searchRoutes);
 router.use("/media", mediaRoutes);
 router.use("/chat", chatRoutes);
 router.use("/brands", brandRoutes);
+router.use("/reports",reportRoutes );
 router.use("/connections", connectionRoutes);
 
 

@@ -117,8 +117,15 @@ const GigSchema = new Schema<GigDocument>(
 
     status: {
       type: String,
-      enum: ["draft", "published", "paused", "archived"],
-      default: "draft",
+      enum: [
+        "draft",
+        "published",     // ACTIVE
+        "flagged",
+        "paused",
+        "under_review",
+        "rejected",
+        "archived"
+      ], default: "draft",
       index: true
     },
 
@@ -126,8 +133,13 @@ const GigSchema = new Schema<GigDocument>(
       type: Boolean,
       default: false,
       index: true
+    }, reportCount: {
+      type: Number,
+      default: 0,
+      index: true
     }
   },
+
   { timestamps: true }
 );
 

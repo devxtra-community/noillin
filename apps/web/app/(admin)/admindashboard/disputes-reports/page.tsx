@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     Search,
     Clock,
@@ -9,14 +9,26 @@ import {
 } from "lucide-react";
 
 import MetricCard from "@/components/admindashboard/MetricCard";
+import MetricCardSkeleton from "@/components/admindashboard/MetricCardSkeleton";
+import TableSkeleton from "@/components/admindashboard/TableSkeleton";
+import InvestigationSkeleton from "@/components/admindashboard/InvestigationSkeleton";
 import DisputeTabs from "@/components/admindashboard/DisputeTabs";
 import DisputeTable from "@/components/admindashboard/DisputeTable";
 import DisputeInvestigation from "@/components/admindashboard/DisputeInvestigation";
+import { FadeIn } from "@/components/animations/FadeIn";
 import { AdminGuard } from "@/components/rbac/Guards";
 
 export default function DisputesReportsPage() {
+    const [isAtRest, setIsAtRest] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setIsLoading(false), 1500);
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
-        <AdminGuard level="SUPER">
+        <AdminGuard>
             <div className="flex gap-8">
                 {/* Left Column: Metrics & Table */}
                 <div className="flex-1 space-y-8 min-w-0">
@@ -27,32 +39,44 @@ export default function DisputesReportsPage() {
                     </div>
 
                     {/* Metrics Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                        <MetricCard
-                            title="Pending Review"
-                            value="14"
-                            status="Urgent"
-                            icon={Clock}
-                            iconColor="text-orange-500"
-                            iconBg="bg-orange-50"
-                        />
-                        <MetricCard
-                            title="Resolved Today"
-                            value="38"
-                            change="+12%"
-                            isPositive={true}
-                            icon={CheckCircle2}
-                            iconColor="text-emerald-500"
-                            iconBg="bg-emerald-50"
-                        />
-                        <MetricCard
-                            title="Avg. Resolution Time"
-                            value="4.2h"
-                            icon={Users}
-                            iconColor="text-[#111827]"
-                            iconBg="bg-gray-100"
-                        />
-                    </div>
+                    <FadeIn onDone={() => setIsAtRest(true)} delay={0.1}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {isLoading ? (
+                                <>
+                                    <MetricCardSkeleton startLoading={isAtRest} />
+                                    <MetricCardSkeleton startLoading={isAtRest} />
+                                    <MetricCardSkeleton startLoading={isAtRest} />
+                                </>
+                            ) : (
+                                <>
+                                    <MetricCard
+                                        title="Pending Review"
+                                        value="14"
+                                        status="Urgent"
+                                        icon={Clock}
+                                        iconColor="text-orange-500"
+                                        iconBg="bg-orange-50"
+                                    />
+                                    <MetricCard
+                                        title="Resolved Today"
+                                        value="38"
+                                        change="+12%"
+                                        isPositive={true}
+                                        icon={CheckCircle2}
+                                        iconColor="text-emerald-500"
+                                        iconBg="bg-emerald-50"
+                                    />
+                                    <MetricCard
+                                        title="Avg. Resolution Time"
+                                        value="4.2h"
+                                        icon={Users}
+                                        iconColor="text-[#111827]"
+                                        iconBg="bg-gray-100"
+                                    />
+                                </>
+                            )}
+                        </div>
+                    </FadeIn>
 
                     {/* Search & Filter Controls */}
                     <div className="flex flex-col xl:flex-row items-center justify-between gap-4 py-2">
@@ -73,12 +97,24 @@ export default function DisputesReportsPage() {
                     </div>
 
                     {/* Disputes Table */}
-                    <DisputeTable />
+                    <FadeIn delay={0.2}>
+                        {isLoading ? (
+                            <TableSkeleton startLoading={isAtRest} />
+                        ) : (
+                            <DisputeTable />
+                        )}
+                    </FadeIn>
                 </div>
 
                 {/* Right Column: Investigation View */}
                 <div className="hidden min-[1600px]:block">
-                    <DisputeInvestigation />
+                    <FadeIn delay={0.3}>
+                        {isLoading ? (
+                            <InvestigationSkeleton startLoading={isAtRest} />
+                        ) : (
+                            <DisputeInvestigation />
+                        )}
+                    </FadeIn>
                 </div>
             </div>
         </AdminGuard>

@@ -1,39 +1,55 @@
 "use client";
-import React, { useState } from "react";
-
-import { cn } from "@/lib/utils";
+import React from "react";
+import { motion } from "framer-motion";
 
 const tabs = [
-    { id: "all", label: "All Gigs", count: 128 },
-    { id: "reported", label: "Reported", count: 24, isAlert: true },
-    { id: "paused", label: "Paused", count: 18 },
+    { id: "all", label: "All Gigs" },
+    { id: "reported", label: "Reported" },
+    { id: "paused", label: "Paused" },
 ];
 
-export default function GigsTabs() {
-    const [activeTab, setActiveTab] = useState("all");
+interface GigsTabsProps {
+    activeTab: string;
+    onChange: (tab: string) => void;
+    counts?: {
+        all: number;
+        reported: number;
+        paused: number;
+    };
+}
 
+export default function GigsTabs({ activeTab, onChange, counts }: GigsTabsProps) {
     return (
-        <div className="flex items-center p-1 bg-gray-50/50 rounded-xl border border-gray-100 w-fit">
+        <div className="flex items-center gap-1 bg-white p-1 rounded-xl w-fit border border-gray-100 shadow-sm">
             {tabs.map((tab) => (
                 <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={cn(
-                        "flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200",
-                        activeTab === tab.id
-                            ? "bg-white text-[#111827] shadow-sm ring-1 ring-gray-200/50"
-                            : "text-gray-400 hover:text-gray-600 hover:bg-white/50"
-                    )}
+                    onClick={() => onChange(tab.id)}
+                    className="relative px-5 py-2 text-[13px] font-bold rounded-lg transition-colors duration-200 flex items-center gap-2 outline-none group"
+                    style={{ color: activeTab === tab.id ? "#ffffff" : "#6b7280" }}
                 >
-                    {tab.label}
-                    <span className={cn(
-                        "px-1.5 py-0.5 rounded-md text-[10px]",
-                        activeTab === tab.id
-                            ? (tab.isAlert ? "bg-red-50 text-red-600" : "bg-gray-100 text-gray-600")
-                            : "bg-gray-100/50 text-gray-400"
-                    )}>
-                        {tab.count}
+                    {/* Animated sliding background */}
+                    {activeTab === tab.id && (
+                        <motion.div
+                            layoutId="gigs-tab-bg"
+                            className="absolute inset-0 bg-[#0b121f] rounded-lg shadow-sm"
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                    )}
+                    <span className="relative z-10">
+                        {tab.label}
                     </span>
+                    {counts && counts[tab.id as keyof typeof counts] !== undefined && (
+                        <span
+                            className="relative z-10 text-[10px] font-extrabold px-1.5 py-0.5 rounded-full transition-all"
+                            style={{
+                                background: activeTab === tab.id ? "rgba(255,255,255,0.15)" : "#f3f4f6",
+                                color: activeTab === tab.id ? "#ffffff" : "#6b7280",
+                            }}
+                        >
+                            {counts[tab.id as keyof typeof counts]}
+                        </span>
+                    )}
                 </button>
             ))}
         </div>

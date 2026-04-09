@@ -25,6 +25,8 @@ export interface IUser extends Document {
   isEmailVerified: boolean;
   status: UserStatus;
   refreshToken?: string;
+  createdAt: Date;
+  updatedAt: Date;
 
   //  Forgot Password Fields
   resetOtp?: string;
