@@ -14,7 +14,7 @@ import searchRoutes from "./search.routes.js";
 import healthRoutes from "./health.routes.js";
 import adminRoutes from "./admin.route.js"
 import brandRoutes from "./brand.route.js";
-
+import reportRoutes from "./report.route.js";
 
 const router:Router = Router()
 router.use("/health", healthRoutes)
@@ -30,6 +30,7 @@ router.use("/payments", paymentRoutes);
 router.use("/search", searchRoutes);
 router.use("/media", mediaRoutes);
 router.use("/brands", brandRoutes);
+router.use("/reports",reportRoutes );
 
 
 export default router

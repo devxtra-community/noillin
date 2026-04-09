@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 
 import { stripe } from "../lib/stripe.js";
-import Order from "../models/order.model.js";
+import { OrderModel } from "../models/order.model.js";
 import { createBooking } from "../services/booking.service.js";
 import { createCheckoutSession } from "../services/payment.service.js";
 
@@ -49,7 +49,7 @@ export const stripeWebhook = async (req: Request, res: Response) => {
 
     const orderId = session.metadata.orderId;
 
-    const order = await Order.findById(orderId);
+    const order = await OrderModel.findById(orderId);
 
     if (!order) return res.json({ status: "order not found" });
 

@@ -1,10 +1,19 @@
 import type { NextFunction, Request, Response } from "express";
 
-import { getGigDetailsService, getMyGigsService, listGigsService, publishGigService, updateGigDeliverablesService, updateGigPricingService } from "../services/gig.service.js";
+import {
+  createGigService,
+  deleteGigService,
+  editGigService,
+  getGigDetailsService,
+  getMyGigsService,
+  listGigsService,
+  publishGigService,
+  updateGigDeliverablesService,
+  updateGigPricingService
+} from "../services/gig.service.js";
+import type { AuthRequest } from "../middlewares/auth.middleware.js";
 import type { GigDeliverable } from "../types/gig.type.js";
 import { getChannel } from "../queue/rabbit.js";
-import { createGigService, deleteGigService, editGigService } from "../services/gig.service.js";
-import type { AuthRequest } from "../middlewares/auth.middleware.js";
 
 
 
@@ -22,6 +31,7 @@ export const createGigController = async (
   next: NextFunction
 ) => {
   try {
+    
     const { userId, role } = req.user!;
 
     const result = await createGigService(
@@ -30,21 +40,21 @@ export const createGigController = async (
       req.body
     );
 
-   
-      
-      getChannel().sendToQueue(
-        GIG_CREATED_EVENT,
-        Buffer.from(JSON.stringify({
-          gigId: result.gig._id.toString(),
-          title: result.gig.title,
-          category: result.gig.category,
-          pricing: result.gig.pricing.basePrice,
-          influencerId: result.gig.primaryInfluencerId.toString(),
-          createdAt: result.gig.createdAt,
-        })),
-        { persistent: true }
-      );
-    
+
+
+    getChannel().sendToQueue(
+      GIG_CREATED_EVENT,
+      Buffer.from(JSON.stringify({
+        gigId: result.gig._id.toString(),
+        title: result.gig.title,
+        category: result.gig.category,
+        pricing: result.gig.pricing.basePrice,
+        influencerId: result.gig.primaryInfluencerId.toString(),
+        createdAt: result.gig.createdAt,
+      })),
+      { persistent: true }
+    );
+
 
 
     return res.status(201).json({
@@ -117,6 +127,7 @@ export const editGigController = async (
   next: NextFunction
 ) => {
   try {
+    
     const { id } = req.params;
 
     // 🔥 Type-safe ID guard
@@ -206,6 +217,7 @@ export const publishGigController = async (
   next: NextFunction
 ) => {
   try {
+    
     const { userId } = req.user!;
 
     const id = req.params.id as string;
@@ -237,6 +249,7 @@ export const updateGigDeliverablesController = async (
   next: NextFunction
 ) => {
   try {
+    
     const { userId } = req.user!;
     const id = req.params.id as string;
 
@@ -299,6 +312,8 @@ export const updateGigPricingController = async (
   }
 };
 
+/* =================  GET GIGS ================= */
+
 export const getGigController = async (
   req: Request,
   res: Response,
@@ -324,3 +339,4 @@ export const getGigController = async (
     next(error);
   }
 };
+

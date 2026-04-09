@@ -10,6 +10,7 @@ export const RolePermissions: Record<UserRole, Permission[]> = {
     Permission.APPROVE_SIGNUP,
     Permission.REJECT_SIGNUP,
     Permission.MANAGE_USERS,
+    Permission.DELETE_GIG,
   ],
   [UserRole.BRAND]: [
     Permission.CREATE_PROFILE,
@@ -21,6 +22,7 @@ export const RolePermissions: Record<UserRole, Permission[]> = {
     Permission.CREATE_GIG,
     Permission.UPDATE_GIG,
     Permission.DELETE_GIG,
-    Permission.PUBLISH_GIG
+    Permission.PUBLISH_GIG,
+    Permission.REPORT_GIG
   ],
 };

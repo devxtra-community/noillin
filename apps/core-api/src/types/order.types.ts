@@ -1,0 +1,20 @@
+import { Types } from "mongoose";
+
+export interface OrderDocument {
+    _id: Types.ObjectId;
+    buyerId: Types.ObjectId;
+    influencerId: Types.ObjectId;
+    gigId: Types.ObjectId;
+
+    amount: number;
+    currency: string;
+
+    status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED";
+    escrowStatus: "HOLD" | "RELEASED";
+    workStatus: "NOT_STARTED" | "SUBMITTED" | "APPROVED";
+
+    stripePaymentIntentId?: string;
+
+    createdAt: Date;
+    updatedAt: Date;
+}

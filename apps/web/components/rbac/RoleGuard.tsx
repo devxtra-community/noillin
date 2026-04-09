@@ -37,11 +37,9 @@ export default function RoleGuard({
 
         // Specific Admin Level check if required
         if (user?.role === "ADMIN" && adminLevel && user.adminLevel !== adminLevel) {
-            // If they are NORMAL admin but SUPER is required, just show restricted or redirect
-            if (adminLevel === "SUPER" && user.adminLevel === "NORMAL") {
-                router.push("/admindashboard"); // Redirect to main dashboard if they lack super powers
-                return;
-            }
+            // Redirect to main dashboard if they lack required powers (SUPER)
+            router.push("/admindashboard");
+            return;
         }
     }, [accessToken, user, allowedRoles, adminLevel, router, redirectTo]);
 
