@@ -18,6 +18,7 @@ export async function startGigConsumer(channel: Channel) {
       if (!msg) return;
 
       try {
+        logger.info("Received gig.created event");
         const data = JSON.parse(
           msg.content.toString()
         );
@@ -27,7 +28,7 @@ export async function startGigConsumer(channel: Channel) {
       } catch (err) {
         logger.error("Failed processing gig.created", err);
 
-        channel.nack(msg, false, true); // simple requeue
+        channel.nack(msg, false, false); //now the worker will not reque the same failed events. this is a temporary fix and later we can implement the DLQ.
       }
     },
     { noAck: false }
