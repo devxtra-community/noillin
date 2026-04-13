@@ -10,6 +10,7 @@ export const createReportController = async (
 ) => {
     try {
         if (!req.user) throw new Error("Unauthorized");
+
         const report = await createReportService(req.user, req.body);
 
         res.status(201).json({

@@ -4,16 +4,12 @@ import { ReportModel } from "../models/report.model.js";
 import { GigModel } from "../models/gig.model.js";
 import { OrderModel } from "../models/order.model.js";
 import type { JwtPayload } from "../modules/auth/auth.utils.js";
+import type { ReportDocument } from "../types/report.types.js";
+import { createReportRepository, findOneReportRepository } from "../repositories/report.repository.js";
 
 export const createReportService = async (
   user: JwtPayload,
-  data: {
-    entityType: "GIG" | "ORDER" | "USER";
-    entityId: string;
-    type: "CONTENT" | "PAYMENT" | "BEHAVIOR";
-    subType?: "NOT_RECEIVED" | "LOW_QUALITY" | "SCAM" | "PAYMENT_ISSUE";
-    description?: string;
-  }
+  data: ReportDocument
 ) => {
   const reportId = `REP-${Date.now()}`;
 
@@ -35,7 +31,7 @@ export const createReportService = async (
       throw new Error("Not allowed to report this order");
     }
 
-    const existingReport = await ReportModel.findOne({
+    const existingReport = await findOneReportRepository({
       entityType: "ORDER",
       entityId: data.entityId,
       reportedBy: user.userId
@@ -75,7 +71,7 @@ export const createReportService = async (
     }
   }
 
-  const report = await ReportModel.create({
+  const report = await createReportRepository({
     reportId,
     entityType: data.entityType,
     entityId: new Types.ObjectId(data.entityId),
@@ -84,10 +80,12 @@ export const createReportService = async (
     usersInvolved,
     ...(data.subType && { subType: data.subType }),
     ...(data.description && { description: data.description }),
+    evidenceUrls: data.evidenceUrls ?? [],
     auditTrail: [
       {
         action: "REPORT_CREATED",
-        performedBy: new Types.ObjectId(user.userId)
+        performedBy: new Types.ObjectId(user.userId),
+        createdAt: new Date()
       }
     ]
   });
@@ -300,3 +298,5 @@ export const getReportByIdService = async (reportId: string) => {
     entityDetails
   };
 };
+
+

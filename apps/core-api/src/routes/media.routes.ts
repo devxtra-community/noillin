@@ -3,7 +3,7 @@ import { Router } from "express";
 import { generateUploadUrlController } from "../controllers/media.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 
-const router:Router = Router();
+const router: Router = Router();
 
 router.post(
   "/upload-url",
