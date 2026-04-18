@@ -20,16 +20,14 @@ interface Gig {
   title: string;
   category: string;
   pricing: GigPricing;
-  primaryInfluencerId: string;
-  createdAt: string;
-  // Enriched fields from influencer populate (adjust to your actual schema)
-  influencer?: {
-    name: string;
-    avatar?: string;
-    niche?: string;
-    platforms?: Platform[];
-    availableFrom?: string;
+  primaryInfluencerId: {
+    _id: string;
+    fullName: string;
+    profileImageUrl?: string;
+    followersCount?: number;
+    categories?: string[];
   };
+  createdAt: string;
 }
 
 interface Pagination {
@@ -140,10 +138,11 @@ function SkeletonCard() {
 // ─── Gig Card ─────────────────────────────────────────────────────────────────
 
 function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
-  const name = gig.influencer?.name ?? "Unknown Creator";
-  const niche = gig.influencer?.niche ?? gig.category;
-  const platforms = gig.influencer?.platforms ?? [];
-  const availableFrom = gig.influencer?.availableFrom;
+  const influencer = gig.primaryInfluencerId;
+  const name = influencer?.fullName ?? "Unknown Creator";
+  const niche = gig.category;
+  const platforms: Platform[] = []; // Currently not stored in profile
+  const availableFrom = undefined;
   const color = avatarColor(gig._id);
 
   const availableLabel = availableFrom
@@ -188,9 +187,12 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
           </svg>
           {availableLabel}
         </div>
-        <button className="shrink-0 text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+        <Link 
+          href={`/gig-details?id=${gig._id}`}
+          className="shrink-0 text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+        >
           View Gig
-        </button>
+        </Link>
       </div>
     );
   }
@@ -255,9 +257,12 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
             <br />
             after payment
           </p>
-          <button className="text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+          <Link 
+            href={`/gig-details?id=${gig._id}`}
+            className="text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+          >
             View Gig
-          </button>
+          </Link>
         </div>
       </div>
     </div>

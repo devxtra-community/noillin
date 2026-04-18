@@ -1,7 +1,7 @@
 import { Server, Socket } from "socket.io";
 
-  import { MessageModel } from "../../../core-api/src/models/chat.model";
-import { generateConversationId } from "../../../core-api/src/utils/chat.utils";
+import { MessageModel } from "../../../core-api/src/models/chat.model";
+import { ConversationModel } from "../../../core-api/src/models/conversation.model";
 
 
 const onlineUsers = new Map<string, string[]>();
@@ -39,7 +39,13 @@ socket.on("send_message", async (data) => {
 
   if (!receiverId || !content) return;
 
-  const conversationId = generateConversationId(userId, receiverId);
+  // 🔥 FIND REAL CONVERSATION (instead of string ID)
+  const conversation = await ConversationModel.findOne({
+    participants: { $all: [userId, receiverId] },
+  });
+
+  // Fallback if not found (legacy or special cases)
+  const conversationId = conversation ? conversation._id : [userId, receiverId].sort().join("_");
 
   // ✅ save message
   const message = await MessageModel.create({

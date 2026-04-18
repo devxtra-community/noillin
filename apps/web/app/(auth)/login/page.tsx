@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
 
 
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
   const [role, setRole] = useState<"BRAND" | "INFLUENCER">("BRAND");
   const [formData, setFormData] = useState({
     email: "",
@@ -46,7 +48,7 @@ export default function LoginPage() {
       if (response.data.data?.accessToken) {
         const {accessToken, user} = response.data.data
         setAuth(accessToken, user)
-        router.push("/home"); ;
+        router.push(redirect || "/home");
       }
 
     } catch (error) {
@@ -153,4 +155,12 @@ export default function LoginPage() {
       </div>
     </div>
   );
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100">Loading...</div>}>
+            <LoginContent />
+        </Suspense>
+    );
 }

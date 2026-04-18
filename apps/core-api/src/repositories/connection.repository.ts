@@ -5,8 +5,10 @@ export class ConnectionRepository {
   async create(data: {
     brandId: string;
     influencerId: string;
+    gigId?: string | undefined;
   }) {
-    return ConnectionModel.create(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return ConnectionModel.create(data as any);
   }
 
   // Find by ID
@@ -15,11 +17,9 @@ export class ConnectionRepository {
   }
 
   // Check existing connection (prevent duplicate)
-  async findExisting(brandId: string, influencerId: string) {
-    return ConnectionModel.findOne({
-      brandId,
-      influencerId,
-    });
+  async findExisting(brandId: string, influencerId: string, _gigId?: string) {
+    const query = { brandId, influencerId };
+    return ConnectionModel.findOne(query);
   }
 
   // Update status (accept/reject)

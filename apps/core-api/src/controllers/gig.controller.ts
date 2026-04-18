@@ -107,7 +107,10 @@ export const getGigDetailsController = async (
 
     const gig = await getGigDetailsService(id);
 
-    return res.status(200).json(gig);
+    return res.status(200).json({
+      success: true,
+      data: gig
+    });
   } catch (error: unknown) {
     console.error("Error fetching gig details:", error);
 
