@@ -60,7 +60,11 @@ export function ChatWindow({
       }
     };
 
-    if (receiverId) fetchMessages();
+    if (receiverId) {
+      setTimeout(() => {
+        fetchMessages();
+      }, 0);
+    }
   }, [receiverId, accessToken]);
 
   // ✅ load connection
@@ -76,7 +80,11 @@ export function ChatWindow({
   }, [receiverId]);
 
   useEffect(() => {
-    if (receiverId && accessToken) fetchConnection();
+    if (receiverId && accessToken) {
+      setTimeout(() => {
+        fetchConnection();
+      }, 0);
+    }
   }, [receiverId, accessToken, fetchConnection]);
 
   // ✅ socket
