@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { ShieldCheck, CreditCard } from "lucide-react";
+import React, { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ShieldCheck, CreditCard, Loader2 } from "lucide-react";
 
 import api from "@/lib/axios.client";
 
-export default function PaymentPage() {
+function PaymentContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const [error, setError] = useState<string | null>(null);
@@ -79,4 +79,17 @@ export default function PaymentPage() {
       </div>
     </div>
   );
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+                <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
+                <p className="text-gray-500 font-medium">Initializing secure checkout...</p>
+            </div>
+        }>
+            <PaymentContent />
+        </Suspense>
+    );
 }
