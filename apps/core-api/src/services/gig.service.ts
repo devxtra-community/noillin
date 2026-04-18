@@ -283,7 +283,18 @@ const gig = await findGigById(gigId);
       statusCode: 404
     });
   }
-}
+
+  if (gig.primaryInfluencerId.toString() !== influencerProfile._id.toString()) {
+    throw Object.assign(new Error("Unauthorized to publish this gig"), {
+      statusCode: 403
+    });
+  }
+
+  gig.status = "published";
+  await gig.save();
+
+  return gig;
+};
 //* ================= EDIT GIG ================= */
 
 

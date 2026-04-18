@@ -51,7 +51,7 @@ export const findPublishedGigs = async (
       .select(
         "title category pricing.basePrice pricing.currency primaryInfluencerId createdAt influencer"
       )
-      .populate("primaryInfluencerId", "displayName profileImage availableFrom platforms")
+      .populate("primaryInfluencerId", "userId fullName profileImageUrl categories")
       .sort(sort)
       .skip(skip)
       .limit(limit)
@@ -89,7 +89,7 @@ export const findPublishedGigById = async (gigId: string) => {
   })
     .populate({
       path: "primaryInfluencerId",
-      select: "displayName profileImage followersCount ratingAvg"
+      select: "userId fullName profileImageUrl followersCount categories"
     })
     .lean();
 };
