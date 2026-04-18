@@ -1,6 +1,6 @@
 import mongoose, { Types } from "mongoose";
 
-import Order from "../models/order.model.js";
+import { OrderModel } from "../models/order.model.js";
 import { GigModel } from "../models/gig.model.js";
 
 // ✅ Define input type
@@ -31,18 +31,18 @@ export const createOrderService = async (data: CreateOrderInput) => {
   }
 
   // 🔥 STEP 3: Handle existing orders (Idempotency)
-  const existingOrder = await Order.findOne({
+  const existingOrderModel = await OrderModel.findOne({
     connectionId: new Types.ObjectId(connectionId),
     gigId: new Types.ObjectId(gigId),
     status: { $in: ["PENDING", "IN_ESCROW"] }
   });
 
-  if (existingOrder) {
+  if (existingOrderModel) {
     // If it's just PENDING, return it so the user can continue to payment
-    if (existingOrder.status === "PENDING") {
+    if (existingOrderModel.status === "PENDING") {
         return {
-          orderId: existingOrder._id,
-          amount: existingOrder.amount,
+          orderId: existingOrderModel._id,
+          amount: existingOrderModel.amount,
           alreadyExisted: true
         };
     }
@@ -59,7 +59,7 @@ export const createOrderService = async (data: CreateOrderInput) => {
   }
 
   // 🔥 STEP 5: Create order
-  const order = await Order.create({
+  const order = await OrderModel.create({
     gigId: new Types.ObjectId(gigId),
     buyerId: new Types.ObjectId(buyerId),
     influencerId: new Types.ObjectId(influencerId),
@@ -79,10 +79,10 @@ export const createOrderService = async (data: CreateOrderInput) => {
 
 // ================= SUBMIT WORK =================
 export const submitWorkService = async (orderId: string) => {
-  const order = await Order.findById(new Types.ObjectId(orderId));
+  const order = await OrderModel.findById(new Types.ObjectId(orderId));
 
   if (!order) {
-    throw new Error("Order not found");
+    throw new Error("OrderModel not found");
   }
 
   if (order.status !== "IN_ESCROW") {
@@ -97,10 +97,10 @@ export const submitWorkService = async (orderId: string) => {
 
 // ================= APPROVE WORK =================
 export const approveWorkService = async (orderId: string) => {
-  const order = await Order.findById(new Types.ObjectId(orderId));
+  const order = await OrderModel.findById(new Types.ObjectId(orderId));
 
   if (!order) {
-    throw new Error("Order not found");
+    throw new Error("OrderModel not found");
   }
 
   if (order.workStatus !== "SUBMITTED") {

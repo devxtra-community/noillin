@@ -5,6 +5,7 @@ export interface OrderDocument {
     buyerId: Types.ObjectId;
     influencerId: Types.ObjectId;
     gigId: Types.ObjectId;
+    connectionId: Types.ObjectId;
 
     amount: number;
     currency: string;

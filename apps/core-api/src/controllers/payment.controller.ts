@@ -13,7 +13,7 @@ export const createCheckout = async (req: Request, res: Response, next: NextFunc
 
     // 🔥 If amount is missing, fetch it from the order record (More Robust)
     if (!amount) {
-      const order = await Order.findById(orderId);
+      const order = await OrderModel.findById(orderId);
       if (!order) throw new Error("Order not found");
       amount = order.amount;
     }
