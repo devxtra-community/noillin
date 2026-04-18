@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { MessageSquare } from "lucide-react";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 import { ChatWindow } from "@/components/chat/ChatWindow";
@@ -58,8 +59,15 @@ export default function ChatPage() {
                 onClick={() => (window.location.href = `/chat?to=${conv.user._id}`)}
             >
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full shrink-0 overflow-hidden">
-                        {conv.user.profileImage && <img src={conv.user.profileImage} alt="" className="w-full h-full object-cover" />}
+                    <div className="w-10 h-10 bg-gray-200 rounded-full shrink-0 overflow-hidden relative">
+                        {conv.user.profileImage && (
+                          <Image 
+                            src={conv.user.profileImage} 
+                            alt={conv.user.name} 
+                            fill 
+                            className="object-cover" 
+                          />
+                        )}
                     </div>
                     <div className="min-w-0">
                         <p className="font-bold text-sm text-gray-900 truncate">{conv.user.name}</p>

@@ -51,17 +51,13 @@ function GigDetailsContent() {
     const { user, isInitialized } = useAuthStore();
     
     const [gig, setGig] = useState<GigData | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(!!id);
     const [bookingLoading, setBookingLoading] = useState(false);
-    const [error, setError] = useState("");
+    const [error, setError] = useState(id ? "" : "No gig identified. Please select a gig from the catalog.");
     const [showToast, setShowToast] = useState(false);
 
     useEffect(() => {
-        if (!id) {
-            setError("No gig identified. Please select a gig from the catalog.");
-            setLoading(false);
-            return;
-        }
+        if (!id) return;
         
         api.get(`/gigs/${id}`)
             .then(res => {

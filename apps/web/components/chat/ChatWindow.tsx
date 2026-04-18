@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { MoreVertical, Info, Check, X, MessageSquare } from "lucide-react";
+import Image from "next/image";
 
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
@@ -63,7 +64,7 @@ export function ChatWindow({
   }, [receiverId, accessToken]);
 
   // ✅ load connection
-  const fetchConnection = async () => {
+  const fetchConnection = useCallback(async () => {
     try {
       const res = await api.get(`/connections/${receiverId}`);
       if (res.data && res.data.connection) {
@@ -72,11 +73,11 @@ export function ChatWindow({
     } catch (err) {
       console.error(err);
     }
-  };
+  }, [receiverId]);
 
   useEffect(() => {
     if (receiverId && accessToken) fetchConnection();
-  }, [receiverId, accessToken]);
+  }, [receiverId, accessToken, fetchConnection]);
 
   // ✅ socket
   useEffect(() => {
@@ -113,7 +114,7 @@ export function ChatWindow({
     socketRef.current = socketInstance;
 
     return () => { socketInstance.disconnect() };
-  }, [currentUserId]);
+  }, [currentUserId, fetchConnection]);
 
   // ✅ auto scroll
   useEffect(() => {
@@ -197,15 +198,14 @@ export function ChatWindow({
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white/95 backdrop-blur-xl sticky top-0 z-20">
         <div className="flex items-center space-x-4">
           <div className="relative">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center ring-2 ring-white shadow-sm">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center ring-2 ring-white shadow-sm relative">
               {receiverImage ? (
                 <Image
-                  unoptimized
-                  width={48}
-                  height={48}
                   src={receiverImage}
-                  alt="profile"
-                  className="w-full h-full object-cover"
+                  alt={receiverName || "profile"}
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
               ) : (
                 <span className="text-[16px] font-semibold text-gray-500">
