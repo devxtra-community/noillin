@@ -103,7 +103,7 @@ export function ChatWindow({
       setMessages((prev) =>
         prev.map((m) =>
           m.conversationId === conversationId &&
-          m.senderId === currentUserId // ✅ IMPORTANT FIX
+            m.senderId === currentUserId // ✅ IMPORTANT FIX
             ? { ...m, status: "READ" }
             : m
         )
@@ -112,7 +112,7 @@ export function ChatWindow({
 
     socketRef.current = socketInstance;
 
-    return () => {socketInstance.disconnect()};
+    return () => { socketInstance.disconnect() };
   }, [currentUserId]);
 
   // ✅ auto scroll
@@ -199,7 +199,10 @@ export function ChatWindow({
           <div className="relative">
             <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center ring-2 ring-white shadow-sm">
               {receiverImage ? (
-                <img
+                <Image
+                  unoptimized
+                  width={48}
+                  height={48}
                   src={receiverImage}
                   alt="profile"
                   className="w-full h-full object-cover"

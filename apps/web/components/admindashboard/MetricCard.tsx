@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
     title: string;
-    value: string;
+    value: number | string;
     change?: string;
     status?: string;
     icon: LucideIcon;
@@ -24,6 +24,10 @@ export default function MetricCard({
     iconBg,
     isPositive,
 }: MetricCardProps) {
+    // const [data,setData]=useState(null)
+    // useEffect(()=>{
+    //     api.get('/')
+    // })
     return (
         <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 group">
             <div className="flex justify-between items-start mb-6">
@@ -39,7 +43,12 @@ export default function MetricCard({
                     </span>
                 )}
                 {status && (
-                    <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-full lowercase">
+                    <span className={cn(
+                        "text-[10px] font-bold",
+                        status === "Stable" ? "text-gray-400" :
+                            status === "Live Now" ? "text-blue-600 bg-blue-50 px-2 py-1 rounded-full" :
+                                "text-orange-600 bg-orange-50 px-2 py-1 rounded-full"
+                    )}>
                         {status}
                     </span>
                 )}

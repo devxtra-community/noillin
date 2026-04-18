@@ -7,6 +7,7 @@ export async function connectRabbit() {
   );
 
   const channel = await connection.createChannel();
+  await channel.prefetch(10)
 
   logger.info("Worker connected to RabbitMQ");
 

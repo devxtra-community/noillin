@@ -9,6 +9,14 @@ import { getChannel } from "../queue/rabbit.js";
 import { INFLUENCER_CREATED_EVENT } from "../queue/events.js";
 import { BRAND_CREATED_EVENT } from "../queue/events.js";
 
+// ================= GET PENDING SIGNUP COUNT =================
+export const getTotalUsersService = async () => {
+  const userCount = await userRepository.findAllUsers();
+  return userCount.length;
+};
+
+
+
 // ================= VERIFY OTP =================
 export const verifyOtpService = async (
   email: string,
@@ -174,7 +182,7 @@ if (user.role === "INFLUENCER") {
     isVerified: false,
   });
 
-  // 🔥 Send event AFTER creation
+  //  Send event AFTER creation
   getChannel().sendToQueue(
     INFLUENCER_CREATED_EVENT,
     Buffer.from(

@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 
 import { createOrderService } from "../services/order.service.js";
-import Order from "../models/order.model.js";
+import { OrderModel } from "../models/order.model.js";
 
 // ✅ CREATE ORDER (already exists)
 export const createOrder = async (req: Request, res: Response) => {
@@ -13,10 +13,10 @@ export const createOrder = async (req: Request, res: Response) => {
 export const releasePayment = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const order = await Order.findById(id);
+  const order = await OrderModel.findById(id);
 
   if (!order) {
-    return res.status(404).json({ message: "Order not found" });
+    return res.status(404).json({ message: "OrderModel not found" });
   }
 
   if (order.escrowStatus !== "HOLD") {
@@ -44,10 +44,10 @@ export const releasePayment = async (req: Request, res: Response) => {
 export const markCompleted = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const order = await Order.findById(id);
+  const order = await OrderModel.findById(id);
 
   if (!order) {
-    return res.status(404).json({ message: "Order not found" });
+    return res.status(404).json({ message: "OrderModel not found" });
   }
 
   order.workStatus = "SUBMITTED";
@@ -63,10 +63,10 @@ export const markCompleted = async (req: Request, res: Response) => {
 export const approveWork = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const order = await Order.findById(id);
+  const order = await OrderModel.findById(id);
 
   if (!order) {
-    return res.status(404).json({ message: "Order not found" });
+    return res.status(404).json({ message: "OrderModel not found" });
   }
 
   if (order.workStatus !== "SUBMITTED") {

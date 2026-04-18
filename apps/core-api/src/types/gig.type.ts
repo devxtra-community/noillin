@@ -3,7 +3,10 @@ import { Types } from "mongoose";
 export type GigStatus =
   | "draft"
   | "published"
+  | "flagged"
   | "paused"
+  | "under_review"
+  | "rejected"
   | "archived";
 
 export type Platform =
@@ -29,6 +32,21 @@ export interface GigPricing {
   revisionsIncluded: number;
 }
 
+export interface GigReport {
+  reportedBy: Types.ObjectId;
+  type: "SPAM" | "MISLEADING" | "INAPPROPRIATE" | "COPYRIGHT";
+  message?: string;
+  resolved: boolean;
+  createdAt: Date;
+}
+
+export interface GigModerationLog {
+  action: "PAUSED" | "REJECTED" | "IGNORED";
+  reason?: string;
+  adminId: Types.ObjectId;
+  createdAt: Date;
+}
+
 export interface GigDocument {
   _id: Types.ObjectId;
   title: string;
@@ -52,6 +70,9 @@ export interface GigDocument {
   status: GigStatus;
 
   isDeleted: boolean;
+  reportCount: number;
+  reports?: GigReport[];
+  moderationLogs?: GigModerationLog[];
 
   createdAt: Date;
   updatedAt: Date;

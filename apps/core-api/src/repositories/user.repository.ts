@@ -2,6 +2,15 @@ import { User } from "../models/user.model.js";
 
 class UserRepository {
 
+  //FIND ALL USERS
+
+  async findAllUsers() {
+    return User.find();
+  }
+
+
+  
+
 
   // FIND USER WITH PASSWORD
 

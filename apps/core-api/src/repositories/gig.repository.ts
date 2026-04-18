@@ -8,6 +8,12 @@ export const create_gig = async (
 ) => {
   return GigModel.create(data);
 };
+
+/* ================= FGET ALL GIGS ================= */
+export const getAllGigs=async ()=>{
+      return GigModel.find();
+}
+
 /* ================= FIND BY ID ================= */
 
 export const findGigById = async (
