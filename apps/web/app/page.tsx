@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, useInView, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -179,11 +180,16 @@ export default function HomePage() {
           </motion.div>
 
           <div className="hidden md:flex items-center gap-10 text-[13px] font-semibold text-slate-500 uppercase tracking-wider">
-            {["About", "Influencers", "Gigs", "Support"].map((item) => (
-              <a key={item} href="#" className="hover:text-emerald-600 transition-colors relative group">
-                {item}
+            {[
+              { name: "About", href: "#" },
+              { name: "Influencers", href: "#" },
+              { name: "Gigs", href: "/gig-list" },
+              { name: "Support", href: "#" }
+            ].map((item) => (
+              <Link key={item.name} href={item.href} className="hover:text-emerald-600 transition-colors relative group">
+                {item.name}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full" />
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -192,12 +198,16 @@ export default function HomePage() {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-4"
           >
-            <Button variant="ghost" className="text-slate-600 font-semibold hover:text-emerald-600 hover:bg-emerald-50 transition-all px-6">
-              Sign In
-            </Button>
-            <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 shadow-lg shadow-emerald-200 rounded-lg">
-              Get Started
-            </Button>
+            <Link href="/login">
+              <Button variant="ghost" className="text-slate-600 font-semibold hover:text-emerald-600 hover:bg-emerald-50 transition-all px-6">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/signup">
+              <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 shadow-lg shadow-emerald-200 rounded-lg">
+                Get Started
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </nav>
@@ -231,13 +241,17 @@ export default function HomePage() {
               variants={fadeInUp}
               className="flex flex-wrap items-center gap-5 mb-12"
             >
-              <Button className="h-14 px-8 text-base font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-xl shadow-emerald-200 group transition-all">
-                Explore Gigs
-                <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-              <Button variant="outline" className="h-14 px-8 text-base font-bold text-slate-700 bg-white border-slate-200 hover:bg-slate-50 rounded-xl transition-all">
-                Become an Influencer
-              </Button>
+              <Link href="/gig-list">
+                <Button className="h-14 px-8 text-base font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-xl shadow-emerald-200 group transition-all">
+                  Explore Gigs
+                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+              <Link href="/signup?role=INFLUENCER">
+                <Button variant="outline" className="h-14 px-8 text-base font-bold text-slate-700 bg-white border-slate-200 hover:bg-slate-50 rounded-xl transition-all">
+                  Become an Influencer
+                </Button>
+              </Link>
             </motion.div>
 
             <motion.div
@@ -567,12 +581,16 @@ export default function HomePage() {
               Join thousands of brands and creators building the future of influence together.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 relative mb-20">
-              <Button className="h-16 px-12 bg-white text-emerald-600 hover:bg-emerald-50 text-lg font-bold rounded-2xl shadow-2xl transition-all">
-                Find Influencers
-              </Button>
-              <Button variant="outline" className="h-16 px-12 text-white border-white/20 hover:text-emerald-600 bg-white/10 text-lg font-bold rounded-2xl transition-all">
-                Join as Influencer
-              </Button>
+              <Link href="/signup">
+                <Button className="h-16 px-12 bg-white text-emerald-600 hover:bg-emerald-50 text-lg font-bold rounded-2xl shadow-2xl transition-all">
+                  Find Influencers
+                </Button>
+              </Link>
+              <Link href="/signup?role=INFLUENCER">
+                <Button variant="outline" className="h-16 px-12 text-white border-white/20 hover:text-emerald-600 bg-white/10 text-lg font-bold rounded-2xl transition-all">
+                  Join as Influencer
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
