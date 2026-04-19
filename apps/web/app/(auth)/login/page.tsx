@@ -204,7 +204,7 @@ function LoginForm() {
         </form>
 
         <p className="text-sm text-center text-gray-400 mt-8">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/signup" className="text-emerald-600 font-bold hover:underline">
             Create new account
           </Link>
