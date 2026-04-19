@@ -7,4 +7,5 @@ const router: Router = Router();
 
 router.post("/", authenticate, createReportController);
 
+
 export default router;

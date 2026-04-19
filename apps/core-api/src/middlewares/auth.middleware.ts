@@ -7,6 +7,7 @@ import type { Permission } from "../rbac/permission.js";
 
 export interface AuthRequest extends Request {
   user?: JwtPayload;
+  files?: unknown;
 }
 
 interface HttpError extends Error {
@@ -40,9 +41,9 @@ export const authenticate = (
     next();
   } catch (error) {
     const err = error as HttpError;
-  if (!err.statusCode) err.statusCode = 401;
-  next(err);
-}
+    if (!err.statusCode) err.statusCode = 401;
+    next(err);
+  }
 
 };
 export const authorizePermission = (permission: Permission) => {
@@ -52,7 +53,7 @@ export const authorizePermission = (permission: Permission) => {
     }
 
     const permissions = RolePermissions[req.user.role] ?? [];
-    
+
     if (!permissions.includes(permission)) {
       return next(Object.assign(new Error("Forbidden"), { statusCode: 403 }));
     }

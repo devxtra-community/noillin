@@ -80,7 +80,11 @@ const ReportSchema = new Schema<ReportDocument>({
       performedBy: Schema.Types.ObjectId,
       createdAt: { type: Date, default: Date.now }
     }
-  ]
+  ],
+  evidenceUrls:{
+    type:[String],
+    default:[]
+  }
 
 }, { timestamps: true });
 

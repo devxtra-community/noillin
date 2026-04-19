@@ -10,7 +10,7 @@ export interface OrderDocument {
     amount: number;
     currency: string;
 
-    status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED";
+    status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED" | "DISPUTED";
     escrowStatus: "HOLD" | "RELEASED";
     workStatus: "NOT_STARTED" | "SUBMITTED" | "APPROVED";
 
