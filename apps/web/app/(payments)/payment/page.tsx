@@ -1,50 +1,95 @@
 "use client";
 
+import React, { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ShieldCheck, CreditCard, Loader2 } from "lucide-react";
+
 import api from "@/lib/axios.client";
 
-export default function PaymentPage() {
-  const handlePayment = async () => {
-    try {
-      // 1️⃣ Create Order
-      const orderRes = await api.post(
-        "/orders",
-        {
-          buyerId: "507f1f77bcf86cd799439011",
-          influencerId: "507f1f77bcf86cd799439012",
-          gigId: "507f1f77bcf86cd799439013",
-          amount: 500,
+function PaymentContent() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("orderId");
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const startCheckout = async () => {
+      if (!orderId) {
+        setError("Order ID is missing.");
+        return;
+      }
+
+      try {
+        // 🔥 Directly create Stripe Session (Backend now fetches amount automatically)
+        const res = await api.post("/payments/checkout", {
+          orderId
+        });
+
+        if (res.data.url) {
+          window.location.href = res.data.url;
+        } else {
+          throw new Error("Failed to get checkout URL from server.");
         }
-      );
+      } catch (err: unknown) {
+        console.error(err);
+        const errorResponse = err as { response?: { data?: { message?: string } } };
+        setError(errorResponse.response?.data?.message || "Something went wrong while starting checkout.");
+      }
+    };
 
-      const { orderId, amount } = orderRes.data;
+    startCheckout();
+  }, [orderId]);
 
-      // 2️⃣ Create Stripe Checkout Session
-      const res = await api.post(
-        "/payments/checkout",
-        {
-          amount,
-          orderId,
-        }
-      );
-
-      // 3️⃣ Redirect to Stripe Payment Page
-      window.location.href = res.data.url;
-      console.log(res.data);
-
-    } catch (err) {
-      console.error(err);
-      alert("Payment failed");
-    }
-  };
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-red-100">
+          <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShieldCheck className="w-8 h-8" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Checkout Failed</h1>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button 
+            onClick={() => window.history.back()}
+            className="w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-black transition-colors"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <button
-        onClick={handlePayment}
-        className="bg-black text-white px-6 py-3 rounded"
-      >
-        Pay ₹500
-      </button>
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+      <div className="relative mb-8">
+        <div className="w-24 h-24 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
+        <div className="absolute inset-0 flex items-center justify-center">
+            <CreditCard className="w-10 h-10 text-emerald-600 animate-pulse" />
+        </div>
+      </div>
+      
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Preparing Secure Checkout</h1>
+      <p className="text-gray-500 max-w-xs text-center">
+        Setting up your encrypted payment session with Stripe. You&apos;ll be redirected in a moment.
+      </p>
+
+      <div className="mt-12 flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
+        <ShieldCheck className="w-4 h-4 text-emerald-500" />
+        <span className="text-xs font-medium text-gray-500 uppercase tracking-widest">PCI DSS Compliant · Secure Escrow</span>
+      </div>
     </div>
   );
+}
+
+export default function Page() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+                <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
+                <p className="text-gray-500 font-medium">Initializing secure checkout...</p>
+            </div>
+        }>
+            <PaymentContent />
+        </Suspense>
+    );
 }

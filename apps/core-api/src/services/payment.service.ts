@@ -26,8 +26,8 @@ export const createCheckoutSession = async (
       },
     ],
 
-    success_url: "http://localhost:3000/success",
-    cancel_url: "http://localhost:3000/cancel",
+    success_url: "http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}",
+    cancel_url: "http://localhost:3000/payment/cancel",
 
     metadata: {
       orderId,

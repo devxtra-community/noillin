@@ -8,6 +8,13 @@ const orderSchema = new mongoose.Schema(
     influencerId: { type: mongoose.Schema.Types.ObjectId, required: true },
     gigId: { type: mongoose.Schema.Types.ObjectId, required: true },
 
+    // 🔥 ADD THIS
+    connectionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Connection",
+      required: true,
+    },
+
     amount: { type: Number, required: true },
     currency: { type: String, default: "INR" },
 
@@ -29,7 +36,7 @@ const orderSchema = new mongoose.Schema(
       default: "NOT_STARTED",
     },
 
-    stripePaymentIntentId: String
+    stripePaymentIntentId: String,
   },
   { timestamps: true }
 );

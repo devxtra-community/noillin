@@ -12,11 +12,12 @@ export class ConnectionController {
     }
 
     const brandId = req.user.userId;
-    const { influencerId } = req.body;
+    const { influencerId, gigId } = req.body;
 
     const data = await service.sendRequest(
       brandId,
-      influencerId as string
+      influencerId as string,
+      gigId as string
     );
 
     res.json({
@@ -62,6 +63,22 @@ export class ConnectionController {
     res.json({
       success: true,
       data,
+    });
+  }
+
+  async getConnectionWithReceiver(req: AuthRequest, res: Response) {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const currentUserId = req.user.userId;
+    const receiverId = req.params.receiverId as string;
+
+    const connection = await service.getConnectionBetween(currentUserId, receiverId);
+
+    res.json({
+      success: true,
+      connection,
     });
   }
 }

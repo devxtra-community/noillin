@@ -46,7 +46,10 @@ api.interceptors.response.use(
         const originalRequest = error.config;
 
         // If error is 401 and we haven't tried to refresh yet
-        if (error.response?.status === 401 && !originalRequest._retry) 
+        // Don't attempt refresh loop for auth-related routes
+        const isAuthRoute = originalRequest.url?.includes("/auth/");
+
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) 
         {
             if (isRefreshing) {
                 // If already refreshing, queue this request
@@ -86,10 +89,10 @@ api.interceptors.response.use(
                 // Retry original request
                 return api(originalRequest);
             } catch (refreshError) {
-                // Refresh failed, clear token and redirect to login
+                // Refresh failed, clear token but don't force redirect yet
+                // Let the components handle redirects if needed
                 processQueue(refreshError as Error, null);
                 useAuthStore.getState().clearAuth();
-                window.location.href = "/signup";
                 return Promise.reject(refreshError);
             } finally {
                 isRefreshing = false;
