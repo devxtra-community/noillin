@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { publishEvent } from "src/queue/publisher.js";
 
 import { createOrderService } from "../services/order.service.js";
 import { OrderModel } from "../models/order.model.js";
@@ -28,7 +29,10 @@ export const releasePayment = async (req: Request, res: Response) => {
   order.escrowStatus = "RELEASED";
 
   await order.save();
-
+  await publishEvent("payment.released", {
+  orderId: order._id.toString(),
+  influencerId: order.influencerId,
+});
   res.json({
     message: "Payment released to influencer ✅",
   });
@@ -53,6 +57,10 @@ export const markCompleted = async (req: Request, res: Response) => {
   order.workStatus = "SUBMITTED";
 
   await order.save();
+  await publishEvent("order.submitted", {
+  orderId: order._id.toString(),
+  buyerId: order.buyerId,
+});
 
   res.json({ message: "Work submitted ✅" });
 };
@@ -78,6 +86,11 @@ export const approveWork = async (req: Request, res: Response) => {
   order.escrowStatus = "RELEASED";
 
   await order.save();
+  await publishEvent("order.completed", {
+  orderId: order._id.toString(),
+  influencerId: order.influencerId,
+});
+
 
   res.json({ message: "Work approved & payment released ✅" });
 };
