@@ -31,7 +31,7 @@ export default function RoleGuard({
 
         // If authenticated but role not allowed
         if (user && !allowedRoles.includes(user.role)) {
-            router.push(redirectTo || "/home");
+            router.push(redirectTo || "/influencer-dashboard");
             return;
         }
 

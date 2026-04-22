@@ -168,7 +168,7 @@ export default function ProfileSetupPage() {
             await api.patch("/profile/update_profile", payload);
 
             alert("Profile Updated Successfully");
-            router.push("/home");
+            router.push("/influencer-dashboard");
         } catch (err) {
             console.error(err);
             alert("Failed to update profile");
