@@ -34,7 +34,10 @@ export const releasePayment = async (req: AuthRequest, res: Response) => {
   order.escrowStatus = "RELEASED";
 
   await order.save();
-
+  await publishEvent("payment.released", {
+  orderId: order._id.toString(),
+  influencerId: order.influencerId,
+});
   res.json({
     message: "Payment released to influencer ✅",
   });
@@ -60,6 +63,10 @@ export const markCompleted = async (req: AuthRequest, res: Response) => {
   order.workStatus = "SUBMITTED";
 
   await order.save();
+  await publishEvent("order.submitted", {
+  orderId: order._id.toString(),
+  buyerId: order.buyerId,
+});
 
   res.json({ message: "Work submitted ✅" });
 };
@@ -86,6 +93,11 @@ export const approveWork = async (req: AuthRequest, res: Response) => {
   order.escrowStatus = "RELEASED";
 
   await order.save();
+  await publishEvent("order.completed", {
+  orderId: order._id.toString(),
+  influencerId: order.influencerId,
+});
+
 
   res.json({ message: "Work approved & payment released ✅" });
 };

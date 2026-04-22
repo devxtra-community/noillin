@@ -19,6 +19,7 @@ export interface ReportDocument extends Document {
     resolution?: "VALID" | "INVALID";
     adminNotes?: string;
     auditTrail: AuditTrailEntry[];
+    evidenceUrls?: string[];
     createdAt: Date;
     updatedAt: Date;
 }

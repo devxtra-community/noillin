@@ -31,3 +31,32 @@ export const generateUploadUrlService = async (
     fileUrl
   };
 };
+
+interface MulterFile {
+  originalname: string;
+  buffer: Buffer;
+  mimetype: string;
+}
+
+export const uploadFilesService = async (
+  files: MulterFile[],
+  folder: string
+): Promise<string[]> => {
+  const uploadPromises = files.map(async (file) => {
+    const uniqueFileName = `${Date.now()}-${file.originalname}`;
+    const key = `${folder}/${uniqueFileName}`;
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME!,
+      Key: key,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    });
+
+    await s3Client.send(command);
+
+    return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  });
+
+  return Promise.all(uploadPromises);
+};
