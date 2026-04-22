@@ -5,6 +5,7 @@ import type { AuthRequest } from "../middlewares/auth.middleware.js";
 import { createOrderService } from "../services/order.service.js";
 import { OrderModel } from "../models/order.model.js";
 import { stripe } from "../lib/stripe.js";
+import { publishEvent } from "../queue/publisher.js";
 
 
 // ✅ CREATE ORDER (already exists)

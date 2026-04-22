@@ -1,6 +1,6 @@
-import { publishEvent } from "src/queue/publisher.js";
 import mongoose, { Types } from "mongoose";
 
+import { publishEvent } from "../queue/publisher.js";
 import { OrderModel } from "../models/order.model.js";
 import { GigModel } from "../models/gig.model.js";
 
