@@ -17,8 +17,11 @@ export class ConnectionRepository {
   }
 
   // Check existing connection (prevent duplicate)
-  async findExisting(brandId: string, influencerId: string, _gigId?: string) {
-    const query = { brandId, influencerId };
+  async findExisting(brandId: string, influencerId: string, gigId?: string) {
+    const query: { brandId: string; influencerId: string; gigId?: string } = { brandId, influencerId };
+    if (gigId) {
+      query.gigId = gigId;
+    }
     return ConnectionModel.findOne(query);
   }
 
@@ -38,6 +41,8 @@ export class ConnectionRepository {
         { brandId: userId },
         { influencerId: userId },
       ],
-    }).sort({ createdAt: -1 });
+    })
+    .populate("gigId")
+    .sort({ createdAt: -1 });
   }
 }

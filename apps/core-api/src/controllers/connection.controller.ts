@@ -73,8 +73,19 @@ export class ConnectionController {
 
     const currentUserId = req.user.userId;
     const receiverId = req.params.receiverId as string;
+    const gigId = req.query.gigId as string;
 
-    const connection = await service.getConnectionBetween(currentUserId, receiverId);
+    const connection = await service.getConnectionBetween(currentUserId, receiverId, gigId);
+
+    res.json({
+      success: true,
+      connection,
+    });
+  }
+
+  async getById(req: AuthRequest, res: Response) {
+    const id = req.params.id as string;
+    const connection = await service.getConnectionById(id);
 
     res.json({
       success: true,
