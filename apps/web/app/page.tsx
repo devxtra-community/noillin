@@ -123,7 +123,7 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
                   {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-5 h-5 fill-emerald-400" />)}
                 </div>
                 <p className="text-slate-600 text-xl font-medium leading-relaxed italic mb-10">
-                  "{t.text}"
+                  &quot;{t.text}&quot;
                 </p>
               </div>
 
