@@ -82,24 +82,21 @@ function GigDetailsContent() {
 
         setBookingLoading(true);
         try {
-            await api.post("/connections/request", {
+            const res = await api.post("/connections/request", {
                 influencerId: gig.primaryInfluencerId.userId,
                 gigId: gig._id
             });
             
+            const connectionId = res.data.data.connection._id;
+
             setShowToast(true);
             setTimeout(() => {
-                router.push(`/chat?to=${gig.primaryInfluencerId.userId}&gigId=${gig._id}`);
+                router.push(`/chat?connectionId=${connectionId}`);
             }, 1500);
         } catch (err: unknown) {
             console.error(err);
-            const errorResponse = err as { response?: { data?: { message?: string } } };
-            if (errorResponse.response?.data?.message === "Connection already exists") {
-                router.push(`/chat?to=${gig.primaryInfluencerId.userId}&gigId=${gig._id}`);
-            } else {
-                alert("Failed to send booking request.");
-                setBookingLoading(false);
-            }
+            alert("Failed to send booking request.");
+            setBookingLoading(false);
         }
     };
 

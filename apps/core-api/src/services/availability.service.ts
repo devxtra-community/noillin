@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 // import { Types } from "mongoose";
 
 // import { UserRole } from "../models/user.model.js";
@@ -75,20 +76,29 @@ export class AvailabilityService {
     return repo.removeUnavailableDate(influencerId, date);
   }
 
-  // ⭐ FINAL SIMPLE LOGIC
+  //  FINAL SIMPLE LOGIC
   async isAvailableToday(influencerId: string) {
-    const today = new Date();
+    try {
+      if (!influencerId || !mongoose.Types.ObjectId.isValid(influencerId)) {
+        console.warn("Invalid influencerId for availability check:", influencerId);
+        return true; // Fail open
+      }
 
-    const availability = await repo.getAvailability(influencerId);
+      const today = new Date();
+      const availability = await repo.getAvailability(influencerId);
 
-    // If no record → available
-    if (!availability) return true;
+      // If no record → available
+      if (!availability || !availability.overrides) return true;
 
-    const isBlocked = availability.overrides.find(
-      (o: { date: Date | string }) =>
-        new Date(o.date).toDateString() === today.toDateString()
-    );
+      const isBlocked = availability.overrides.find(
+        (o: { date: Date | string }) =>
+          new Date(o.date).toDateString() === today.toDateString()
+      );
 
-    return !isBlocked;
+      return !isBlocked;
+    } catch (error) {
+      console.error("isAvailableToday error:", error);
+      return true; // Fail open
+    }
   }
 }
