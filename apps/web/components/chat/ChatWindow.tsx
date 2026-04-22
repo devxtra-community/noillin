@@ -18,12 +18,13 @@ export interface Message {
   receiverId: string;
   content: string;
   createdAt: string;
-  conversationId: string;
+  connectionId: string;
   status: "SENT" | "DELIVERED" | "READ";
 }
 
 interface ChatWindowProps {
   currentUserId: string;
+  connectionId: string;
   receiverId: string;
   receiverName?: string;
   receiverImage?: string;
@@ -32,6 +33,7 @@ interface ChatWindowProps {
 
 export function ChatWindow({
   currentUserId,
+  connectionId,
   receiverId,
   receiverName,
   receiverImage,
@@ -45,74 +47,87 @@ export function ChatWindow({
   const { accessToken, user } = useAuthStore();
   const [connection, setConnection] = useState<{ _id: string; status: string; gigId?: string } | null>(null);
 
-  // ✅ helper
-  const getConversationId = (a: string, b: string) =>
-    [a, b].sort().join("_");
+
 
   // ✅ load messages
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await api.get(`/chat/${receiverId}`);
+        const res = await api.get(`/chat/${connectionId}`);
         setMessages(res.data.messages || []);
       } catch (err) {
         console.error(err);
       }
     };
 
-    if (receiverId) {
+    if (connectionId) {
       setTimeout(() => {
         fetchMessages();
       }, 0);
     }
-  }, [receiverId, accessToken]);
+  }, [connectionId, accessToken]);
 
   // ✅ load connection
   const fetchConnection = useCallback(async () => {
     try {
-      const res = await api.get(`/connections/${receiverId}`);
+      const res = await api.get(`/connections/details/${connectionId}`);
       if (res.data && res.data.connection) {
         setConnection(res.data.connection);
       }
     } catch (err) {
       console.error(err);
     }
-  }, [receiverId]);
+  }, [connectionId]);
 
   useEffect(() => {
-    if (receiverId && accessToken) {
+    if (connectionId && accessToken) {
       setTimeout(() => {
         fetchConnection();
       }, 0);
     }
-  }, [receiverId, accessToken, fetchConnection]);
+  }, [connectionId, accessToken, fetchConnection]);
 
   // ✅ socket
   useEffect(() => {
+    if (!currentUserId) return;
+
     const socketInstance = io("http://localhost:6001", {
       auth: { userId: currentUserId },
+      transports: ["websocket"], // Force websocket for faster/more stable connection
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+    });
+
+    socketInstance.on("connect", () => {
+      console.log("Chat socket connected ✅");
     });
 
     socketInstance.on("receive_message", (message: Message) => {
+      console.log("New message received via socket:", message);
       setMessages((prev) => {
-        const exists = prev.find((m) => m._id === message._id);
+        // Remove matching optimistic message if any
+        const withoutTemp = prev.filter(m => 
+          !(m._id.startsWith("temp-") && m.content === message.content && m.senderId === message.senderId)
+        );
+        
+        // Final check against IDs to avoid any duplication
+        const exists = withoutTemp.some((m) => m._id === message._id);
         if (exists) return prev;
 
-        return [...prev, message];
+        return [...withoutTemp, message];
       });
 
-      // 🔥 REFRESH CONNECTION IF STATUS MESSAGE
+      // Refresh connection data if it's a status update
       if (message.content.includes("accepted") || message.content.includes("rejected")) {
         fetchConnection();
       }
     });
 
-    // ✅ READ UPDATE (ONLY MY SENT MESSAGES)
-    socketInstance.on("messages_read", ({ conversationId }) => {
+    socketInstance.on("messages_read", ({ connectionId: readConnectionId }) => {
       setMessages((prev) =>
         prev.map((m) =>
-          m.conversationId === conversationId &&
-            m.senderId === currentUserId // ✅ IMPORTANT FIX
+          m.connectionId === readConnectionId && m.senderId === currentUserId
             ? { ...m, status: "READ" }
             : m
         )
@@ -121,8 +136,12 @@ export function ChatWindow({
 
     socketRef.current = socketInstance;
 
-    return () => { socketInstance.disconnect() };
-  }, [currentUserId, fetchConnection]);
+    return () => {
+      console.log("Disconnecting chat socket...");
+      socketInstance.disconnect();
+    };
+  }, [currentUserId, connectionId]); // Reconnect when connectionId changes to be safe, but keep it stable
+
 
   // ✅ auto scroll
   useEffect(() => {
@@ -133,19 +152,15 @@ export function ChatWindow({
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
 
-    const conversationId = getConversationId(
-      currentUserId,
-      receiverId
-    );
-
-    // ✅ optimistic message (FIXED)
+    // ✅ Optimistic update
+    const tempId = "temp-" + Date.now();
     const tempMessage: Message = {
-      _id: "temp-" + Date.now(),
+      _id: tempId,
       senderId: currentUserId,
       receiverId,
       content,
       createdAt: new Date().toISOString(),
-      conversationId,
+      connectionId,
       status: "SENT"
     };
 
@@ -153,23 +168,33 @@ export function ChatWindow({
 
     try {
       // 🔥 1. Save to DB via API (Guaranteed Persistence)
-      await api.post("/chat/send", {
-        receiverId,
+      const res = await api.post("/chat/send", {
+        connectionId,
         content
       });
+
+      const savedMessage = res.data.message;
 
       // 🔥 2. Emit via socket (Real-time Feel)
       if (socketRef.current) {
         socketRef.current.emit("send_message", {
-          receiverId,
-          content,
+          message: savedMessage
         });
       }
+
+      // Update the optimistic message with the real one from DB
+      setMessages((prev) => 
+        prev.map(m => m._id === tempId ? savedMessage : m)
+      );
+
     } catch (err) {
       console.error("Failed to send message:", err);
-      // Optional: show error in UI
+      // Remove optimistic message on failure
+      setMessages((prev) => prev.filter(m => m._id !== tempId));
     }
   };
+
+
 
   const handleUpdateConnection = async (status: "accepted" | "rejected") => {
     try {
@@ -195,10 +220,10 @@ export function ChatWindow({
 
   // ✅ mark as read
   useEffect(() => {
-    if (!receiverId) return;
+    if (!connectionId) return;
 
-    api.post(`/chat/read/${receiverId}`).catch(console.error);
-  }, [receiverId, accessToken]);
+    api.post(`/chat/read/${connectionId}`).catch(console.error);
+  }, [connectionId, accessToken]);
 
   return (
     <div className="flex flex-col h-full bg-[#f8f9fa] shadow-2xl relative w-full overflow-hidden">

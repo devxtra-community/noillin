@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { MessageSquare } from "lucide-react";
 import Image from "next/image";
 
@@ -11,9 +11,11 @@ import { useAuthStore } from "@/store/auth.store";
 
 interface Conversation {
   _id: string;
+  connectionId: string;
   lastMessage: string;
   lastMessageTime: string;
   unreadCount: number;
+  gigTitle?: string;
   user: {
     _id: string;
     name: string;
@@ -23,10 +25,12 @@ interface Conversation {
 
 export default function ChatPage() {
   const params = useSearchParams();
+  const router = useRouter();
   const { user, accessToken } = useAuthStore();
 
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const receiverId = params.get("to");
+  const connectionId = params.get("connectionId");
 
   // ✅ Conversations (Sidebar)
   useEffect(() => {
@@ -37,10 +41,12 @@ export default function ChatPage() {
   }, [accessToken]);
 
   if (!user) return <div className="p-8">Loading profile...</div>;
-  if (!receiverId) return <div className="p-8">No receiver selected</div>;
+  if (!connectionId && conversations.length > 0) {
+      // Auto-select first if none selected? Or just wait.
+  }
 
   const currentUserId = user.id;
-  const activeConv = conversations.find((c) => c.user._id === receiverId);
+  const activeConv = conversations.find((c) => c.connectionId === connectionId);
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -55,8 +61,9 @@ export default function ChatPage() {
             {conversations.map((conv) => (
             <div
                 key={conv._id}
-                className={`p-3 rounded-xl cursor-pointer transition-all ${conv.user._id === receiverId ? 'bg-emerald-50 border-emerald-100 border' : 'hover:bg-gray-50'}`}
-                onClick={() => (window.location.href = `/chat?to=${conv.user._id}`)}
+                className={`p-3 rounded-xl cursor-pointer transition-all ${conv.connectionId === connectionId ? 'bg-emerald-50 border-emerald-100 border' : 'hover:bg-gray-50'}`}
+                onClick={() => router.push(`/chat?connectionId=${conv.connectionId}`)}
+
             >
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gray-200 rounded-full shrink-0 overflow-hidden relative">
@@ -71,6 +78,7 @@ export default function ChatPage() {
                     </div>
                     <div className="min-w-0">
                         <p className="font-bold text-sm text-gray-900 truncate">{conv.user.name}</p>
+                        <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-tight truncate">{conv.gigTitle}</p>
                         <p className="text-xs text-gray-500 truncate">{conv.lastMessage}</p>
                     </div>
                 </div>
@@ -81,12 +89,20 @@ export default function ChatPage() {
 
       {/* Chat Area */}
       <main className="flex-1 flex flex-col relative bg-white">
-        <ChatWindow
-          currentUserId={currentUserId}
-          receiverId={receiverId}
-          receiverName={activeConv?.user?.name}
-          receiverImage={activeConv?.user?.profileImage}
-        />
+        {connectionId ? (
+          <ChatWindow
+            currentUserId={currentUserId}
+            connectionId={connectionId}
+            receiverId={activeConv?.user?._id || ""}
+            receiverName={activeConv?.user?.name}
+            receiverImage={activeConv?.user?.profileImage}
+          />
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-gray-500">
+            <MessageSquare className="w-12 h-12 mb-4 opacity-20" />
+            <p className="font-medium">Select a conversation to start chatting</p>
+          </div>
+        )}
       </main>
     </div>
   );

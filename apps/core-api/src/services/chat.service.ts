@@ -1,51 +1,36 @@
-import { ConversationModel } from "../models/conversation.model.js";
+import mongoose from "mongoose";
+
+import { ConnectionModel } from "../models/connection.model.js";
 import {
-  findMessagesByConversation,
+  findMessagesByConnection,
   aggregateConversations,
   addMessage
 } from "../repositories/chat.repository.js";
 
-// 🟢 Get messages between two users (via conversation)
-export const getMessages = async (
-  userA: string,
-  userB: string
-) => {
-  // 🔥 Step 1: find conversation using participants
-  const conversation = await ConversationModel.findOne({
-    participants: { $all: [userA, userB] },
-  });
-
-  // 🔥 Step 2: if no conversation → no messages
-  if (!conversation) {
-    return [];
-  }
-
-  // 🔥 Step 3: fetch messages using conversationId (ObjectId)
-  return findMessagesByConversation(conversation._id);
+//  Get messages by connectionId
+export const getMessages = async (connectionId: string) => {
+  return findMessagesByConnection(new mongoose.Types.ObjectId(connectionId));
 };
 
-// 🟡 Get all conversations for sidebar
+//  Get all conversations for sidebar
 export const getConversations = async (userId: string) => {
   return aggregateConversations(userId);
 };
 
-// 🔵 Send message
-export const sendMessage = async (senderId: string, receiverId: string, content: string) => {
-    // 1. Find or create conversation
-    let conversation = await ConversationModel.findOne({
-        participants: { $all: [senderId, receiverId] }
-    });
+//  Send message by connectionId
+export const sendMessage = async (senderId: string, connectionId: string, content: string) => {
+    const connection = await ConnectionModel.findById(connectionId);
 
-    if (!conversation) {
-        conversation = await ConversationModel.create({
-            participants: [senderId, receiverId],
-            // Note: connectionId might be null for direct chats not linked to a booking
-        });
+    if (!connection) {
+        throw new Error("Connection not found");
     }
 
-    // 2. Save message
+    const receiverId = connection.brandId.toString() === senderId 
+        ? connection.influencerId.toString() 
+        : connection.brandId.toString();
+
     return addMessage({
-        conversationId: conversation._id,
+        connectionId: new mongoose.Types.ObjectId(connectionId),
         senderId,
         receiverId,
         content,

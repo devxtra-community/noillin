@@ -2,7 +2,7 @@ import { Schema, model, Types } from "mongoose";
 
 export interface MessageDocument {
   _id: Types.ObjectId;
-  conversationId: Types.ObjectId;
+  connectionId: Types.ObjectId;
 
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
@@ -19,12 +19,12 @@ export interface MessageDocument {
 
 const MessageSchema = new Schema<MessageDocument>(
   {
-  conversationId: {
-  type: Schema.Types.ObjectId,
-  ref: "Conversation",
-  required: true,
-  index: true
-},
+    connectionId: {
+      type: Schema.Types.ObjectId,
+      ref: "Connection",
+      required: true,
+      index: true,
+    },
 
     senderId: {
       type: Schema.Types.ObjectId,

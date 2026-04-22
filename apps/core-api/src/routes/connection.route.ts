@@ -10,6 +10,7 @@ router.post("/request", authenticate, controller.sendRequest);
 router.patch("/:id/accept", authenticate, controller.accept);
 router.patch("/:id/reject", authenticate, controller.reject);
 router.get("/my", authenticate, controller.myConnections);
+router.get("/details/:id", authenticate, controller.getById);
 router.get("/:receiverId", authenticate, controller.getConnectionWithReceiver);
 
 export default router;

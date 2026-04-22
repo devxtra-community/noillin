@@ -8,13 +8,13 @@ router.get("/conversations", authenticate, getConversationsController);
 router.post("/send", authenticate, sendMessageController);
 
 router.get(
-  "/:userId",
+  "/:connectionId",
   authenticate,
   getChatMessagesController
 );
 
 router.post(
-  "/read/:userId",
+  "/read/:connectionId",
   authenticate,
   markAsReadController
 );

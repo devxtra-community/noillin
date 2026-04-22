@@ -1,19 +1,18 @@
 import type { Request, Response } from "express";
+import mongoose from "mongoose";
 
 import { getConversations, getMessages, sendMessage } from "../services/chat.service.js";
 import { MessageModel } from "../models/chat.model.js";
-import { ConversationModel } from "../models/conversation.model.js";
 
-// 🟢 Get messages between two users
+//  Get messages between two users
 export const getChatMessagesController = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const userId = req.user!.userId;
-    const otherUserId = req.params.userId as string;
+    const connectionId = req.params.connectionId as string;
 
-    const messages = await getMessages(userId, otherUserId);
+    const messages = await getMessages(connectionId);
 
     res.json({ messages });
   } catch (err) {
@@ -22,13 +21,13 @@ export const getChatMessagesController = async (
   }
 };
 
-// 🔵 Send message (REST fallback)
+//  Send message (REST fallback)
 export const sendMessageController = async (req: Request, res: Response) => {
   try {
     const senderId = req.user!.userId;
-    const { receiverId, content } = req.body;
+    const { connectionId, content } = req.body;
 
-    const message = await sendMessage(senderId, receiverId, content);
+    const message = await sendMessage(senderId, connectionId, content);
 
     res.json({ success: true, message });
   } catch (err) {
@@ -37,7 +36,7 @@ export const sendMessageController = async (req: Request, res: Response) => {
   }
 };
 
-// 🟡 Get all conversations (sidebar)
+//  Get all conversations (sidebar)
 export const getConversationsController = async (
   req: Request,
   res: Response
@@ -54,29 +53,19 @@ export const getConversationsController = async (
   }
 };
 
-// 🔵 Mark messages as READ
+//  Mark messages as READ
 export const markAsReadController = async (
   req: Request,
   res: Response
 ) => {
   try {
     const userId = req.user!.userId;
-    const otherUserId = req.params.userId;
+    const connectionId = req.params.connectionId as string;
 
-    // 🔥 FIND CONVERSATION (NEW SYSTEM)
-    const conversation = await ConversationModel.findOne({
-      participants: { $all: [userId, otherUserId] },
-    });
-
-    // If no conversation → nothing to update
-    if (!conversation) {
-      return res.json({ success: true });
-    }
-
-    // 🔥 UPDATE MESSAGES USING ObjectId
+    //  UPDATE MESSAGES USING connectionId
     await MessageModel.updateMany(
       {
-        conversationId: conversation._id,
+        connectionId: new mongoose.Types.ObjectId(connectionId),
         receiverId: userId,
         status: { $ne: "READ" },
       },
