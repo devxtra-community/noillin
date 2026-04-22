@@ -1,3 +1,4 @@
+import { publishEvent } from "src/queue/publisher.js";
 import mongoose, { Types } from "mongoose";
 
 import { OrderModel } from "../models/order.model.js";
@@ -70,7 +71,13 @@ export const createOrderService = async (data: CreateOrderInput) => {
     escrowStatus: "HOLD",
     workStatus: "NOT_STARTED",
   });
-
+await publishEvent("order.created", {
+  orderId: order._id.toString(),
+  buyerId: order.buyerId,
+  influencerId: order.influencerId,
+  amount: order.amount,
+});
+console.log("🚀 order.created event published");
   return {
     orderId: order._id,
     amount: order.amount,
