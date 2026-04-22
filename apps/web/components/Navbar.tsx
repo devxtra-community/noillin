@@ -153,8 +153,8 @@ export default function Navbar() {
             <Link
               href="/explore"
               className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/explore")
-                  ? "bg-green-50 text-[#059669]"
-                  : "text-gray-700 hover:text-[#059669] hover:bg-gray-50"
+                ? "bg-green-50 text-[#059669]"
+                : "text-gray-700 hover:text-[#059669] hover:bg-gray-50"
                 }`}
             >
               Explore
@@ -162,8 +162,8 @@ export default function Navbar() {
             <Link
               href="/how-it-works"
               className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/how-it-works")
-                  ? "bg-green-50 text-[#059669]"
-                  : "text-gray-700 hover:text-[#059669] hover:bg-gray-50"
+                ? "bg-green-50 text-[#059669]"
+                : "text-gray-700 hover:text-[#059669] hover:bg-gray-50"
                 }`}
             >
               How it Works
@@ -171,8 +171,8 @@ export default function Navbar() {
             <Link
               href="/blog"
               className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/blog")
-                  ? "bg-green-50 text-[#059669]"
-                  : "text-gray-700 hover:text-[#059669] hover:bg-gray-50"
+                ? "bg-green-50 text-[#059669]"
+                : "text-gray-700 hover:text-[#059669] hover:bg-gray-50"
                 }`}
             >
               Blog
@@ -180,8 +180,8 @@ export default function Navbar() {
             <Link
               href="/our-story"
               className={`block px-3 py-2 rounded-md text-base font-medium ${isActive("/our-story")
-                  ? "bg-green-50 text-[#059669]"
-                  : "text-gray-700 hover:text-[#059669] hover:bg-gray-50"
+                ? "bg-green-50 text-[#059669]"
+                : "text-gray-700 hover:text-[#059669] hover:bg-gray-50"
                 }`}
             >
               Our Story

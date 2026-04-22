@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 
+
 const connectionSchema = new Schema(
   {
     brandId: {
@@ -14,6 +15,11 @@ const connectionSchema = new Schema(
       required: true,
     },
 
+    gigId: {
+      type: Schema.Types.ObjectId,
+      ref: "Gig",
+    },
+
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],
@@ -25,7 +31,7 @@ const connectionSchema = new Schema(
 
 // Prevent duplicate requests
 connectionSchema.index(
-  { brandId: 1, influencerId: 1 },
+  { brandId: 1, influencerId: 1, gigId: 1 },
   { unique: true }
 );
 

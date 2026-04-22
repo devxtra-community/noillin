@@ -89,15 +89,15 @@ export const loginService = async (
   logger.info(`EMAIL: ${email}`);
 
   if (!user) {
-    throw createHttpError("Invalid credentials", 409);
+    throw createHttpError("Invalid credentials", 401);
   }
 
   if (user.status !== "ACTIVE") {
-    throw createHttpError("User is not active", 409);
+    throw createHttpError("User is not active", 401);
   }
 
   if (!user.isEmailVerified) {
-    throw createHttpError("User email is not verified", 409);
+    throw createHttpError("User email is not verified", 401);
   }
 
 
@@ -105,7 +105,7 @@ export const loginService = async (
   console.log("PASSWORD FROM DB:", user.password);
 
   if (!isMatch) {
-    throw createHttpError("Invalid credentials", 409);
+    throw createHttpError("Invalid credentials", 401);
   }
 
   const payload = {
@@ -208,7 +208,7 @@ export const refreshTokenService = async (
 ): Promise<RefreshResult> => {
   if (!refreshToken) {
 
-    throw createHttpError("Refresh token required", 409);
+    throw createHttpError("Refresh token required", 401);
   }
 
   let payload;
@@ -216,7 +216,7 @@ export const refreshTokenService = async (
     payload = verifyRefreshToken(refreshToken);
   } catch {
 
-    throw createHttpError("Invalid refresh token", 409);
+    throw createHttpError("Invalid refresh token", 401);
   }
 
   const user = await userRepository.findById(payload.userId);
@@ -224,14 +224,14 @@ export const refreshTokenService = async (
   //  FIRST check user existence
   if (!user || !user.refreshToken) {
 
-    throw createHttpError("Refresh token mismatch", 409);
+    throw createHttpError("Refresh token mismatch", 401);
   }
 
 
   //  Compare after narrowing
   if (user.refreshToken.trim() !== refreshToken.trim()) {
 
-    throw createHttpError("Refresh token mismatch", 409);
+    throw createHttpError("Refresh token mismatch", 401);
   }
 
   const newPayload = {
@@ -264,7 +264,7 @@ export const refreshTokenService = async (
 export const logoutService = async (userId: string) => {
   if (!userId) {
 
-    throw createHttpError("User not authenticated", 409);
+    throw createHttpError("User not authenticated", 401);
   }
 
   // Invalidate refresh token

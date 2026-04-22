@@ -5,11 +5,12 @@ export interface OrderDocument {
     buyerId: Types.ObjectId;
     influencerId: Types.ObjectId;
     gigId: Types.ObjectId;
+    connectionId: Types.ObjectId;
 
     amount: number;
     currency: string;
 
-    status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED";
+    status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED" | "DISPUTED";
     escrowStatus: "HOLD" | "RELEASED";
     workStatus: "NOT_STARTED" | "SUBMITTED" | "APPROVED";
 

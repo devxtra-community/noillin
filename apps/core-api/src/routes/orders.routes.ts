@@ -1,16 +1,14 @@
 import { Router } from "express";
-import { approveWork, markCompleted, releasePayment } from "src/controllers/order.controller.js";
 
-import { createOrderService } from "../services/order.service.js";
+import { approveWork, markCompleted, releasePayment, getOrderDetails, createOrder } from "../controllers/order.controller.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
 
 const router: Router = Router();
 
-router.post("/", async (req, res) => {
-  const result = await createOrderService(req.body);
-  res.json(result);
-});
-router.patch("/release/:id", releasePayment);
-router.patch("/submit/:id", markCompleted);
-router.patch("/approve/:id", approveWork);
+router.post("/", authenticate, createOrder);
+router.get("/details/:id", authenticate, getOrderDetails);
+router.patch("/release/:id", authenticate, releasePayment);
+router.patch("/submit/:id", authenticate, markCompleted);
+router.patch("/approve/:id", authenticate, approveWork);
 
 export default router;

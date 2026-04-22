@@ -2,6 +2,12 @@ import { Router } from "express";
 
 import { authenticate } from "../middlewares/auth.middleware.js";
 import {
+  updateReportStatusController,
+  resolveReportController,
+  getReportsController,
+  getReportByIdController
+} from "../controllers/report.controller.js";
+import {
   approveSignupController,
   getAllpendingSignupController,
   rejectSignupController,
@@ -26,4 +32,12 @@ router.get("/gig-stats", authenticate, getGigModerationStatsController);
 router.post("/gigs/:gigId/pause", authenticate, pauseGigController);
 router.post("/gigs/:gigId/ignore", authenticate, ignoreGigController);
 router.post("/gigs/:gigId/reject", authenticate, rejectGigController);
+
+// Report Moderation
+router.get("/reports", authenticate, getReportsController);
+router.get("/reports/:id", authenticate, getReportByIdController);
+router.patch("/reports/:id/status", authenticate, updateReportStatusController);
+router.patch("/reports/:id/resolve", authenticate, resolveReportController);
+
+
 export default router;

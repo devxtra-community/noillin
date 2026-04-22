@@ -1,8 +1,10 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 import { useAuthStore } from "@/store/auth.store";
+import { Button } from "@/components/ui/button";
 import api from "@/lib/axios.client";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -20,16 +22,14 @@ interface Gig {
   title: string;
   category: string;
   pricing: GigPricing;
-  primaryInfluencerId: string;
-  createdAt: string;
-  // Enriched fields from influencer populate (adjust to your actual schema)
-  influencer?: {
-    name: string;
-    avatar?: string;
-    niche?: string;
-    platforms?: Platform[];
-    availableFrom?: string;
+  primaryInfluencerId: {
+    _id: string;
+    fullName: string;
+    profileImageUrl?: string;
+    followersCount?: number;
+    categories?: string[];
   };
+  createdAt: string;
 }
 
 interface Pagination {
@@ -140,10 +140,11 @@ function SkeletonCard() {
 // ─── Gig Card ─────────────────────────────────────────────────────────────────
 
 function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
-  const name = gig.influencer?.name ?? "Unknown Creator";
-  const niche = gig.influencer?.niche ?? gig.category;
-  const platforms = gig.influencer?.platforms ?? [];
-  const availableFrom = gig.influencer?.availableFrom;
+  const influencer = gig.primaryInfluencerId;
+  const name = influencer?.fullName ?? "Unknown Creator";
+  const niche = gig.category;
+  const platforms: Platform[] = []; // Currently not stored in profile
+  const availableFrom = undefined;
   const color = avatarColor(gig._id);
 
   const availableLabel = availableFrom
@@ -188,9 +189,12 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
           </svg>
           {availableLabel}
         </div>
-        <button className="shrink-0 text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+        <Link 
+          href={`/gig-details?id=${gig._id}`}
+          className="shrink-0 text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+        >
           View Gig
-        </button>
+        </Link>
       </div>
     );
   }
@@ -255,9 +259,12 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
             <br />
             after payment
           </p>
-          <button className="text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+          <Link 
+            href={`/gig-details?id=${gig._id}`}
+            className="text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+          >
             View Gig
-          </button>
+          </Link>
         </div>
       </div>
     </div>
@@ -394,28 +401,51 @@ export default function ExploreGigs() {
   return (
     <div className="min-h-screen bg-[#f5f5f3] font-sans" style={{ colorScheme: "light" }}>
       {/* Navbar */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50" style={{ colorScheme: "light" }}>
-        <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 h-18 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm">
-              N
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
+        <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 py-4 flex items-center justify-between">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2"
+          >
+            <div className="w-8 h-8 text-emerald-500">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
             </div>
-            <span className="font-semibold text-gray-900 text-lg tracking-tight">Noillin</span>
+            <span className="text-xl font-bold tracking-tight text-slate-900">Noillin</span>
+          </motion.div>
+
+          <div className="hidden md:flex items-center gap-10 text-[13px] font-semibold text-slate-500 uppercase tracking-wider">
+            {[
+              { name: "About", href: "#" },
+              { name: "Influencers", href: "#" },
+              { name: "Gigs", href: "/gig-list" },
+              { name: "Support", href: "#" }
+            ].map((item) => (
+              <Link key={item.name} href={item.href} className="hover:text-emerald-600 transition-colors relative group">
+                {item.name}
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full" />
+              </Link>
+            ))}
           </div>
-          <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
-            <a href="#" className="hover:text-gray-900 transition-colors">About</a>
-            <a href="#" className="hover:text-gray-900 transition-colors">Influencers</a>
-            <a href="#" className="text-emerald-600 font-medium">Gigs</a>
-            <a href="#" className="hover:text-gray-900 transition-colors">Support</a>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/signup" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium hover:cursor-pointer">
-              Sign Up
+
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-4"
+          >
+            <Link href="/login">
+              <Button variant="ghost" className="text-slate-600 font-semibold hover:text-emerald-600 hover:bg-emerald-50 transition-all px-6">
+                Sign In
+              </Button>
             </Link>
-            <Link href="/login" className="text-sm bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors font-medium hover:cursor-pointer">
-              Login
+            <Link href="/signup">
+              <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 shadow-lg shadow-emerald-200 rounded-lg">
+                Get Started
+              </Button>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </nav>
 

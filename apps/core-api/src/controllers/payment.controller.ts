@@ -8,7 +8,15 @@ import { createCheckoutSession } from "../services/payment.service.js";
 
 export const createCheckout = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { amount, orderId } = req.body;
+    const { orderId } = req.body;
+    let { amount } = req.body;
+
+    // 🔥 If amount is missing, fetch it from the order record (More Robust)
+    if (!amount) {
+      const order = await OrderModel.findById(orderId);
+      if (!order) throw new Error("Order not found");
+      amount = order.amount;
+    }
 
     const session = await createCheckoutSession(amount, orderId);
 

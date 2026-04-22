@@ -94,3 +94,11 @@ export const approveWork = async (req: Request, res: Response) => {
 
   res.json({ message: "Work approved & payment released ✅" });
 };
+
+// ================= GET ORDER DETAILS =================
+export const getOrderDetails = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const order = await OrderModel.findById(id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    res.json(order);
+};
