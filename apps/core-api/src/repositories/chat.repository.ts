@@ -2,20 +2,20 @@ import { Types } from "mongoose";
 
 import { MessageModel } from "../models/chat.model.js";
 
-// 🟢 Get messages by conversationId
-export const findMessagesByConversation = async (
-  conversationId: Types.ObjectId
+//  Get messages by connectionId
+export const findMessagesByConnection = async (
+  connectionId: Types.ObjectId
 ) => {
   return MessageModel.find({
-    conversationId: new Types.ObjectId(conversationId), // 🔥 ensure correct type
+    connectionId: new Types.ObjectId(connectionId), //  ensure correct type
   })
     .sort({ createdAt: 1 })
     .lean();
 };
 
-// 🔵 Add new message
+//  Add new message
 export const addMessage = async (data: {
-    conversationId: Types.ObjectId;
+    connectionId: Types.ObjectId;
     senderId: string;
     receiverId: string;
     content: string;
@@ -24,7 +24,7 @@ export const addMessage = async (data: {
     return MessageModel.create(data);
 };
 
-// 🟡 Get conversation list (sidebar)
+//  Get conversation list (sidebar)
 export const aggregateConversations = async (userId: string) => {
   const userObjectId = new Types.ObjectId(userId);
 
@@ -42,7 +42,7 @@ export const aggregateConversations = async (userId: string) => {
 
     {
       $group: {
-        _id: "$conversationId", // 🔥 now ObjectId (correct)
+        _id: "$connectionId", // Group by connectionId directly
 
         lastMessage: { $first: "$content" },
         lastMessageTime: { $first: "$createdAt" },
@@ -67,7 +67,7 @@ export const aggregateConversations = async (userId: string) => {
       },
     },
 
-    // 🔥 Determine other user
+    //  Determine other user
     {
       $addFields: {
         otherUserId: {
@@ -80,7 +80,7 @@ export const aggregateConversations = async (userId: string) => {
       },
     },
 
-    // 🔥 Join user
+    //  Join user
     {
       $lookup: {
         from: "users",
@@ -91,7 +91,7 @@ export const aggregateConversations = async (userId: string) => {
     },
     { $unwind: "$user" },
 
-    // 🔥 Influencer profile
+    //  Influencer profile
     {
       $lookup: {
         from: "influencerprofiles",
@@ -107,7 +107,7 @@ export const aggregateConversations = async (userId: string) => {
       },
     },
 
-    // 🔥 Brand profile
+    //  Brand profile
     {
       $lookup: {
         from: "brandprofiles",
@@ -123,7 +123,7 @@ export const aggregateConversations = async (userId: string) => {
       },
     },
 
-    // 🔥 Name + image logic
+    //  Name + image logic
     {
       $addFields: {
         name: {
@@ -143,13 +143,37 @@ export const aggregateConversations = async (userId: string) => {
       },
     },
 
-    // 🔥 Final output
+    //  Lookup connection to get gigId
+    {
+      $lookup: {
+        from: "connections",
+        localField: "_id",
+        foreignField: "_id",
+        as: "connection",
+      },
+    },
+    { $unwind: "$connection" },
+
+    //  Lookup gig
+    {
+      $lookup: {
+        from: "gigs",
+        localField: "connection.gigId",
+        foreignField: "_id",
+        as: "gig",
+      },
+    },
+    { $unwind: { path: "$gig", preserveNullAndEmptyArrays: true } },
+
+    //  Final output
     {
       $project: {
-        _id: 1, // conversationId
+        _id: 1, // connectionId
+        connectionId: "$_id",
         lastMessage: 1,
         lastMessageTime: 1,
         unreadCount: 1,
+        gigTitle: { $ifNull: ["$gig.title", "Direct Chat"] },
 
         user: {
           _id: "$user._id",

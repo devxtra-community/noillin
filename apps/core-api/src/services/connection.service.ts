@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 import { ConnectionRepository } from "../repositories/connection.repository.js";
 import { AvailabilityService } from "../services/availability.service.js";
-import { ConversationModel } from "../models/conversation.model.js";
 import { MessageModel } from "../models/chat.model.js";
 import { GigModel } from "../models/gig.model.js";
 
@@ -10,58 +9,50 @@ const repo = new ConnectionRepository();
 const availabilityService = new AvailabilityService();
 
 export class ConnectionService {
-  // 🟢 Send request
+  //  Send request
   async sendRequest(brandId: string, influencerId: string, gigId?: string) {
-    const existing = await repo.findExisting(brandId, influencerId, gigId);
+      if (!influencerId) {
+        throw new Error("influencerId is required");
+      }
 
-    if (existing) {
-      // 🔥 If connection exists, send a NEW auto-message for this specific gig request
-      await this.sendAutoBookingMessages(brandId, influencerId, existing._id.toString(), gigId);
-      
-      return {
-        connection: existing,
-        isAvailable: true,
-        alreadyExisted: true,
-      };
-    }
+      const existing = await repo.findExisting(brandId, influencerId, gigId);
 
-    const isAvailable =
-      await availabilityService.isAvailableToday(influencerId);
+      if (existing) {
+        return {
+          connection: existing,
+        };
+      }
 
-    const connection = (await repo.create({
-      brandId,
-      influencerId,
-      gigId,
-    })) as unknown as { _id: string };
+      const isAvailable =
+        await availabilityService.isAvailableToday(influencerId);
 
-    // 🔥 CREATE CONVERSATION IMMEDIATELY
-    await ConversationModel.create({
-      connectionId: connection._id,
-      participants: [brandId, influencerId],
-    });
+      const connection = (await repo.create({
+        brandId,
+        influencerId,
+        gigId,
+      })) as unknown as { _id: string };
 
-    await this.sendAutoBookingMessages(brandId, influencerId, connection._id.toString(), gigId);
+      await this.sendAutoBookingMessages(brandId, influencerId, connection._id.toString(), gigId);
 
-    return {
-      connection,
-      isAvailable,
-    };
+        return {
+          connection,
+          isAvailable,
+        };
   }
 
-  // 🔵 Helper for auto-messages
+  //  Helper for auto-messages
   private async sendAutoBookingMessages(brandId: string, influencerId: string, connectionId: string, gigId?: string) {
-    const conversation = await ConversationModel.findOne({ connectionId: new mongoose.Types.ObjectId(connectionId) });
-    if (!conversation) return;
-
     let gigTitle = "your service";
-    if (gigId) {
+    if (gigId && mongoose.Types.ObjectId.isValid(gigId)) {
       const gig = await GigModel.findById(gigId);
       if (gig) gigTitle = gig.title;
+    } else if (gigId) {
+       console.warn("Invalid gigId for auto-messages:", gigId);
     }
 
     // 1. User Message (Intent)
     await MessageModel.create({
-      conversationId: conversation._id,
+      connectionId: new mongoose.Types.ObjectId(connectionId),
       senderId: brandId,
       receiverId: influencerId,
       content: `Hi, I'd like to book your "${gigTitle}".`,
@@ -70,7 +61,7 @@ export class ConnectionService {
 
     // 2. Status Message
     await MessageModel.create({
-      conversationId: conversation._id,
+      connectionId: new mongoose.Types.ObjectId(connectionId),
       senderId: brandId,
       receiverId: influencerId,
       content: `📌 New Booking Request for: ${gigTitle}`,
@@ -78,7 +69,7 @@ export class ConnectionService {
     });
   }
 
-  // 🟢 Accept request + CREATE CHAT
+  //  Accept request + CREATE CHAT
   async acceptRequest(connectionId: string) {
   const connection = await repo.findById(connectionId);
 
@@ -95,15 +86,15 @@ export class ConnectionService {
     "accepted"
   );
 
-  // 🔥 FIX: handle possible null
+  //  FIX: handle possible null
   if (!updatedConnection) {
     throw new Error("Failed to update connection");
   }
 
-  // 🔥 CONVERSATION ALREADY CREATED ON REQUEST
+  //  CONVERSATION ALREADY CREATED ON REQUEST
   return updatedConnection;
 }
-  // 🔴 Reject request
+  //  Reject request
   async rejectRequest(connectionId: string) {
     const connection = await repo.findById(connectionId);
 
@@ -118,14 +109,19 @@ export class ConnectionService {
     return repo.updateStatus(connectionId, "rejected");
   }
 
-  // 🟢 Get connection between two users
-  async getConnectionBetween(u1: string, u2: string) {
-    const c1 = await repo.findExisting(u1, u2);
-    if (c1) return c1;
-    return repo.findExisting(u2, u1);
+  //  Get connection by ID
+  async getConnectionById(id: string) {
+    return repo.findById(id);
   }
 
-  // 🟡 Get connections
+  //  Get connection between two users
+  async getConnectionBetween(u1: string, u2: string, gigId?: string) {
+    const c1 = await repo.findExisting(u1, u2, gigId);
+    if (c1) return c1;
+    return repo.findExisting(u2, u1, gigId);
+  }
+
+  // Get connections
   async getMyConnections(userId: string) {
     return repo.findMyConnections(userId);
   }

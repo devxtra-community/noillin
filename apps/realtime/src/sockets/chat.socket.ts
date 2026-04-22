@@ -1,7 +1,5 @@
 import { Server, Socket } from "socket.io";
 
-import { MessageModel } from "../../../core-api/src/models/chat.model";
-import { ConversationModel } from "../../../core-api/src/models/conversation.model";
 
 
 const onlineUsers = new Map<string, string[]>();
@@ -34,54 +32,23 @@ export const registerChatHandlers = (io: Server, socket: Socket) => {
 
   console.log(`User ${userId} joined room ${room}`);
 
-socket.on("send_message", async (data) => {
-  const { receiverId, content } = data;
+socket.on("send_message", (data) => {
+  const { message } = data;
 
-  if (!receiverId || !content) return;
+  if (!message || !message.receiverId) return;
 
-  // 🔥 FIND REAL CONVERSATION (instead of string ID)
-  const conversation = await ConversationModel.findOne({
-    participants: { $all: [userId, receiverId] },
-  });
+  const receiverRoom = `user:${message.receiverId}`;
+  const senderRoom = `user:${userId}`;
 
-  // Fallback if not found (legacy or special cases)
-  const conversationId = conversation ? conversation._id : [userId, receiverId].sort().join("_");
+  // Broadcast to receiver and sender's other tabs
+  console.log(`Relaying message from ${userId} to room ${receiverRoom}`);
+  io.to(receiverRoom).emit("receive_message", message);
+  io.to(senderRoom).emit("receive_message", message);
 
-  // ✅ save message
-  const message = await MessageModel.create({
-    conversationId,
-    senderId: userId,
-    receiverId,
-    content,
-    status: "SENT"
-  });
 
-  const receiverRoom = `user:${receiverId}`;
-
-  // ✅ check if receiver is online
-  const isReceiverOnline = onlineUsers.has(receiverId);
-
-  let finalStatus: "SENT" | "DELIVERED" = "SENT";
-
-  if (isReceiverOnline) {
-    finalStatus = "DELIVERED";
-
-    await MessageModel.findByIdAndUpdate(message._id, {
-      status: "DELIVERED"
-    });
-  }
-
-  // ✅ send correct status
-  const updatedMessage = {
-    ...message.toObject(),
-    status: finalStatus
-  };
-
-  io.to(receiverRoom).emit("receive_message", updatedMessage);
-  io.to(`user:${userId}`).emit("receive_message", updatedMessage);
-
-  console.log("Message saved + sent:", message._id);
+  console.log("Message relayed via socket:", message._id);
 });
+
   // 🔌 DISCONNECT
  socket.on("disconnect", () => {
   const sockets = onlineUsers.get(userId) || [];
