@@ -140,7 +140,7 @@ export function ChatWindow({
       console.log("Disconnecting chat socket...");
       socketInstance.disconnect();
     };
-  }, [currentUserId, connectionId]); // Reconnect when connectionId changes to be safe, but keep it stable
+  }, [currentUserId, connectionId, fetchConnection]); // Reconnect when connectionId changes to be safe, but keep it stable
 
 
   // ✅ auto scroll

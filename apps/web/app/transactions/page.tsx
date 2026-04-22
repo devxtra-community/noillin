@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Filter
 } from "lucide-react";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 import Navbar from "@/components/Navbar";
@@ -196,7 +197,14 @@ export default function TransactionHistoryPage() {
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
                             {order.gigId?.thumbnail ? (
-                              <img src={order.gigId.thumbnail} alt="" className="w-full h-full object-cover" />
+                              <Image 
+                                src={order.gigId.thumbnail} 
+                                alt={order.gigId?.title || ""} 
+                                width={48} 
+                                height={48} 
+                                className="w-full h-full object-cover" 
+                                unoptimized
+                              />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-gray-400">
                                 <History className="w-5 h-5" />
@@ -242,7 +250,7 @@ export default function TransactionHistoryPage() {
               </div>
               <h3 className="text-xl font-bold text-gray-900">No transactions found</h3>
               <p className="mt-2 text-gray-500 max-w-xs mx-auto">
-                You haven't made any transactions yet. Start your first gig to see it appear here!
+                You haven&apos;t made any transactions yet. Start your first gig to see it appear here!
               </p>
               <button className="mt-8 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2">
                 Explore Gigs
