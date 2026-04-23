@@ -1,434 +1,228 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import {
-  Bell,
-  ChevronDown,
-  UserCheck,
-  CalendarCheck,
-  Clock,
-  CircleDollarSign,
-  ChevronRight,
-  CheckCircle2,
-  Calendar,
-} from "lucide-react";
+import React, { useState } from "react";
+import { Clock, Briefcase, Wallet, X, ChevronRight, User } from "lucide-react";
 
-import { useAuthStore } from "@/store/auth.store";
-import api from "@/lib/axios.client";
+// Dummy data for Brand Dashboard reference
+const recentRequests = [
+  { gigName: "Summer Solstice Campaign", influencer: "Sarah Jenkins", price: "$450.00", status: "Pending", statusColor: "text-orange-600 bg-orange-50" },
+  { gigName: "Tech Review: Pro X2", influencer: "Marcus Chen", price: "$1,200.00", status: "Accepted", statusColor: "text-emerald-600 bg-emerald-50" },
+  { gigName: "Healthy Eats Series", influencer: "Elena Rodriguez", price: "$300.00", status: "Rejected", statusColor: "text-rose-600 bg-rose-50" },
+  { gigName: "City Walk Vlogs", influencer: "Jordan Smith", price: "$550.00", status: "Pending", statusColor: "text-orange-600 bg-orange-50" },
+  { gigName: "Fitness Challenge 2024", influencer: "Taylor Reed", price: "$800.00", status: "Accepted", statusColor: "text-emerald-600 bg-emerald-50" },
+];
 
-// Define the Gig interfaces similar to how gig-list works
-interface GigPricing {
-  basePrice: number;
-  currency: string;
-}
+const modalDetails = [
+  { id: 1, title: "Campaign Launch", description: "Review final assets for Summer Solstice...", time: "10:00 AM", color: "bg-orange-100 text-orange-700" },
+  { id: 2, title: "Influencer Sync", description: "Meeting with Marcus Chen for Tech Review...", time: "1:30 PM", color: "bg-emerald-100 text-emerald-700" },
+  { id: 3, title: "Payment Processing", description: "Verify pending transactions for Q2...", time: "4:00 PM", color: "bg-blue-100 text-blue-700" },
+];
 
-interface Gig {
-  _id: string;
-  title: string;
-  category: string;
-  pricing: GigPricing;
-  primaryInfluencerId: {
-    _id: string;
-    displayName: string;
-    profileImage?: string;
-    availableFrom?: string;
-    platforms?: ("IG" | "YT" | "TT" | "PT")[];
+export default function BrandDashboardPage() {
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  const handleDateClick = (day: number) => {
+    setSelectedDate(`May ${day}, 2024`);
   };
-}
 
-const formatCurrency = (amount: number, currency = "INR") => {
-  if (currency === "INR") return `₹${amount.toLocaleString("en-IN")}`;
-  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(amount);
-};
-
-export default function Dashboard() {
-  const { user } = useAuthStore();
-  const isAuthenticated = !!user;
-  const [gigs, setGigs] = useState<Gig[]>([]);
-  const [loadingGigs, setLoadingGigs] = useState(true);
-
-  useEffect(() => {
-    // Fetch a few gigs for the "Explore Gigs" section
-    const fetchGigs = async () => {
-      try {
-        const res = await api.get("/gigs?limit=4");
-        setGigs(res.data.data);
-      } catch (error) {
-        console.error("Failed to fetch gigs:", error);
-      } finally {
-        setLoadingGigs(false);
-      }
-    };
-
-    fetchGigs();
-  }, []);
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-20">
-      {/* Navbar */}
-      <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-12">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 bg-[#059669] rounded-lg flex items-center justify-center">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.5}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-gray-900 tracking-tight">
-                Noillin
-              </span>
-            </Link>
+    <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1400px] mx-auto w-full">
+      {/* Header Area */}
+      <div className="mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Platform Overview</h1>
+        <p className="text-sm text-gray-500 mt-1">Welcome back, here&apos;s what&apos;s happening today.</p>
+      </div>
+
+      {/* Metrics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Requests */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 mb-2">Requests</p>
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">12</h2>
+              <p className="text-[10px] text-gray-400 mt-2 font-medium uppercase tracking-wider">Pending collaborations</p>
+            </div>
+            <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 shrink-0">
+              <Clock className="w-5 h-5" />
+            </div>
           </div>
+        </div>
 
-          {/* Nav Links */}
-          <div className="hidden md:flex gap-8 h-full items-center">
-            <Link
-              href="#"
-              className="text-sm font-semibold text-[#059669] border-b-2 border-[#059669] h-20 flex items-center"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="#"
-              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-            >
-              Gigs
-            </Link>
-            <Link
-              href="#"
-              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-            >
-              Bookings
-            </Link>
-            <Link
-              href="#"
-              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-            >
-              Messages
-            </Link>
-            <Link
-              href="#"
-              className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors h-20 flex items-center"
-            >
-              Transactions
-            </Link>
+        {/* Bookings */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 mb-2">Bookings</p>
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">4</h2>
+              <p className="text-[10px] text-gray-400 mt-2 font-medium uppercase tracking-wider">Active campaigns</p>
+            </div>
+            <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 shrink-0">
+              <Briefcase className="w-5 h-5" />
+            </div>
           </div>
+        </div>
 
+        {/* Transactions */}
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-500 mb-2">Transactions</p>
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">$2,450</h2>
+              <p className="text-[10px] text-gray-400 mt-2 font-medium uppercase tracking-wider">Total spent</p>
+            </div>
+            <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 shrink-0">
+              <Wallet className="w-5 h-5" />
+            </div>
+          </div>
+        </div>
+      </div>
 
-          {/* Right side nav */}
-          <div className="flex items-center gap-6">
-            <button className="text-gray-400 hover:text-gray-600 transition-colors relative">
-              <Bell size={20} />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Requests Table */}
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-gray-900">Recent Requests</h3>
+            <button className="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors">
+              View All
             </button>
-            <div className="flex items-center gap-3 cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 overflow-hidden flex items-center justify-center text-emerald-700 font-bold border border-emerald-200">
-                {/* Show avatar or initials */}
-                {user?.email?.charAt(0).toUpperCase() || "B"}
-              </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-semibold text-gray-900 leading-tight">
-                  {isAuthenticated ? (user?.email?.split('@')[0] || "Brand User") : "Guest User"}
-                </p>
-                <p className="text-xs text-gray-500">Brand</p>
-              </div>
-              <ChevronDown size={16} className="text-gray-400" />
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 mt-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-500 mt-1 text-sm">
-            Manage your gigs, bookings, and requests
-          </p>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Card 1 */}
-          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
-            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center mb-4">
-              <UserCheck className="text-green-600" size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900">Requests</h3>
           </div>
 
-          {/* Card 2 */}
-          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center mb-4">
-              <CalendarCheck className="text-blue-500" size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900">
-              Accepted Bookings
-            </h3>
-          </div>
-
-          {/* Card 3 */}
-          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
-            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center mb-4">
-              <Clock className="text-orange-500" size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900">
-              Pending Requests
-            </h3>
-          </div>
-
-          {/* Card 4 */}
-          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
-            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center mb-4">
-              <CircleDollarSign className="text-purple-600" size={24} />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900">
-              Transaction History
-            </h3>
+          <div className="overflow-x-auto flex-1 pb-4">
+            <table className="w-full text-left border-collapse min-w-[500px]">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="pb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Gig Name</th>
+                  <th className="pb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Influencer Name</th>
+                  <th className="pb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Price</th>
+                  <th className="pb-3 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {recentRequests.map((req, idx) => (
+                  <tr key={idx} className="group hover:bg-gray-50 transition-colors">
+                    <td className="py-5">
+                      <span className="font-bold text-sm text-gray-900">{req.gigName}</span>
+                    </td>
+                    <td className="py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-500 shrink-0 overflow-hidden">
+                          {req.influencer.charAt(0)}
+                        </div>
+                        <span className="text-sm font-medium text-gray-600">{req.influencer}</span>
+                      </div>
+                    </td>
+                    <td className="py-5 text-sm font-bold text-gray-900">{req.price}</td>
+                    <td className="py-5">
+                      <span className={`px-3 py-1 text-[11px] font-bold rounded-full ${req.statusColor}`}>
+                        {req.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Middle Section: Requests & Messages */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-          {/* Requests */}
-          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col">
-            <h2 className="text-lg font-bold text-gray-900 mb-6">Requests</h2>
-            <div className="space-y-6 flex-grow">
-              {/* Item 1 */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-red-600 font-bold text-xl relative shrink-0">
-                    N
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm">
-                      Aura Fashion
-                    </h4>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Req: Fall Collection Reel
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-md">
-                    Pending
-                  </span>
-                  <ChevronRight size={16} className="text-gray-400" />
-                </div>
-              </div>
-
-              {/* Item 2 */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Image
-                    unoptimized
-                    width={48}
-                    height={48}
-                    src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=100&h=100&fit=crop"
-                    alt="GreenLife"
-                    className="w-12 h-12 rounded-full object-cover shrink-0"
-                  />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-sm">
-                      GreenLife Organics
-                    </h4>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Req: Morning Routine Story
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-md">
-                    Accepted
-                  </span>
-                  <ChevronRight size={16} className="text-gray-400" />
-                </div>
-              </div>
-            </div>
-            <div className="mt-8 pt-4 border-t border-gray-100 text-center">
-              <button className="text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors">
-                View All Requests
-              </button>
+        {/* Calendar Widget */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-gray-900">Select Date</h3>
+            <div className="flex items-center gap-3 text-sm font-bold text-gray-900">
+              <button className="text-gray-400 hover:text-gray-900 p-1">&lt;</button>
+              May 2024
+              <button className="text-gray-400 hover:text-gray-900 p-1">&gt;</button>
             </div>
           </div>
 
-          {/* Recent Messages */}
-          <div className="bg-white rounded-2xl p-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900">
-                Recent Messages
-              </h2>
-              <button className="text-sm font-medium text-[#059669] hover:text-[#047857]">
-                Open Messages
-              </button>
-            </div>
-            <div className="space-y-6 flex-grow">
-              {/* Msg 1 */}
-              <div className="flex gap-4">
-                <div className="relative shrink-0">
-                  <Image
-                    unoptimized
-                    width={48}
-                    height={48}
-                    src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=100&h=100&fit=crop"
-                    alt="Marcus"
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                </div>
-                <div className="flex-grow min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className="font-semibold text-gray-900 text-sm truncate">
-                      Marcus Chen (TechNova)
-                    </h4>
-                    <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                      10m ago
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500 line-clamp-2">
-                    Hi Jane, I&apos;ve reviewed the script you sent over. Looks great! Just one small change regarding the intro...
-                  </p>
-                </div>
-              </div>
+          <div className="grid grid-cols-7 gap-1 text-center mb-2">
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+              <div key={day} className="text-[11px] font-bold text-gray-400 py-2">{day}</div>
+            ))}
+          </div>
 
-              {/* Msg 2 */}
-              <div className="flex gap-4">
-                <div className="relative shrink-0">
-                  <Image
-                    unoptimized
-                    width={48}
-                    height={48}
-                    src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100&h=100&fit=crop"
-                    alt="Sarah"
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                </div>
-                <div className="flex-grow min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className="font-semibold text-gray-900 text-sm truncate">
-                      Sarah (Lumina)
-                    </h4>
-                    <span className="text-xs text-gray-400 whitespace-nowrap ml-2">
-                      1h ago
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500 line-clamp-2">
-                    Thanks for the quick delivery! The photos look amazing. We&apos;ll process the payment today.
-                  </p>
-                </div>
+          <div className="grid grid-cols-7 gap-y-2 text-sm text-center">
+            {/* Dummy Days */}
+            <div className="flex justify-center items-center h-8 w-8 mx-auto text-gray-100 font-medium">28</div>
+            <div className="flex justify-center items-center h-8 w-8 mx-auto text-gray-100 font-medium">29</div>
+            <div className="flex justify-center items-center h-8 w-8 mx-auto text-gray-100 font-medium">30</div>
+            {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+              <div
+                key={day}
+                onClick={() => handleDateClick(day)}
+                className={`flex justify-center items-center h-8 w-8 mx-auto text-[13px] font-bold cursor-pointer rounded-full transition-all ${day === 13
+                  ? "text-white bg-emerald-500 shadow-md shadow-emerald-200"
+                  : "text-gray-900 hover:bg-emerald-50 hover:text-emerald-600"
+                  } relative`}
+              >
+                {day}
+                {(day === 15 || day === 22) && (
+                  <div className="w-1 h-1 bg-emerald-500 rounded-full absolute bottom-1 left-1/2 -translate-x-1/2"></div>
+                )}
               </div>
-            </div>
+            ))}
+            <div className="flex justify-center items-center h-8 w-8 mx-auto text-gray-100 font-medium">1</div>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-2">
+            <div className="w-2 h-2 bg-emerald-100 border border-emerald-500 rounded-full"></div>
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.1em]">Marked</span>
           </div>
         </div>
+      </div>
 
-        {/* Explore Gigs */}
-        <div>
-          <h2 className="text-xl font-bold text-gray-900">Explore Gigs</h2>
-          <p className="text-sm text-gray-500 mt-1 mb-6">
-            Find recommended gigs based on your search
-          </p>
+      {/* Date Modal - Keeping the interaction from influencer dashboard */}
+      {selectedDate && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity cursor-pointer"
+            onClick={() => setSelectedDate(null)}
+          ></div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {loadingGigs ? (
-              // Simple skeleton
-              Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] h-64 animate-pulse">
-                  <div className="flex gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-200" />
-                    <div className="flex-1 space-y-2 py-1">
-                      <div className="h-4 bg-gray-200 rounded w-3/4" />
-                      <div className="h-3 bg-gray-100 rounded w-1/2" />
+          <div className="bg-white rounded-[24px] w-full max-w-[380px] overflow-hidden shadow-2xl relative z-10 animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-6">
+                <div>
+                  <h3 className="text-[19px] font-bold text-gray-900 tracking-tight">Today&apos;s Schedule</h3>
+                  <p className="text-[13px] font-semibold text-gray-400 mt-0.5">{selectedDate}</p>
+                </div>
+                <button
+                  onClick={() => setSelectedDate(null)}
+                  className="text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 p-1.5 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                {modalDetails.map((item) => (
+                  <div key={item.id} className="border border-gray-100 bg-white shadow-sm rounded-[16px] p-4 hover:border-emerald-100 hover:bg-emerald-50/20 transition-all cursor-pointer group flex items-start gap-4">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${item.color}`}>
+                      <Briefcase className="w-6 h-6 opacity-90" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-[14px] font-bold text-gray-900 group-hover:text-emerald-700 transition-colors truncate">{item.title}</h4>
+                      <p className="text-[12px] text-gray-500 mt-0.5 font-medium truncate">{item.description}</p>
+                      <p className="text-[12px] font-bold text-gray-800 mt-2.5">{item.time}</p>
+                    </div>
+                    <div className="self-center flex-shrink-0 text-gray-300 group-hover:text-emerald-500 transition-colors">
+                      <ChevronRight className="w-5 h-5" />
                     </div>
                   </div>
-                  <div className="space-y-3 mt-8">
-                    <div className="h-4 bg-gray-200 rounded" />
-                    <div className="h-4 bg-gray-200 rounded w-5/6" />
-                  </div>
-                </div>
-              ))
-            ) : gigs.length === 0 ? (
-              <div className="col-span-full text-center py-10 text-gray-500">
-                No gigs available right now.
+                ))}
               </div>
-            ) : (
-              gigs.map((gig) => {
-                const influencer = gig.primaryInfluencerId;
-                const name = influencer?.displayName || "Unknown Creator";
-                const platforms = influencer?.platforms || [];
-                const availableLabel = influencer?.availableFrom
-                  ? new Date(influencer.availableFrom).toLocaleDateString("en-US", { month: "short", day: "numeric" })
-                  : "Available";
 
-                return (
-                  <div key={gig._id} className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex flex-col h-full hover:-translate-y-1 transition-transform cursor-pointer">
-                    <div className="flex flex-col flex-grow">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold shrink-0">
-                          {name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-gray-900 text-sm flex items-center gap-1 line-clamp-1">
-                            {name} <CheckCircle2 size={14} className="text-[#059669] fill-[#059669]/20" />
-                          </h4>
-                          <p className="text-xs text-gray-500 line-clamp-1">{gig.category}</p>
-                        </div>
-                      </div>
-                      <h3 className="font-semibold text-gray-900 text-sm mb-4 line-clamp-2">
-                        {gig.title}
-                      </h3>
-                      {platforms.length > 0 && (
-                        <div className="flex items-center gap-2 mb-4 flex-wrap">
-                          {platforms.map(p => (
-                            <div key={p} className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-[10px] text-gray-600 font-medium">
-                              {p}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-auto">
-                      <div className="flex items-center justify-between mb-3 border-t border-gray-100 pt-4">
-                        <span className="text-xs text-gray-500">Starting at</span>
-                        <span className="font-bold text-gray-900">{formatCurrency(gig.pricing.basePrice, gig.pricing.currency)}</span>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-gray-500 mb-5">
-                        <Calendar size={12} className="text-[#059669]" />
-                        <span>Next available:</span>
-                        <span className="font-semibold text-gray-900">{availableLabel}</span>
-                      </div>
-                      <div className="flex items-center justify-between bg-gray-50/50 -mx-5 -mb-5 p-4 rounded-b-2xl border-t border-gray-50">
-                        <p className="text-[10px] text-gray-400 leading-tight w-24">
-                          Booking confirmed after payment
-                        </p>
-                        <Link href={`/gig-details?id=${gig._id}`} className="bg-[#059669] hover:bg-[#047857] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                          View Gig
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-
+              <div className="flex flex-col gap-2">
+                <button className="w-full bg-[#1CD36B] hover:bg-[#19C061] text-white font-bold py-3.5 px-4 rounded-[14px] text-[14px] shadow-sm transition-colors uppercase tracking-wider">
+                  View Full Calendar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }

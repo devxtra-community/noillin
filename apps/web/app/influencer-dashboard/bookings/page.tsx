@@ -260,16 +260,48 @@ export default function BookingsPage() {
                                     <span className="text-[13px] font-bold text-rose-600">{selectedBooking.dueDate}</span>
                                 </div>
 
-                                <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
-                                            <Globe className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-[13px] font-bold text-gray-400">Status</span>
+                                <div className="py-6 border-b border-gray-50/80">
+                                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                                        <Clock className="w-3 h-3" /> Booking Lifecycle
+                                    </p>
+                                    <div className="space-y-6 relative ml-2">
+                                        <div className="absolute left-[11px] top-2 bottom-2 w-[1px] bg-gray-100"></div>
+                                        {[
+                                            {
+                                                label: "Order Created",
+                                                date: selectedBooking.bookedDate,
+                                                isCompleted: true
+                                            },
+                                            {
+                                                label: "Funds in Escrow",
+                                                date: selectedBooking.status === "IN ESCROW" || selectedBooking.status === "COMPLETED" ? "April 22" : "-",
+                                                isCompleted: selectedBooking.status === "IN ESCROW" || selectedBooking.status === "COMPLETED"
+                                            },
+                                            {
+                                                label: "Work Submitted",
+                                                date: selectedBooking.status === "COMPLETED" ? "April 24" : "-",
+                                                isCompleted: selectedBooking.status === "COMPLETED"
+                                            },
+                                            {
+                                                label: "Funds Released",
+                                                date: selectedBooking.status === "COMPLETED" ? "April 25" : "-",
+                                                isCompleted: selectedBooking.status === "COMPLETED"
+                                            },
+                                        ].map((step, idx) => (
+                                            <div key={idx} className="flex gap-4 relative z-10">
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 ${step.isCompleted
+                                                    ? "bg-emerald-500 border-emerald-500 text-white shadow-sm"
+                                                    : "bg-white border-gray-200 text-gray-300"
+                                                    }`}>
+                                                    <Check className="w-3 h-3" />
+                                                </div>
+                                                <div>
+                                                    <p className={`text-[13px] font-bold ${step.isCompleted ? "text-gray-900" : "text-gray-400 opacity-60"}`}>{step.label}</p>
+                                                    <p className="text-[11px] font-semibold text-gray-400 mt-0.5">{step.date}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full ${selectedBooking.statusColor}`}>
-                                        {selectedBooking.status}
-                                    </span>
                                 </div>
 
                                 <div className="flex items-center justify-between py-3">
