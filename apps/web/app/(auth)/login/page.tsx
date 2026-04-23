@@ -57,7 +57,8 @@ function LoginForm() {
       if (response.data.data?.accessToken) {
         const { accessToken, user } = response.data.data
         setAuth(accessToken, user)
-        router.push("/home");;
+        const dashboardPath = user.role === "BRAND" ? "/brand-dashboard" : "/influencer-dashboard";
+        router.push(dashboardPath);
       }
 
     } catch (error) {

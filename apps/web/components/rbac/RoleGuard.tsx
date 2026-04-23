@@ -31,7 +31,8 @@ export default function RoleGuard({
 
         // If authenticated but role not allowed
         if (user && !allowedRoles.includes(user.role)) {
-            router.push(redirectTo || "/home");
+            const fallbackPath = user.role === "BRAND" ? "/brand-dashboard" : "/influencer-dashboard";
+            router.push(redirectTo || fallbackPath);
             return;
         }
 
