@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { model } from "mongoose";
-import type { OrderDocument } from "src/types/order.types.js";
+
+import type { OrderDocument } from "../types/order.types.js";
 
 const orderSchema = new mongoose.Schema(
   {

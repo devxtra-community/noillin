@@ -19,7 +19,7 @@ import reportRoutes from "./report.route.js";
 import connectionRoutes from "./connection.route.js";
 
 
-const router:Router = Router()
+const router: Router = Router()
 router.use("/health", healthRoutes)
 router.use("/auth", authRoutes)
 router.use("/admin", adminRoutes)
@@ -34,7 +34,7 @@ router.use("/search", searchRoutes);
 router.use("/media", mediaRoutes);
 router.use("/chat", chatRoutes);
 router.use("/brands", brandRoutes);
-router.use("/reports",reportRoutes );
+router.use("/reports", reportRoutes);
 router.use("/connections", connectionRoutes);
 
 

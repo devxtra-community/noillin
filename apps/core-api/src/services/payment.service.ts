@@ -9,6 +9,7 @@ export const createCheckoutSession = async (
     return { url: "https://buy.stripe.com/test_mock" };
   }
 
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     mode: "payment",
@@ -20,11 +21,12 @@ export const createCheckoutSession = async (
           product_data: {
             name: "Influencer Booking",
           },
-          unit_amount: amount * 100,
+          unit_amount: Math.round(amount * 100),
         },
         quantity: 1,
       },
     ],
+
 
     success_url: `http://localhost:3000/payment/success?session_id={CHECKOUT_SESSION_ID}&orderId=${orderId}`,
 

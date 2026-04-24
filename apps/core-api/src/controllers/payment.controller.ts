@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import type Stripe from "stripe";
 
 import { stripe } from "../lib/stripe.js";
 import { OrderModel } from "../models/order.model.js";
@@ -11,8 +12,9 @@ export const createCheckout = async (req: Request, res: Response, next: NextFunc
     const { orderId } = req.body;
     let { amount } = req.body;
 
-    // 🔥 If amount is missing, fetch it from the order record (More Robust)
+
     if (!amount) {
+      // Find order to get default amount if missing
       const order = await OrderModel.findById(orderId);
       if (!order) throw new Error("Order not found");
       amount = order.amount;
@@ -51,14 +53,11 @@ export const stripeWebhook = async (req: Request, res: Response) => {
     return res.status(400).send("Webhook Error");
   }
 
-  // ✅ PAYMENT SUCCESS (CHECKOUT)
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as unknown as { metadata: { orderId: string } };
-
-    const orderId = session.metadata.orderId;
+    const session = event.data.object as Stripe.Checkout.Session;
+    const orderId = session.metadata?.orderId;
 
     const order = await OrderModel.findById(orderId);
-
     if (!order) return res.json({ status: "order not found" });
 
     // ✅ IDEMPOTENCY
@@ -66,11 +65,7 @@ export const stripeWebhook = async (req: Request, res: Response) => {
       return res.json({ status: "already processed" });
     }
 
-    // 🔥 ESCROW STARTS HERE
-    order.status = "IN_ESCROW";
-    order.escrowStatus = "HOLD";
-
-    await order.save();
+    order.status = "COMPLETED";
 
     // ✅ CREATE BOOKING
     await createBooking(order);

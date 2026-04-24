@@ -20,7 +20,8 @@ export interface IInfluencerProfile extends Document {
 
   isProfileComplete: boolean;
   isVerified: boolean;
-  profileImageUrl?: string,
+  profileImageUrl?: string;
+  stripeAccountId?: string;
 }
 
 const InfluencerProfileSchema = new Schema<IInfluencerProfile>(
