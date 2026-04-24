@@ -88,12 +88,12 @@ export const approveWork = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: "Work not submitted yet" });
   }
 
-  // 🔥 UNLOCK FUNDS FOR MANUAL WITHDRAWAL (No Direct Transfer)
+  // 🔥 UNLOCK FUNDS FOR MANUAL WITHDRAWAL
   order.workStatus = "APPROVED";
   order.status = "COMPLETED";
   order.escrowStatus = "RELEASED";
 
-  // NEW: Payout lifecycle
+  // Financial payout status
   order.payoutStatus = "AVAILABLE";
   order.availableAt = new Date();
 

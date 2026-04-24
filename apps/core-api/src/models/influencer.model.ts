@@ -85,6 +85,10 @@ const InfluencerProfileSchema = new Schema<IInfluencerProfile>(
       type: Boolean,
       default: false,
     },
+    stripeAccountId: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );

@@ -4,3 +4,4 @@ node_modules
 dist
 .next
 !.env.example
+seed_test.ts

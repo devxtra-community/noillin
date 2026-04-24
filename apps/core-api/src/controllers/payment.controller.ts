@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import type Stripe from "stripe";
 
+import { InfluencerProfile } from "../models/influencer.model.js";
 import { stripe } from "../lib/stripe.js";
 import { OrderModel } from "../models/order.model.js";
 import { createBooking } from "../services/booking.service.js";
@@ -20,7 +21,16 @@ export const createCheckout = async (req: Request, res: Response, next: NextFunc
       amount = order.amount;
     }
 
-    const session = await createCheckoutSession(amount, orderId);
+    // 🔥 Fetch Influencer's Stripe ID
+    const order = await OrderModel.findById(orderId);
+    if (!order) throw new Error("Order not found");
+
+    const influencerProfile = await InfluencerProfile.findOne({ userId: order.influencerId });
+    if (!influencerProfile?.stripeAccountId) {
+      throw new Error("Influencer has not set up a Stripe account for payouts.");
+    }
+
+    const session = await createCheckoutSession(amount, orderId, influencerProfile.stripeAccountId);
 
     res.json({ url: session.url });
     console.log("SESSION URL:", session.url);
@@ -65,7 +75,21 @@ export const stripeWebhook = async (req: Request, res: Response) => {
       return res.json({ status: "already processed" });
     }
 
-    order.status = "COMPLETED";
+    // 🔥 ESCROW STARTS HERE (10% Fee)
+    const PLATFORM_FEE_PERCENTAGE = 0.10;
+    const amount = order.amount;
+    const platformFee = amount * PLATFORM_FEE_PERCENTAGE;
+    const influencerAmount = amount - platformFee;
+
+    order.status = "IN_ESCROW";
+    order.escrowStatus = "HOLD";
+    order.stripePaymentIntentId = session.payment_intent as string;
+    order.platformFee = platformFee;
+    order.influencerAmount = influencerAmount;
+
+    await order.save();
+
+    console.log(`✅ Order ${orderId} is now IN_ESCROW. Fee: ${platformFee}, Influencer: ${influencerAmount}`);
 
     // ✅ CREATE BOOKING
     await createBooking(order);
