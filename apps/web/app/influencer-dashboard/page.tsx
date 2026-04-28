@@ -1,32 +1,80 @@
 "use client";
 
-import React, { useState } from "react";
-import { Plus, DollarSign, Calendar, Clock, X, ChevronRight, User } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, DollarSign, Calendar, Clock, X, ChevronRight, User, Loader2 } from "lucide-react";
 
-// Dummy data from the visual reference
-const bookings = [
-  { brand: "Lumina Skincare", initials: "LS", gigType: "IG Reel Promotion", price: "$150.00", status: "Submitted", statusColor: "text-blue-600 bg-blue-50" },
-  { brand: "Urban Coffee", initials: "UC", gigType: "TikTok Integration", price: "$275.00", status: "Not started", statusColor: "text-gray-600 bg-gray-100" },
-  { brand: "TechNova", initials: "TN", gigType: "YouTube Review", price: "$500.00", status: "Approved", statusColor: "text-emerald-600 bg-emerald-50" },
-  { brand: "Aura Fashion", initials: "AF", gigType: "Product Unboxing", price: "$210.00", status: "Approved", statusColor: "text-emerald-600 bg-emerald-50" },
-  { brand: "GreenLife", initials: "GL", gigType: "Eco Campaign", price: "$325.00", status: "Submitted", statusColor: "text-blue-600 bg-blue-50" },
-];
+import api from "@/lib/axios.client";
 
-const modalGigs = [
-  { id: 1, title: "Sound Check - Main St", description: "Ensure all monitors and main arrays...", time: "3:00 PM", color: "bg-[#fff3cc] text-orange-700" },
-  { id: 2, title: "Equipment Load-In", description: "Assist the lighting crew with truss and...", time: "4:00 PM", color: "bg-emerald-100 text-emerald-700" },
-  { id: 3, title: "Security Briefing", description: "Review access control protocols for b...", time: "5:30 PM", color: "bg-blue-100 text-blue-700" },
-];
+interface Order {
+  _id: string;
+  amount: number;
+  platformFee: number;
+  influencerAmount: number;
+  status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED" | "DISPUTED";
+  escrowStatus: "HOLD" | "RELEASED";
+  payoutStatus: "HOLD" | "AVAILABLE" | "PROCESSING" | "PAID";
+  createdAt: string;
+  dueDate?: string;
+  gigId: {
+    title: string;
+    description?: string;
+  };
+}
 
 export default function InfluencerDashboardPage() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/orders/history");
+        setOrders(response.data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboardData();
+  }, []);
+
+  const stats = {
+    earnings: orders
+      .filter(o => o.status === "COMPLETED")
+      .reduce((sum, o) => sum + (o.influencerAmount || 0), 0),
+    activeBookings: orders.filter(o => o.status === "IN_ESCROW").length,
+    pendingRequests: orders.filter(o => o.status === "PENDING").length,
+  };
+
+  const recentBookings = orders.slice(0, 5);
+
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case "COMPLETED": return "text-emerald-600 bg-emerald-50";
+      case "IN_ESCROW": return "text-blue-600 bg-blue-50";
+      case "PENDING": return "text-orange-600 bg-orange-50";
+      case "CANCELLED": return "text-rose-600 bg-rose-50";
+      default: return "text-gray-600 bg-gray-100";
+    }
+  };
 
   const handleDateClick = (day: number) => {
     setSelectedDate(`May ${day}, 2024`);
   };
 
+  if (loading) {
+    return (
+      <div className="h-[80vh] w-full flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1400px] mx-auto w-full">
+    <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1400px] mx-auto w-full font-sans">
       {/* Header Area */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
@@ -46,7 +94,7 @@ export default function InfluencerDashboardPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 mb-2">Total Earnings</p>
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">$12,450.00</h2>
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">₹{stats.earnings.toLocaleString()}</h2>
               <div className="inline-block mt-3 bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-0.5 rounded-md">
                 +12%
               </div>
@@ -62,7 +110,7 @@ export default function InfluencerDashboardPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 mb-2">Active Bookings</p>
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">4</h2>
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{stats.activeBookings}</h2>
             </div>
             <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 shrink-0">
               <Calendar className="w-5 h-5" />
@@ -75,10 +123,12 @@ export default function InfluencerDashboardPage() {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold text-gray-500 mb-2">Pending Requests</p>
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">8</h2>
-              <div className="inline-block mt-3 bg-orange-50 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-md">
-                Action Needed
-              </div>
+              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{stats.pendingRequests}</h2>
+              {stats.pendingRequests > 0 && (
+                <div className="inline-block mt-3 bg-orange-50 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-md">
+                  Action Needed
+                </div>
+              )}
             </div>
             <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 shrink-0">
               <Clock className="w-5 h-5" />
@@ -94,7 +144,7 @@ export default function InfluencerDashboardPage() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="text-lg font-bold text-gray-900 mt-1">Your Bookings</h3>
-              <p className="text-xs text-gray-500 mt-1">Scheduled influencer collaborations for the next 14 days.</p>
+              <p className="text-xs text-gray-500 mt-1">Recently updated influencer collaborations.</p>
             </div>
             <button className="text-sm font-bold text-emerald-600 hover:text-emerald-700">
               View All
@@ -102,35 +152,38 @@ export default function InfluencerDashboardPage() {
           </div>
 
           <div className="overflow-x-auto flex-1 pb-4">
-            <table className="w-full text-left border-collapse min-w-[500px]">
+            <table className="w-full text-left border-separate border-spacing-y-2 min-w-[500px]">
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="pb-3 text-xs font-semibold text-gray-500">Brand</th>
-                  <th className="pb-3 text-xs font-semibold text-gray-500">Gig Type</th>
-                  <th className="pb-3 text-xs font-semibold text-gray-500">Price</th>
-                  <th className="pb-3 text-xs font-semibold text-gray-500">Status</th>
+                <tr>
+                  <th className="px-4 pb-3 text-xs font-semibold text-gray-500">Gig</th>
+                  <th className="px-4 pb-3 text-xs font-semibold text-gray-500 text-right">Price</th>
+                  <th className="px-4 pb-3 text-xs font-semibold text-gray-500 text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {bookings.map((booking, idx) => (
-                  <tr key={idx} className="group hover:bg-gray-50 transition-colors">
-                    <td className="py-4">
+                {recentBookings.map((booking) => (
+                  <tr key={booking._id} className="group hover:bg-gray-50 transition-colors">
+                    <td className="py-4 px-4 first:rounded-l-xl last:rounded-r-xl border-t border-b border-transparent">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 shrink-0">
-                          {booking.initials}
+                          {booking.gigId?.title?.charAt(0) || "B"}
                         </div>
-                        <span className="font-semibold text-sm text-gray-900">{booking.brand}</span>
+                        <span className="font-semibold text-sm text-gray-900 truncate max-w-[200px]">{booking.gigId?.title || "Influencer Booking"}</span>
                       </div>
                     </td>
-                    <td className="py-4 text-sm text-gray-500">{booking.gigType}</td>
-                    <td className="py-4 text-sm font-medium text-gray-900">{booking.price}</td>
-                    <td className="py-4">
-                      <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${booking.statusColor}`}>
+                    <td className="py-4 px-4 text-sm font-bold text-gray-900 text-right">₹{(booking.influencerAmount || 0).toLocaleString()}</td>
+                    <td className="py-4 px-4 text-center">
+                      <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${getStatusStyles(booking.status)}`}>
                         {booking.status}
                       </span>
                     </td>
                   </tr>
                 ))}
+                {recentBookings.length === 0 && (
+                  <tr>
+                    <td colSpan={3} className="text-center py-20 text-gray-400 font-semibold italic">No bookings found</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -207,21 +260,26 @@ export default function InfluencerDashboardPage() {
               </div>
 
               <div className="space-y-3 mb-6">
-                {modalGigs.map((gig) => (
-                  <div key={gig.id} className="border border-gray-100 bg-white shadow-sm rounded-[16px] p-4 hover:border-emerald-100 hover:bg-emerald-50/20 transition-all cursor-pointer group flex items-start gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${gig.color}`}>
-                      <User className="w-6 h-6 opacity-90" />
+                {orders
+                  .filter(o => o.dueDate && new Date(o.dueDate).toLocaleDateString() === selectedDate)
+                  .map((order) => (
+                    <div key={order._id} className="border border-gray-100 bg-white shadow-sm rounded-[16px] p-4 hover:border-emerald-100 hover:bg-emerald-50/20 transition-all cursor-pointer group flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-emerald-50 text-emerald-600">
+                        <User className="w-6 h-6 opacity-90" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-[14px] font-bold text-gray-900 group-hover:text-emerald-700 transition-colors truncate">{order.gigId?.title}</h4>
+                        <p className="text-[12px] text-gray-500 mt-0.5 font-medium truncate">{order.gigId?.description || "Collaboration"}</p>
+                        <p className="text-[12px] font-bold text-gray-800 mt-2.5">Price: ₹{order.influencerAmount}</p>
+                      </div>
+                      <div className="self-center flex-shrink-0 text-gray-300 group-hover:text-emerald-500 transition-colors">
+                        <ChevronRight className="w-5 h-5" />
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-[14px] font-bold text-gray-900 group-hover:text-emerald-700 transition-colors truncate">{gig.title}</h4>
-                      <p className="text-[12px] text-gray-500 mt-0.5 font-medium truncate">{gig.description}</p>
-                      <p className="text-[12px] font-bold text-gray-800 mt-2.5">Due by {gig.time}</p>
-                    </div>
-                    <div className="self-center flex-shrink-0 text-gray-300 group-hover:text-emerald-500 transition-colors">
-                      <ChevronRight className="w-5 h-5" />
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                {orders.filter(o => o.dueDate && new Date(o.dueDate).toLocaleDateString() === selectedDate).length === 0 && (
+                  <p className="text-center py-10 text-gray-400 text-sm italic">No gigs due on this date</p>
+                )}
               </div>
 
               <div className="flex flex-col gap-2">

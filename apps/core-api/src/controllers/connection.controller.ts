@@ -1,4 +1,4 @@
-import type{ Response } from "express";
+import type { Response } from "express";
 
 import { ConnectionService } from "../services/connection.service.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
@@ -12,19 +12,28 @@ export class ConnectionController {
     }
 
     const brandId = req.user.userId;
-    const { influencerId, gigId } = req.body;
+    const { influencerId, gigId, note } = req.body;
 
-    const data = await service.sendRequest(
-      brandId,
-      influencerId as string,
-      gigId as string
-    );
+    try {
+      const data = await service.sendRequest(
+        brandId,
+        influencerId as string,
+        gigId as string,
+        note as string
+      );
 
-    res.json({
-      success: true,
-      message: "Connection request sent",
-      data,
-    });
+      res.json({
+        success: true,
+        message: "Connection request sent",
+        data,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      if (error.message === "Already requested this gig.") {
+        return res.status(400).json({ success: false, message: error.message });
+      }
+      return res.status(500).json({ success: false, message: "Internal server error" });
+    }
   }
 
   async accept(req: AuthRequest, res: Response) {
@@ -57,8 +66,9 @@ export class ConnectionController {
     }
 
     const userId = req.user.userId;
+    const role = (req.query.role as string) || undefined;
 
-    const data = await service.getMyConnections(userId);
+    const data = await service.getMyConnections(userId, role);
 
     res.json({
       success: true,

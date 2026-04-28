@@ -2,7 +2,7 @@ import { Schema, model, Types } from "mongoose";
 
 export interface MessageDocument {
   _id: Types.ObjectId;
-  connectionId: Types.ObjectId;
+  gigRequestId: Types.ObjectId;
 
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
@@ -19,9 +19,9 @@ export interface MessageDocument {
 
 const MessageSchema = new Schema<MessageDocument>(
   {
-    connectionId: {
+    gigRequestId: {
       type: Schema.Types.ObjectId,
-      ref: "Connection",
+      ref: "GigRequest",
       required: true,
       index: true,
     },

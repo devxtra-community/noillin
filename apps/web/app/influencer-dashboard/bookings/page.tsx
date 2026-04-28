@@ -1,117 +1,91 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, ChevronRight, Calendar, Clock, Globe, XCircle, AlertCircle, Check } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, ChevronRight, Calendar, Clock, Globe, XCircle, AlertCircle, Check, Loader2 } from "lucide-react";
 
-interface Booking {
-    id: number;
-    brand: string;
-    gig: string;
-    price: string;
-    status: string;
-    statusColor: string;
-    color: string;
-    platform: string;
-    platformColor: string;
-    bookedDate: string;
-    bookedTime: string;
-    dueDate: string;
+import api from "@/lib/axios.client";
+
+interface Order {
+    _id: string;
+    amount: number;
+    platformFee: number;
+    influencerAmount: number;
+    status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED" | "DISPUTED";
+    escrowStatus: "HOLD" | "RELEASED";
+    payoutStatus: "HOLD" | "AVAILABLE" | "PROCESSING" | "PAID";
+    createdAt: string;
+    dueDate?: string;
+    gigId: {
+        title: string;
+        description?: string;
+    };
 }
 
 export default function BookingsPage() {
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeTab, setActiveTab] = useState("All");
 
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get("/orders/history");
+                setOrders(response.data);
+            } catch (error) {
+                console.error("Failed to fetch bookings:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBookings();
+    }, []);
+
     const tabs = ["All", "Active", "Completed", "Disputed"];
 
-    const [bookings] = useState<Booking[]>([
-        {
-            id: 1,
-            brand: "Lumina Skincare",
-            gig: "IG Reel Promotion",
-            price: "$150",
-            status: "IN ESCROW",
-            statusColor: "bg-blue-50 text-blue-600",
-            color: "bg-[#0A192F] text-white",
-            platform: "Instagram",
-            platformColor: "bg-rose-50 text-rose-600",
-            bookedDate: "April 20, 2024",
-            bookedTime: "11:00 AM",
-            dueDate: "April 30, 2024"
-        },
-        {
-            id: 2,
-            brand: "Urban Coffee",
-            gig: "TikTok Ad Campaign",
-            price: "$275",
-            status: "PENDING",
-            statusColor: "bg-orange-50 text-orange-600",
-            color: "bg-orange-100 text-orange-900",
-            platform: "TikTok",
-            platformColor: "bg-gray-100 text-gray-600",
-            bookedDate: "April 21, 2024",
-            bookedTime: "03:30 PM",
-            dueDate: "May 05, 2024"
-        },
-        {
-            id: 3,
-            brand: "TechNova",
-            gig: "YouTube Review",
-            price: "$500",
-            status: "COMPLETED",
-            statusColor: "bg-emerald-50 text-emerald-600",
-            color: "bg-teal-50 text-teal-700",
-            platform: "YouTube",
-            platformColor: "bg-indigo-50 text-indigo-600",
-            bookedDate: "April 15, 2024",
-            bookedTime: "09:15 AM",
-            dueDate: "April 25, 2024"
-        },
-        {
-            id: 4,
-            brand: "Aura Fashion",
-            gig: "Product Unboxing",
-            price: "$210",
-            status: "CANCELLED",
-            statusColor: "bg-gray-100 text-gray-800",
-            color: "bg-emerald-50 text-emerald-800",
-            platform: "Instagram",
-            platformColor: "bg-rose-50 text-rose-600",
-            bookedDate: "April 18, 2024",
-            bookedTime: "10:00 AM",
-            dueDate: "April 28, 2024"
-        },
-        {
-            id: 5,
-            brand: "GreenLife",
-            gig: "Eco Campaign",
-            price: "$325",
-            status: "DISPUTED",
-            statusColor: "bg-rose-50 text-rose-600",
-            color: "bg-black text-white",
-            platform: "Instagram",
-            platformColor: "bg-rose-50 text-rose-600",
-            bookedDate: "April 22, 2024",
-            bookedTime: "01:00 PM",
-            dueDate: "May 02, 2024"
-        },
-    ]);
+    const filteredBookings = orders.filter(o => {
+        const titleMatch = o.gigId?.title?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const filteredBookings = bookings.filter(b => {
-        const matchesQuery = b.brand.toLowerCase().includes(searchQuery.toLowerCase()) || b.gig.toLowerCase().includes(searchQuery.toLowerCase());
-
-        let matchesTab = true;
+        let statusMatch = true;
         if (activeTab === "Active") {
-            matchesTab = b.status === "IN ESCROW" || b.status === "PENDING";
-        } else if (activeTab !== "All") {
-            matchesTab = b.status === activeTab.toUpperCase();
+            statusMatch = o.status === "IN_ESCROW" || o.status === "PENDING";
+        } else if (activeTab === "Completed") {
+            statusMatch = o.status === "COMPLETED";
+        } else if (activeTab === "Disputed") {
+            statusMatch = o.status === "DISPUTED";
         }
 
-        return matchesQuery && matchesTab;
+        return titleMatch && statusMatch;
     });
 
-    const [selectedBookingId, setSelectedBookingId] = useState(filteredBookings[0]?.id || bookings[0].id);
-    const selectedBooking = bookings.find(b => b.id === selectedBookingId) || bookings[0];
+    const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (filteredBookings.length > 0 && !selectedBookingId) {
+            setSelectedBookingId(filteredBookings[0]._id);
+        }
+    }, [filteredBookings, selectedBookingId]);
+
+    const selectedBooking = orders.find(o => o._id === selectedBookingId) || filteredBookings[0];
+
+    const getStatusStyles = (status: string) => {
+        switch (status) {
+            case "COMPLETED": return "bg-emerald-50 text-emerald-600";
+            case "IN_ESCROW": return "bg-blue-50 text-blue-600";
+            case "PENDING": return "bg-orange-50 text-orange-600";
+            case "DISPUTED": return "bg-rose-50 text-rose-600";
+            default: return "bg-gray-100 text-gray-800";
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="h-[80vh] w-full flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1500px] mx-auto w-full h-full flex flex-col overflow-hidden">
@@ -172,23 +146,23 @@ export default function BookingsPage() {
                             <tbody className="divide-y divide-gray-50">
                                 {filteredBookings.map((b) => (
                                     <tr
-                                        key={b.id}
-                                        onClick={() => setSelectedBookingId(b.id)}
-                                        className={`group cursor-pointer transition-all ${selectedBookingId === b.id ? "bg-emerald-50/40" : "hover:bg-gray-50/50"}`}
+                                        key={b._id}
+                                        onClick={() => setSelectedBookingId(b._id)}
+                                        className={`group cursor-pointer transition-all ${selectedBookingId === b._id ? "bg-emerald-50/40" : "hover:bg-gray-50/50"}`}
                                     >
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm ${b.color}`}>
-                                                    {b.brand.charAt(0)}
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600">
+                                                    {b.gigId?.title?.charAt(0) || "B"}
                                                 </div>
-                                                <span className="font-bold text-[14px] text-gray-900">{b.brand}</span>
+                                                <span className="font-bold text-[14px] text-gray-900 truncate max-w-[150px]">{b.gigId?.title}</span>
                                             </div>
                                         </td>
-                                        <td className="py-4 px-6 text-[14px] font-medium text-gray-500">{b.gig}</td>
-                                        <td className="py-4 px-6 text-[14px] font-bold text-gray-900 text-right">{b.price}</td>
+                                        <td className="py-4 px-6 text-[14px] font-medium text-gray-500">{b.status}</td>
+                                        <td className="py-4 px-6 text-[14px] font-bold text-gray-900 text-right">₹{b.influencerAmount.toLocaleString()}</td>
                                         <td className="py-4 px-6 text-center">
                                             <div className="flex items-center justify-center">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${selectedBookingId === b.id ? "bg-emerald-500 text-white shadow-md shadow-emerald-100" : "text-gray-300 group-hover:text-gray-500"}`}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${selectedBookingId === b._id ? "bg-emerald-500 text-white shadow-md shadow-emerald-100" : "text-gray-300 group-hover:text-gray-500"}`}>
                                                     <ChevronRight className="w-4 h-4" />
                                                 </div>
                                             </div>
@@ -209,118 +183,108 @@ export default function BookingsPage() {
                 <div className="xl:w-[360px] shrink-0 h-full">
                     <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex flex-col h-full sticky top-0">
                         <div className="p-6 flex flex-col h-full">
-                            <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-6">Booking Details</h2>
+                            <div className="p-6 flex flex-col h-full">
+                                {selectedBooking ? (
+                                    <>
+                                        <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-6">Booking Details</h2>
 
-                            {/* Brand Profile */}
-                            <div className="flex flex-col items-center text-center mb-8">
-                                <div className={`w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 ${selectedBooking.color}`}>
-                                    {selectedBooking.brand.charAt(0)}
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedBooking.brand}</h3>
-                                <div className="flex items-center justify-center gap-2">
-                                    <span className={`px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide rounded-full ${selectedBooking.platformColor} flex items-center gap-1.5`}>
-                                        <Globe className="w-2.5 h-2.5" />
-                                        {selectedBooking.platform}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Details List */}
-                            <div className="space-y-1.5 flex-grow">
-                                <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
-                                            <AlertCircle className="w-4 h-4" />
+                                        {/* Brand Profile */}
+                                        <div className="flex flex-col items-center text-center mb-8">
+                                            <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
+                                                {selectedBooking.gigId?.title?.charAt(0) || "B"}
+                                            </div>
+                                            <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedBooking.gigId?.title}</h3>
+                                            <div className="flex items-center justify-center gap-2">
+                                                <span className={`px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide rounded-full ${getStatusStyles(selectedBooking.status)} flex items-center gap-1.5`}>
+                                                    <Globe className="w-2.5 h-2.5" />
+                                                    {selectedBooking.status}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <span className="text-[13px] font-bold text-gray-400">Gig Name</span>
-                                    </div>
-                                    <span className="text-[13px] font-bold text-gray-900">{selectedBooking.gig}</span>
-                                </div>
 
-                                <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
-                                            <Calendar className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-[13px] font-bold text-gray-400">Booked Date</span>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-[13px] font-bold text-gray-900">{selectedBooking.bookedDate}</p>
-                                        <p className="text-[10px] text-gray-500 font-medium">{selectedBooking.bookedTime}</p>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
-                                            <Clock className="w-4 h-4" />
-                                        </div>
-                                        <span className="text-[13px] font-bold text-gray-400">Due Date</span>
-                                    </div>
-                                    <span className="text-[13px] font-bold text-rose-600">{selectedBooking.dueDate}</span>
-                                </div>
-
-                                <div className="py-6 border-b border-gray-50/80">
-                                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                                        <Clock className="w-3 h-3" /> Booking Lifecycle
-                                    </p>
-                                    <div className="space-y-6 relative ml-2">
-                                        <div className="absolute left-[11px] top-2 bottom-2 w-[1px] bg-gray-100"></div>
-                                        {[
-                                            {
-                                                label: "Order Created",
-                                                date: selectedBooking.bookedDate,
-                                                isCompleted: true
-                                            },
-                                            {
-                                                label: "Funds in Escrow",
-                                                date: selectedBooking.status === "IN ESCROW" || selectedBooking.status === "COMPLETED" ? "April 22" : "-",
-                                                isCompleted: selectedBooking.status === "IN ESCROW" || selectedBooking.status === "COMPLETED"
-                                            },
-                                            {
-                                                label: "Work Submitted",
-                                                date: selectedBooking.status === "COMPLETED" ? "April 24" : "-",
-                                                isCompleted: selectedBooking.status === "COMPLETED"
-                                            },
-                                            {
-                                                label: "Funds Released",
-                                                date: selectedBooking.status === "COMPLETED" ? "April 25" : "-",
-                                                isCompleted: selectedBooking.status === "COMPLETED"
-                                            },
-                                        ].map((step, idx) => (
-                                            <div key={idx} className="flex gap-4 relative z-10">
-                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 ${step.isCompleted
-                                                    ? "bg-emerald-500 border-emerald-500 text-white shadow-sm"
-                                                    : "bg-white border-gray-200 text-gray-300"
-                                                    }`}>
-                                                    <Check className="w-3 h-3" />
+                                        {/* Details List */}
+                                        <div className="space-y-1.5 flex-grow overflow-y-auto">
+                                            <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                                        <AlertCircle className="w-4 h-4" />
+                                                    </div>
+                                                    <span className="text-[13px] font-bold text-gray-400">Status</span>
                                                 </div>
-                                                <div>
-                                                    <p className={`text-[13px] font-bold ${step.isCompleted ? "text-gray-900" : "text-gray-400 opacity-60"}`}>{step.label}</p>
-                                                    <p className="text-[11px] font-semibold text-gray-400 mt-0.5">{step.date}</p>
+                                                <span className="text-[13px] font-bold text-gray-900">{selectedBooking.status}</span>
+                                            </div>
+
+                                            <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                                        <Calendar className="w-4 h-4" />
+                                                    </div>
+                                                    <span className="text-[13px] font-bold text-gray-400">Booked Date</span>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-[13px] font-bold text-gray-900">{new Date(selectedBooking.createdAt).toLocaleDateString()}</p>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
 
-                                <div className="flex items-center justify-between py-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                                            <Check className="w-4 h-4" />
+                                            {selectedBooking.dueDate && (
+                                                <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
+                                                            <Clock className="w-4 h-4" />
+                                                        </div>
+                                                        <span className="text-[13px] font-bold text-gray-400">Due Date</span>
+                                                    </div>
+                                                    <span className="text-[13px] font-bold text-rose-600">{new Date(selectedBooking.dueDate).toLocaleDateString()}</span>
+                                                </div>
+                                            )}
+
+                                            <div className="py-6 border-b border-gray-50/80">
+                                                <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                                                    <Clock className="w-3 h-3" /> Booking Lifecycle
+                                                </p>
+                                                <div className="space-y-6 relative ml-2">
+                                                    <div className="absolute left-[11px] top-2 bottom-2 w-[1px] bg-gray-100"></div>
+                                                    {[
+                                                        { label: "Order Created", isCompleted: true },
+                                                        { label: "Funds in Escrow", isCompleted: selectedBooking.status === "IN_ESCROW" || selectedBooking.status === "COMPLETED" },
+                                                        { label: "Work Approved", isCompleted: selectedBooking.status === "COMPLETED" },
+                                                        { label: "Funds Released", isCompleted: selectedBooking.status === "COMPLETED" },
+                                                    ].map((step, idx) => (
+                                                        <div key={idx} className="flex gap-4 relative z-10">
+                                                            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 ${step.isCompleted
+                                                                ? "bg-emerald-500 border-emerald-500 text-white shadow-sm"
+                                                                : "bg-white border-gray-200 text-gray-300"
+                                                                }`}>
+                                                                <Check className="w-3 h-3" />
+                                                            </div>
+                                                            <p className={`text-[13px] font-bold ${step.isCompleted ? "text-gray-900" : "text-gray-400 opacity-60"}`}>{step.label}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-center justify-between py-3">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
+                                                        <Check className="w-4 h-4" />
+                                                    </div>
+                                                    <span className="text-[13px] font-bold text-gray-400">Total Price</span>
+                                                </div>
+                                                <span className="text-[17px] font-black text-emerald-600">₹{selectedBooking.influencerAmount.toLocaleString()}</span>
+                                            </div>
                                         </div>
-                                        <span className="text-[13px] font-bold text-gray-400">Total Price</span>
-                                    </div>
-                                    <span className="text-[17px] font-black text-emerald-600">{selectedBooking.price}</span>
-                                </div>
-                            </div>
 
-                            {/* Actions */}
-                            <div className="mt-8 pt-6 border-t border-gray-100">
-                                <button className="w-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold py-3.5 px-4 rounded-[16px] text-sm transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-[0.98]">
-                                    <XCircle className="w-4 h-4" />
-                                    Cancel Booking
-                                </button>
+                                        {/* Actions */}
+                                        <div className="mt-8 pt-6 border-t border-gray-100">
+                                            <button className="w-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold py-3.5 px-4 rounded-[16px] text-sm transition-all flex items-center justify-center gap-2">
+                                                <XCircle className="w-4 h-4" />
+                                                Cancel Booking
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="h-full flex items-center justify-center text-gray-400 italic text-sm">Select a booking to see details</div>
+                                )}
                             </div>
                         </div>
                     </div>

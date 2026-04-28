@@ -4,15 +4,15 @@ import mongoose from "mongoose";
 import { getConversations, getMessages, sendMessage } from "../services/chat.service.js";
 import { MessageModel } from "../models/chat.model.js";
 
-//  Get messages between two users
+//  Get messages for a gig request
 export const getChatMessagesController = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const connectionId = req.params.connectionId as string;
+    const gigRequestId = req.params.gigRequestId as string;
 
-    const messages = await getMessages(connectionId);
+    const messages = await getMessages(gigRequestId);
 
     res.json({ messages });
   } catch (err) {
@@ -25,13 +25,17 @@ export const getChatMessagesController = async (
 export const sendMessageController = async (req: Request, res: Response) => {
   try {
     const senderId = req.user!.userId;
-    const { connectionId, content } = req.body;
+    const { gigRequestId, content } = req.body;
 
-    const message = await sendMessage(senderId, connectionId, content);
+    const message = await sendMessage(senderId, gigRequestId, content);
 
     res.json({ success: true, message });
-  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
     console.error("sendMessage error:", err);
+    if (err.message === "Chat is only available for accepted gig requests") {
+      return res.status(403).json({ message: err.message });
+    }
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -43,8 +47,9 @@ export const getConversationsController = async (
 ) => {
   try {
     const userId = req.user!.userId;
+    const role = (req.query.role as string) || undefined;
 
-    const data = await getConversations(userId);
+    const data = await getConversations(userId, role);
 
     res.json({ conversations: data });
   } catch (err) {
@@ -60,12 +65,11 @@ export const markAsReadController = async (
 ) => {
   try {
     const userId = req.user!.userId;
-    const connectionId = req.params.connectionId as string;
+    const gigRequestId = req.params.gigRequestId as string;
 
-    //  UPDATE MESSAGES USING connectionId
     await MessageModel.updateMany(
       {
-        connectionId: new mongoose.Types.ObjectId(connectionId),
+        gigRequestId: new mongoose.Types.ObjectId(gigRequestId),
         receiverId: userId,
         status: { $ne: "READ" },
       },
