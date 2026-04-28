@@ -276,8 +276,8 @@ importers:
         specifier: ^17.2.3
         version: 17.2.3
       ioredis:
-        specifier: ^5.9.2
-        version: 5.9.2
+        specifier: ^5.10.1
+        version: 5.10.1
       meilisearch:
         specifier: ^0.55.0
         version: 0.55.0
@@ -1537,7 +1537,7 @@ packages:
   "@ioredis/commands@1.5.1":
     resolution:
       {
-    integrity: sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw==,
+        integrity: sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw==,
       }
 
   "@jridgewell/gen-mapping@0.3.13":
@@ -4747,13 +4747,6 @@ packages:
     engines: { node: ">= 0.4" }
 
   ioredis@5.10.1:
-    resolution:
-      {
-        integrity: sha512-HuEDBTI70aYdx1v6U97SbNx9F1+svQKBDo30o0b9fw055LMepzpOOd0Ccg9Q6tbqmBSJaMuY0fB7yw9/vjBYCA==,
-      }
-    engines: { node: ">=12.22.0" }
-
-  ioredis@5.9.2:
     resolution:
       {
         integrity: sha512-HuEDBTI70aYdx1v6U97SbNx9F1+svQKBDo30o0b9fw055LMepzpOOd0Ccg9Q6tbqmBSJaMuY0fB7yw9/vjBYCA==,
@@ -10830,20 +10823,6 @@ snapshots:
       side-channel: 1.1.0
 
   ioredis@5.10.1:
-    dependencies:
-      "@ioredis/commands": 1.5.1
-      cluster-key-slot: 1.1.2
-      debug: 4.4.3(supports-color@5.5.0)
-      denque: 2.1.0
-      lodash.defaults: 4.2.0
-      lodash.isarguments: 3.1.0
-      redis-errors: 1.2.0
-      redis-parser: 3.0.0
-      standard-as-callback: 2.1.0
-    transitivePeerDependencies:
-      - supports-color
-
-  ioredis@5.9.2:
     dependencies:
       "@ioredis/commands": 1.5.1
       cluster-key-slot: 1.1.2
