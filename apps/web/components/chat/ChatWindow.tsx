@@ -93,7 +93,7 @@ export function ChatWindow({
 
     const socketInstance = io("http://localhost:6001", {
       auth: { userId: currentUserId },
-      transports: ["websocket"], // Force websocket for faster/more stable connection
+      transports: ["websocket"],
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,
@@ -101,6 +101,10 @@ export function ChatWindow({
 
     socketInstance.on("connect", () => {
       console.log("Chat socket connected ✅");
+      // Join the shared conversation room as soon as connected
+      if (gigRequestId) {
+        socketInstance.emit("join_conversation", gigRequestId);
+      }
     });
 
     socketInstance.on("receive_message", (message: Message) => {
@@ -124,7 +128,8 @@ export function ChatWindow({
       }
     });
 
-    socketInstance.on("messages_read", ({ gigRequestId: readGigRequestId }) => {
+    // ✅ When other user reads our messages → update tick colour to blue
+    socketInstance.on("messages_read", ({ gigRequestId: readGigRequestId }: { gigRequestId: string; readByUserId: string }) => {
       setMessages((prev) =>
         prev.map((m) =>
           m.gigRequestId === readGigRequestId && m.senderId === currentUserId
@@ -137,6 +142,10 @@ export function ChatWindow({
     socketRef.current = socketInstance;
 
     return () => {
+      // Leave conversation room cleanly
+      if (gigRequestId) {
+        socketInstance.emit("leave_conversation", gigRequestId);
+      }
       console.log("Disconnecting chat socket...");
       socketInstance.disconnect();
     };
@@ -218,10 +227,15 @@ export function ChatWindow({
   const isBrand = user?.role === "BRAND";
   const isChatDisabled = isPending && isBrand;
 
-  // ✅ mark as read
+  // ✅ mark as read — via REST (persists to DB) + socket (live double-tick)
   useEffect(() => {
     if (!gigRequestId) return;
+    // REST: Update DB status for unread messages
     api.post(`/chat/read/${gigRequestId}`).catch(console.error);
+    // Socket: Notify sender their messages are now READ (blue ticks)
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("mark_read", gigRequestId);
+    }
   }, [gigRequestId, accessToken]);
 
   return (
