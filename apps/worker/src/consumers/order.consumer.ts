@@ -13,7 +13,9 @@ export async function startOrderConsumer(channel: Channel) {
   channel.consume(
     ORDER_CREATED_EVENT,
     async (msg: ConsumeMessage | null) => {
+      console.log("🔥 RAW MESSAGE RECEIVED");
       if (!msg) return;
+          console.log("📦 MESSAGE CONTENT:", msg.content.toString());
 
       try {
         const data = JSON.parse(msg.content.toString());

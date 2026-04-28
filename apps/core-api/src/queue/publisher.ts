@@ -8,7 +8,9 @@ export async function publishEvent(queue: string, data: unknown) {
   if (!channel) {
     throw new Error("RabbitMQ channel not initialized");
   }
+    await channel.assertQueue(queue, { durable: true });
 
+  console.log("📤 Sending event to queue:", queue);
   channel.sendToQueue(
     queue,
     Buffer.from(JSON.stringify(data)),

@@ -1,6 +1,7 @@
 import mongoose, { Types } from "mongoose";
 
 import { publishEvent } from "../queue/publisher.js";
+import { ORDER_CREATED_EVENT } from "../queue/events.js";
 import { OrderModel } from "../models/order.model.js";
 import { GigModel } from "../models/gig.model.js";
 import { GigRequestModel } from "../models/gig-request.model.js";
@@ -70,6 +71,13 @@ export const createOrderService = async (data: CreateOrderInput) => {
     escrowStatus: "HOLD",
     workStatus: "NOT_STARTED",
   });
+await publishEvent(ORDER_CREATED_EVENT, {
+  orderId: order._id.toString(),
+  buyerId: order.buyerId.toString(),
+  influencerId: order.influencerId.toString(),
+  amount: order.amount,
+});
+console.log("🚀 order.created event published");
   await publishEvent("order.created", {
     orderId: order._id.toString(),
     buyerId: order.buyerId,
