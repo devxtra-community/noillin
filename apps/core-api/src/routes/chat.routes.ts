@@ -3,18 +3,18 @@ import { Router } from "express";
 import { getConversationsController, getChatMessagesController, markAsReadController, sendMessageController } from "../controllers/chat.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 
-const router:Router = Router();
+const router: Router = Router();
 router.get("/conversations", authenticate, getConversationsController);
 router.post("/send", authenticate, sendMessageController);
 
 router.get(
-  "/:connectionId",
+  "/:gigRequestId",
   authenticate,
   getChatMessagesController
 );
 
 router.post(
-  "/read/:connectionId",
+  "/read/:gigRequestId",
   authenticate,
   markAsReadController
 );

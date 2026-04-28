@@ -77,7 +77,7 @@ function SignupForm() {
       const response = await api.post("/auth/signup", payload);
 
       if (response.data.role === "BRAND") {
-        router.push("/gig-list")
+        router.push("/profile-setup")
       } else {
         router.push("/")
       }

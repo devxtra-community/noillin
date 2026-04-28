@@ -1,105 +1,93 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, Wallet, DollarSign, ArrowUpRight, History, MoreVertical, ChevronRight, CheckCircle2, Clock, ShieldAlert, AlertCircle, RefreshCw } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, Wallet, DollarSign, ArrowUpRight, History,  ChevronRight, CheckCircle2, Clock, ShieldAlert, Loader2 } from "lucide-react";
 
-interface Transaction {
-    id: number;
-    brand: string;
-    gig: string;
-    price: string;
-    totalAmount: string;
-    deductions: string;
-    netAmount: string;
-    date: string;
+import api from "@/lib/axios.client";
+
+interface Order {
+    _id: string;
+    amount: number;
+    platformFee: number;
+    influencerAmount: number;
     status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED" | "DISPUTED";
-    timeline: {
-        label: string;
-        date: string;
-        isCompleted: boolean;
-    }[];
+    escrowStatus: "HOLD" | "RELEASED";
+    payoutStatus: "HOLD" | "AVAILABLE" | "PROCESSING" | "PAID";
+    createdAt: string;
+    gigId: {
+        title: string;
+    };
+    // Note: Brand name is not directly on the order, we'll use a placeholder or derived from buyer info if available
 }
 
 export default function EarningsPage() {
-    const [selectedTxId, setSelectedTxId] = useState(1);
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [withdrawing, setWithdrawing] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
     const [activeFilter, setActiveFilter] = useState("30 days");
+
+    const fetchOrders = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get("/orders/history");
+            setOrders(response.data);
+            if (response.data.length > 0) {
+                setSelectedOrderId(response.data[0]._id);
+            }
+        } catch (error) {
+            console.error("Failed to fetch orders:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchOrders();
+    }, []);
+
+    const handleWithdraw = async () => {
+        const availableAmount = stats.available;
+        if (availableAmount <= 0) return;
+
+        if (!confirm(`Are you sure you want to withdraw ₹${availableAmount}?`)) return;
+
+        try {
+            setWithdrawing(true);
+            await api.post("/payouts/withdraw");
+            alert("Withdrawal successful! Funds are on the way.");
+            fetchOrders(); // Refresh data
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            console.error("Withdrawal failed:", error);
+            alert(error.response?.data?.message || "Withdrawal failed. Please try again.");
+        } finally {
+            setWithdrawing(false);
+        }
+    };
+
+    const stats = {
+        total: orders
+            .filter(o => o.status === "COMPLETED")
+            .reduce((sum, o) => sum + (o.influencerAmount || 0), 0),
+        escrow: orders
+            .filter(o => o.status === "IN_ESCROW")
+            .reduce((sum, o) => sum + (o.influencerAmount || 0), 0),
+        available: orders
+            .filter(o => o.payoutStatus === "AVAILABLE")
+            .reduce((sum, o) => sum + (o.influencerAmount || 0), 0),
+        thisMonth: orders
+            .filter(o => {
+                const date = new Date(o.createdAt);
+                const now = new Date();
+                return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+            })
+            .reduce((sum, o) => sum + (o.influencerAmount || 0), 0)
+    };
 
     const filters = ["Last 7 days", "30 days", "Month"];
 
-    const [transactions] = useState<Transaction[]>([
-        {
-            id: 1,
-            brand: "Lumina Skincare",
-            gig: "IG Reel Promotion",
-            price: "$150.00",
-            totalAmount: "$150.00",
-            deductions: "$15.00",
-            netAmount: "$135.00",
-            date: "Oct 24, 2023",
-            status: "COMPLETED",
-            timeline: [
-                { label: "Payment Initiated", date: "Oct 22, 2023", isCompleted: true },
-                { label: "Moved to Escrow", date: "Oct 23, 2023", isCompleted: true },
-                { label: "Funds Released", date: "Oct 24, 2023", isCompleted: true },
-            ]
-        },
-        {
-            id: 2,
-            brand: "Urban Coffee",
-            gig: "TikTok Ad Campaign",
-            price: "$275.00",
-            totalAmount: "$275.00",
-            deductions: "$27.50",
-            netAmount: "$247.50",
-            date: "Oct 22, 2023",
-            status: "IN_ESCROW",
-            timeline: [
-                { label: "Payment Initiated", date: "Oct 21, 2023", isCompleted: true },
-                { label: "Moved to Escrow", date: "Oct 22, 2023", isCompleted: true },
-                { label: "Funds Released", date: "-", isCompleted: false },
-            ]
-        },
-        {
-            id: 3,
-            brand: "TechNova",
-            gig: "YouTube Review",
-            price: "$500.00",
-            totalAmount: "$500.00",
-            deductions: "$50.00",
-            netAmount: "$450.00",
-            date: "Oct 20, 2023",
-            status: "PENDING",
-            timeline: [
-                { label: "Payment Initiated", date: "Oct 20, 2023", isCompleted: true },
-                { label: "Moved to Escrow", date: "-", isCompleted: false },
-                { label: "Funds Released", date: "-", isCompleted: false },
-            ]
-        },
-        {
-            id: 4,
-            brand: "Aura Fashion",
-            gig: "Product Unboxing",
-            price: "$210.00",
-            totalAmount: "$210.00",
-            deductions: "$21.00",
-            netAmount: "$189.00",
-            date: "Oct 19, 2023",
-            status: "DISPUTED",
-            timeline: [
-                { label: "Payment Initiated", date: "Oct 18, 2023", isCompleted: true },
-                { label: "Dispute Raised", date: "Oct 19, 2023", isCompleted: true },
-                { label: "Under Review", date: "Oct 20, 2023", isCompleted: false },
-            ]
-        }
-    ]);
-
-    const selectedTx = transactions.find(t => t.id === selectedTxId) || transactions[0];
-
-    const stats = [
-        { label: "TOTAL EARNED", value: "$12,450", color: "text-gray-900" },
-        { label: "IN ESCROW", value: "$2,300", color: "text-blue-600" },
-        { label: "THIS MONTH", value: "$3,200", color: "text-emerald-500" },
-    ];
+    const selectedOrder = orders.find(o => o._id === selectedOrderId) || orders[0];
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -111,8 +99,25 @@ export default function EarningsPage() {
         }
     };
 
+    const getPayoutBadge = (status: string) => {
+        switch (status) {
+            case "PAID": return "bg-emerald-500 text-white";
+            case "PROCESSING": return "bg-blue-500 text-white";
+            case "AVAILABLE": return "bg-amber-500 text-white";
+            default: return "bg-gray-200 text-gray-700";
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="h-[80vh] w-full flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+            </div>
+        );
+    }
+
     return (
-        <div className="p-4 sm:p-6 lg:p-10 max-w-[1600px] mx-auto w-full flex flex-col">
+        <div className="p-4 sm:p-6 lg:p-10 max-w-[1600px] mx-auto w-full flex flex-col font-sans">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
                 <div>
@@ -138,35 +143,58 @@ export default function EarningsPage() {
 
             {/* Stats Row */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-                {/* Available Balance - spans 2 columns on lg */}
+                {/* Available Balance */}
                 <div className="lg:col-span-1 bg-white rounded-[28px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group min-h-[160px]">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-3xl opacity-40 -translate-y-1/2 translate-x-1/2"></div>
                     <div>
                         <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">Available Balance</p>
-                        <h2 className="text-4xl font-black text-gray-900 tracking-tighter leading-none">$8,900</h2>
+                        <h2 className="text-4xl font-black text-gray-900 tracking-tighter leading-none">₹{stats.available.toLocaleString()}</h2>
                     </div>
-                    <button className="mt-4 w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 rounded-xl text-xs shadow-md shadow-emerald-100 transition-all flex items-center justify-center gap-2">
-                        <Wallet className="w-4 h-4" /> Withdraw
+                    <button
+                        onClick={handleWithdraw}
+                        disabled={stats.available <= 0 || withdrawing}
+                        className={`mt-4 w-full ${stats.available > 0 ? "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-100" : "bg-gray-200 cursor-not-allowed text-gray-400"} text-white font-black py-3 rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2`}
+                    >
+                        {withdrawing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wallet className="w-4 h-4" />}
+                        {withdrawing ? "Processing..." : "Withdraw"}
                     </button>
                 </div>
 
-                {stats.map((s, i) => (
-                    <div key={i} className="bg-white rounded-[28px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between group h-full">
-                        <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">{s.label}</p>
-                        <div className="flex items-end justify-between">
-                            <h3 className={`text-3xl font-black tracking-tight ${s.color}`}>{s.value}</h3>
-                            <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-200 group-hover:text-emerald-500 transition-colors">
-                                <ArrowUpRight className="w-5 h-5" />
-                            </div>
+                <div className="bg-white rounded-[28px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between group h-full">
+                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">TOTAL EARNED</p>
+                    <div className="flex items-end justify-between">
+                        <h3 className="text-3xl font-black tracking-tight text-gray-900">₹{stats.total.toLocaleString()}</h3>
+                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-200 group-hover:text-emerald-500 transition-colors">
+                            <ArrowUpRight className="w-5 h-5" />
                         </div>
                     </div>
-                ))}
+                </div>
+
+                <div className="bg-white rounded-[28px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between group h-full">
+                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">IN ESCROW</p>
+                    <div className="flex items-end justify-between">
+                        <h3 className="text-3xl font-black tracking-tight text-blue-600">₹{stats.escrow.toLocaleString()}</h3>
+                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-200 group-hover:text-emerald-500 transition-colors">
+                            <ArrowUpRight className="w-5 h-5" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-[28px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between group h-full">
+                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">THIS MONTH</p>
+                    <div className="flex items-end justify-between">
+                        <h3 className="text-3xl font-black tracking-tight text-emerald-500">₹{stats.thisMonth.toLocaleString()}</h3>
+                        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-200 group-hover:text-emerald-500 transition-colors">
+                            <ArrowUpRight className="w-5 h-5" />
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Left Side: Table */}
-                <div className="xl:col-span-2 bg-white rounded-[32px] shadow-sm border border-gray-100 flex flex-col">
+                <div className="xl:col-span-2 bg-white rounded-[32px] shadow-sm border border-gray-100 flex flex-col min-h-[500px]">
                     <div className="px-8 py-6 border-b border-gray-50 flex items-center justify-between shrink-0">
                         <h3 className="text-[17px] font-bold text-gray-900 tracking-tight">Recent Transactions</h3>
                         <div className="relative">
@@ -179,118 +207,126 @@ export default function EarningsPage() {
                         </div>
                     </div>
 
-                    <div className="px-4 pb-6">
+                    <div className="px-4 pb-6 overflow-auto max-h-[600px]">
                         <table className="w-full text-left border-separate border-spacing-y-2">
                             <thead className="sticky top-0 bg-white z-10">
                                 <tr>
                                     <th className="px-6 py-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Gig Name</th>
-                                    <th className="px-6 py-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Brand Name</th>
-                                    <th className="px-6 py-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest text-right">Price</th>
+                                    <th className="px-6 py-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest text-right">Status</th>
+                                    <th className="px-6 py-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest text-right">Net Amount</th>
                                     <th className="w-10"></th>
                                 </tr>
                             </thead>
                             <tbody className="divide-none">
-                                {transactions.map((tx) => (
+                                {orders.map((order) => (
                                     <tr
-                                        key={tx.id}
-                                        onClick={() => setSelectedTxId(tx.id)}
-                                        className={`group cursor-pointer transition-all ${selectedTxId === tx.id
+                                        key={order._id}
+                                        onClick={() => setSelectedOrderId(order._id)}
+                                        className={`group cursor-pointer transition-all ${selectedOrderId === order._id
                                             ? "bg-emerald-50/40"
                                             : "hover:bg-gray-50"
                                             }`}
                                     >
                                         <td className="px-6 py-5 first:rounded-l-2xl last:rounded-r-2xl border-t border-b border-l border-transparent transition-all group-hover:border-emerald-100/50">
-                                            <div className="font-bold text-[14px] text-gray-900 leading-tight">{tx.gig}</div>
-                                            <div className="text-[11px] font-semibold text-gray-400 mt-1">{tx.date}</div>
+                                            <div className="font-bold text-[14px] text-gray-900 leading-tight">{order.gigId?.title || "Influencer Booking"}</div>
+                                            <div className="text-[11px] font-semibold text-gray-400 mt-1">{new Date(order.createdAt).toLocaleDateString()}</div>
                                         </td>
-                                        <td className="px-6 py-5 border-t border-b border-transparent group-hover:border-emerald-100/50">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-[10px] font-black text-gray-400">
-                                                    {tx.brand.charAt(0)}
-                                                </div>
-                                                <span className="font-bold text-[14px] text-gray-700">{tx.brand}</span>
+                                        <td className="px-6 py-5 border-t border-b border-transparent group-hover:border-emerald-100/50 text-right">
+                                            <div className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black tracking-widest ${getStatusColor(order.status)}`}>
+                                                {order.status}
                                             </div>
                                         </td>
                                         <td className="px-6 py-5 border-t border-b border-transparent group-hover:border-emerald-100/50 text-right font-black text-[15px] text-gray-900">
-                                            {tx.price}
+                                            ₹{(order.influencerAmount || 0).toLocaleString()}
                                         </td>
                                         <td className="px-4 py-5 last:rounded-r-2xl border-t border-b border-r border-transparent group-hover:border-emerald-100/50 text-gray-300">
-                                            <ChevronRight className={`w-5 h-5 transition-transform ${selectedTxId === tx.id ? "translate-x-1 text-emerald-500" : ""}`} />
+                                            <ChevronRight className={`w-5 h-5 transition-transform ${selectedOrderId === order._id ? "translate-x-1 text-emerald-500" : ""}`} />
                                         </td>
                                     </tr>
                                 ))}
+                                {orders.length === 0 && (
+                                    <tr>
+                                        <td colSpan={4} className="text-center py-20 text-gray-400 font-semibold italic">No transactions found</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 {/* Right Side: Detail Sidecard */}
-                <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 flex flex-col h-fit sticky top-24">
-                    <div className="p-8 border-b border-gray-50 flex flex-col items-center">
-                        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center text-xl font-black text-gray-400 mb-4 shadow-sm">
-                            {selectedTx.brand.charAt(0)}
-                        </div>
-                        <h3 className="font-black text-xl text-gray-900 tracking-tight">{selectedTx.brand}</h3>
-                        <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest mt-1 opacity-80">{selectedTx.gig}</p>
+                {selectedOrder && (
+                    <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 flex flex-col h-fit sticky top-24">
+                        <div className="p-8 border-b border-gray-50 flex flex-col items-center">
+                            <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center text-xl font-black text-emerald-500 mb-4 shadow-sm">
+                                <DollarSign className="w-8 h-8" />
+                            </div>
+                            <h3 className="font-black text-xl text-gray-900 tracking-tight text-center">{selectedOrder.gigId?.title || "Influencer Booking"}</h3>
+                            <p className="text-[13px] font-bold text-gray-400 uppercase tracking-widest mt-1 opacity-80">Order Details</p>
 
-                        <div className={`mt-5 px-4 py-1.5 rounded-full text-[11px] font-black tracking-widest ${getStatusColor(selectedTx.status)} shadow-sm`}>
-                            {selectedTx.status}
+                            <div className={`mt-5 px-5 py-2 rounded-xl text-[11px] font-black tracking-widest ${getPayoutBadge(selectedOrder.payoutStatus)} shadow-lg shadow-gray-100`}>
+                                PAYOUT: {selectedOrder.payoutStatus}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="p-8 space-y-10">
-                        {/* Timeline */}
-                        <div>
-                            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                                <History className="w-3 h-3" /> Transaction Timeline
-                            </p>
-                            <div className="space-y-6 relative">
-                                <div className="absolute left-2.5 top-2 bottom-2 w-[1px] bg-gray-100"></div>
-                                {selectedTx.timeline.map((item, idx) => (
-                                    <div key={idx} className="flex gap-4 relative z-10">
-                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 ${item.isCompleted
-                                            ? "bg-emerald-500 border-emerald-500 text-white"
-                                            : "bg-white border-gray-200 text-gray-300"
-                                            }`}>
+                        <div className="p-8 space-y-10">
+                            {/* Payout Info */}
+                            <div>
+                                <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                                    <History className="w-3 h-3" /> Status Tracking
+                                </p>
+                                <div className="space-y-6 relative">
+                                    <div className="absolute left-2.5 top-2 bottom-2 w-[1px] bg-gray-100"></div>
+                                    <div className="flex gap-4 relative z-10">
+                                        <div className="w-5 h-5 rounded-full bg-emerald-500 border-2 border-emerald-500 text-white flex items-center justify-center shrink-0">
                                             <CheckCircle2 className="w-3 h-3" />
                                         </div>
                                         <div>
-                                            <p className={`text-[13px] font-bold ${item.isCompleted ? "text-gray-900" : "text-gray-400"}`}>{item.label}</p>
-                                            <p className="text-[11px] font-semibold text-gray-400 mt-0.5">{item.date}</p>
+                                            <p className="text-[13px] font-bold text-gray-900 border-gray-100">Payment Received</p>
+                                            <p className="text-[11px] font-semibold text-gray-400 mt-0.5">{new Date(selectedOrder.createdAt).toLocaleDateString()}</p>
                                         </div>
                                     </div>
-                                ))}
+                                    <div className="flex gap-4 relative z-10">
+                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 ${selectedOrder.escrowStatus === "RELEASED" ? "bg-emerald-500 border-emerald-500 text-white" : "bg-white border-gray-200 text-gray-300"}`}>
+                                            <Clock className="w-3 h-3" />
+                                        </div>
+                                        <div>
+                                            <p className={`text-[13px] font-bold ${selectedOrder.escrowStatus === "RELEASED" ? "text-gray-900" : "text-gray-400"}`}>Escrow Released</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-4 relative z-10">
+                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 border-2 ${selectedOrder.payoutStatus === "PAID" ? "bg-emerald-500 border-emerald-500 text-white" : "bg-white border-gray-200 text-gray-300"}`}>
+                                            <ShieldAlert className="w-3 h-3" />
+                                        </div>
+                                        <div>
+                                            <p className={`text-[13px] font-bold ${selectedOrder.payoutStatus === "PAID" ? "text-gray-900" : "text-gray-400"}`}>Final Payout</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
 
-                        {/* Financial Breakdown */}
-                        <div className="bg-gray-50/50 rounded-3xl p-6 border border-gray-100/50">
-                            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em] mb-5">Financial Breakdown</p>
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-[13px] font-bold text-gray-500">Gross Amount</span>
-                                    <span className="text-[14px] font-black text-gray-900">{selectedTx.totalAmount}</span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-[13px] font-bold text-gray-500">Deductions (10%)</span>
-                                    <span className="text-[14px] font-bold text-rose-500">-{selectedTx.deductions}</span>
-                                </div>
-                                <div className="h-[1px] bg-gray-200/60 my-2"></div>
-                                <div className="flex justify-between items-center pt-2">
-                                    <span className="text-[14px] font-black text-gray-900">Net Amount</span>
-                                    <span className="text-[20px] font-black text-emerald-600 tracking-tighter">{selectedTx.netAmount}</span>
+                            {/* Financial Breakdown */}
+                            <div className="bg-gray-50/50 rounded-3xl p-6 border border-gray-100/50">
+                                <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em] mb-5">Financial Breakdown</p>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[13px] font-bold text-gray-500">Gross Price</span>
+                                        <span className="text-[14px] font-black text-gray-900">₹{(selectedOrder.amount || 0).toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[13px] font-bold text-gray-500">Platform Fee (10%)</span>
+                                        <span className="text-[14px] font-bold text-rose-500">-₹{(selectedOrder.platformFee || 0).toLocaleString()}</span>
+                                    </div>
+                                    <div className="h-[1px] bg-gray-200/60 my-2"></div>
+                                    <div className="flex justify-between items-center pt-2">
+                                        <span className="text-[14px] font-black text-gray-900">Your Earning</span>
+                                        <span className="text-[20px] font-black text-emerald-600 tracking-tighter">₹{(selectedOrder.influencerAmount || 0).toLocaleString()}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div className="p-8 bg-white shrink-0 shadow-[0_-10px_30px_-15px_rgba(0,0,0,0.05)]">
-                        <button className="w-full py-4 bg-white border-2 border-gray-100 hover:border-emerald-100 hover:bg-emerald-50 transition-all rounded-[20px] text-[13px] font-bold text-gray-500 hover:text-emerald-600 flex items-center justify-center gap-2 group">
-                            <ShieldAlert className="w-4 h-4 text-gray-300 group-hover:text-emerald-500 transition-colors" />
-                            Report a Problem
-                        </button>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );

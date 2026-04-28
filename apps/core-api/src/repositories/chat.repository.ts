@@ -2,12 +2,12 @@ import { Types } from "mongoose";
 
 import { MessageModel } from "../models/chat.model.js";
 
-//  Get messages by connectionId
-export const findMessagesByConnection = async (
-  connectionId: Types.ObjectId
+//  Get messages by gigRequestId
+export const findMessagesByGigRequest = async (
+  gigRequestId: Types.ObjectId
 ) => {
   return MessageModel.find({
-    connectionId: new Types.ObjectId(connectionId), //  ensure correct type
+    gigRequestId: new Types.ObjectId(gigRequestId),
   })
     .sort({ createdAt: 1 })
     .lean();
@@ -15,22 +15,24 @@ export const findMessagesByConnection = async (
 
 //  Add new message
 export const addMessage = async (data: {
-    connectionId: Types.ObjectId;
-    senderId: string;
-    receiverId: string;
-    content: string;
-    status: string;
+  gigRequestId: Types.ObjectId;
+  senderId: string;
+  receiverId: string;
+  content: string;
+  status: string;
 }) => {
-    return MessageModel.create(data);
+  return MessageModel.create(data);
 };
 
-//  Get conversation list (sidebar)
-export const aggregateConversations = async (userId: string) => {
+//  Get conversation list (sidebar) — only shows accepted gig request chats
+export const aggregateConversations = async (userId: string, role?: string) => {
   const userObjectId = new Types.ObjectId(userId);
 
-  return MessageModel.aggregate([
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pipeline: any[] = [
     {
       $match: {
+        gigRequestId: { $exists: true, $ne: null },
         $or: [
           { senderId: userObjectId },
           { receiverId: userObjectId },
@@ -42,7 +44,7 @@ export const aggregateConversations = async (userId: string) => {
 
     {
       $group: {
-        _id: "$connectionId", // Group by connectionId directly
+        _id: "$gigRequestId", // Group by gigRequestId
 
         lastMessage: { $first: "$content" },
         lastMessageTime: { $first: "$createdAt" },
@@ -80,7 +82,7 @@ export const aggregateConversations = async (userId: string) => {
       },
     },
 
-    //  Join user
+    //  Join other user
     {
       $lookup: {
         from: "users",
@@ -143,22 +145,30 @@ export const aggregateConversations = async (userId: string) => {
       },
     },
 
-    //  Lookup connection to get gigId
+    //  Lookup gig request to get gigId
     {
       $lookup: {
-        from: "connections",
+        from: "gigrequests",
         localField: "_id",
         foreignField: "_id",
-        as: "connection",
+        as: "gigRequest",
       },
     },
-    { $unwind: "$connection" },
+    { $unwind: "$gigRequest" },
+  ];
 
-    //  Lookup gig
+  if (role === "brand") {
+    pipeline.push({ $match: { "gigRequest.brandId": userObjectId } });
+  } else if (role === "influencer") {
+    pipeline.push({ $match: { "gigRequest.influencerId": userObjectId } });
+  }
+
+  pipeline.push(
+    //  Lookup gig details
     {
       $lookup: {
         from: "gigs",
-        localField: "connection.gigId",
+        localField: "gigRequest.gigId",
         foreignField: "_id",
         as: "gig",
       },
@@ -168,12 +178,12 @@ export const aggregateConversations = async (userId: string) => {
     //  Final output
     {
       $project: {
-        _id: 1, // connectionId
-        connectionId: "$_id",
+        _id: 1, // gigRequestId
+        gigRequestId: "$_id",
         lastMessage: 1,
         lastMessageTime: 1,
         unreadCount: 1,
-        gigTitle: { $ifNull: ["$gig.title", "Direct Chat"] },
+        gigTitle: { $ifNull: ["$gig.title", "Unknown Gig"] },
 
         user: {
           _id: "$user._id",
@@ -182,6 +192,8 @@ export const aggregateConversations = async (userId: string) => {
           profileImage: "$profileImage",
         },
       },
-    },
-  ]);
+    }
+  );
+
+  return MessageModel.aggregate(pipeline);
 };

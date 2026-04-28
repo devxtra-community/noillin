@@ -20,6 +20,10 @@ const connectionSchema = new Schema(
       ref: "Gig",
     },
 
+    note: {
+      type: String,
+    },
+
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],

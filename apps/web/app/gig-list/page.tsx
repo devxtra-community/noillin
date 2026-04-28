@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { Zap } from "lucide-react";
 
 import { useAuthStore } from "@/store/auth.store";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ interface Gig {
     followersCount?: number;
     categories?: string[];
   };
+  shortDescription: string;
   createdAt: string;
 }
 
@@ -109,9 +111,9 @@ const formatCurrency = (amount: number, currency = "INR") => {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden animate-pulse">
-      <div className="h-1 bg-gray-200 w-full" />
-      <div className="p-5 space-y-3">
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden animate-pulse">
+      <div className="h-1 bg-slate-200 w-full" />
+      <div className="p-8 flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full bg-gray-200 shrink-0" />
           <div className="flex-1 space-y-1.5">
@@ -154,7 +156,7 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
 
   if (view === "list") {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group flex items-center gap-5 px-5 py-4">
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-100/50 hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-300 overflow-hidden group flex items-center gap-6 px-8 py-6 hover:-translate-y-1">
         <div className="h-full w-1 rounded-full shrink-0 self-stretch" style={{ background: color }} />
         <div
           className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs shrink-0"
@@ -169,7 +171,8 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
           </div>
-          <p className="text-xs text-gray-400 truncate">{gig.title}</p>
+          <p className="text-sm font-semibold text-gray-800 truncate mb-0.5">{gig.title}</p>
+          <p className="text-xs text-gray-400 truncate">{gig.shortDescription}</p>
         </div>
         <div className="flex gap-1.5 shrink-0">
           {platforms.map((p) => (
@@ -190,9 +193,9 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
           </svg>
           {availableLabel}
         </div>
-        <Link 
+        <Link
           href={`/gig-details?id=${gig._id}`}
-          className="shrink-0 text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+          className="shrink-0 text-sm font-bold bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-2xl transition-all shadow-md hover:shadow-lg"
         >
           View Gig
         </Link>
@@ -201,9 +204,9 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 overflow-hidden group">
-      <div className="h-1 w-full" style={{ background: color }} />
-      <div className="p-5">
+    <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-100/50 hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-300 hover:-translate-y-2 overflow-hidden group flex flex-col h-full">
+      <div className="h-1.5 w-full shrink-0" style={{ background: color }} />
+      <div className="p-8 flex flex-col flex-1">
         <div className="flex items-center gap-3 mb-3">
           <div
             className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
@@ -222,7 +225,8 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
           </div>
         </div>
 
-        <p className="text-xs text-gray-500 mb-3 leading-relaxed line-clamp-2">{gig.title}</p>
+        <h3 className="text-base font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors">{gig.title}</h3>
+        <p className="text-[13px] text-slate-500 mb-5 leading-relaxed line-clamp-2">{gig.shortDescription}</p>
 
         <div className="flex gap-1.5 mb-4 flex-wrap">
           {platforms.length > 0
@@ -260,9 +264,9 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
             <br />
             after payment
           </p>
-          <Link 
+          <Link
             href={`/gig-details?id=${gig._id}`}
-            className="text-sm font-semibold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+            className="text-sm font-bold bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-2xl transition-all shadow-md hover:shadow-lg"
           >
             View Gig
           </Link>
@@ -401,10 +405,10 @@ export default function ExploreGigs() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f5f5f3] font-sans" style={{ colorScheme: "light" }}>
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -455,7 +459,7 @@ export default function ExploreGigs() {
         </div>
       </nav>
 
-      <div className="max-w-[1800px] w-full mx-auto px-4 xl:px-8 py-10 flex flex-col lg:flex-row gap-8 lg:gap-12">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col lg:flex-row gap-10 lg:gap-14">
         {/* Sidebar */}
         <aside className="w-full lg:w-64 shrink-0 space-y-8">
           {/* Platform */}
@@ -674,8 +678,8 @@ export default function ExploreGigs() {
 
           {/* Cards */}
           <div
-            className={`grid gap-6 ${view === "grid"
-              ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            className={`grid gap-8 ${view === "grid"
+              ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
               : "grid-cols-1"
               }`}
           >
@@ -749,6 +753,48 @@ export default function ExploreGigs() {
           )}
         </main>
       </div>
-    </div>
+
+      {/* Footer */}
+      <footer className="bg-[#0F172A] pt-28 pb-16 text-slate-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-12 pb-20 border-b border-white/5">
+            <div className="flex items-center gap-3 group cursor-pointer">
+              <div className="w-10 h-10 text-white bg-emerald-500 rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+              </div>
+              <span className="text-2xl font-black text-white tracking-tight ">Noillin</span>
+            </div>
+
+            <div className="flex gap-16 text-[13px] font-bold uppercase tracking-widest">
+              {["About", "Support", "Privacy", "Terms"].map(l => (
+                <a key={l} href="#" className="hover:text-emerald-500 transition-colors">{l}</a>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-8">
+              {[
+                { label: "SECURE PAYMENTS", icon: "🔒" },
+                { label: "VERIFIED PROFILES", icon: "✔" }
+              ].map((badge, i) => (
+                <div key={i} className="flex items-center gap-3 text-[10px] font-black tracking-[.2em] opacity-80 group">
+                  <span className="text-emerald-500 text-lg group-hover:scale-125 transition-transform">{badge.icon}</span>
+                  <span className="text-slate-100">{badge.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] font-bold tracking-widest opacity-30">
+            <p>&copy; 2026 NOILLIN INC. ALL RIGHTS RESERVED.</p>
+            <p className="flex items-center gap-2">
+              <Zap className="w-3 h-3 fill-white" />
+              BUILT FOR THE FUTURE OF INFLUENCE
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div >
   );
 }
