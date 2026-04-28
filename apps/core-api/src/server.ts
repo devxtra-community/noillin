@@ -59,6 +59,7 @@ await setupMeili();
 
 // Ensure gig.created queue exists
 await getChannel().assertQueue(GIG_CREATED_EVENT,{durable: true});
+await getChannel().assertQueue("order.created", { durable: true });
 
 
 app.listen(PORT, "127.0.0.1", () => {
