@@ -17,7 +17,7 @@ import adminRoutes from "./admin.route.js"
 import chatRoutes from "./chat.routes.js"
 import brandRoutes from "./brand.route.js";
 import reportRoutes from "./report.route.js";
-import connectionRoutes from "./connection.route.js";
+import connectionRoutes from "./gig-request.route.js";
 
 
 const router: Router = Router()

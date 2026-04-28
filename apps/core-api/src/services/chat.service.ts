@@ -1,39 +1,43 @@
 import mongoose from "mongoose";
 
-import { ConnectionModel } from "../models/connection.model.js";
+import { GigRequestModel } from "../models/gig-request.model.js";
 import {
-  findMessagesByConnection,
+  findMessagesByGigRequest,
   aggregateConversations,
   addMessage
 } from "../repositories/chat.repository.js";
 
-//  Get messages by connectionId
-export const getMessages = async (connectionId: string) => {
-  return findMessagesByConnection(new mongoose.Types.ObjectId(connectionId));
+//  Get messages by gigRequestId
+export const getMessages = async (gigRequestId: string) => {
+  return findMessagesByGigRequest(new mongoose.Types.ObjectId(gigRequestId));
 };
 
 //  Get all conversations for sidebar
-export const getConversations = async (userId: string) => {
-  return aggregateConversations(userId);
+export const getConversations = async (userId: string, role?: string) => {
+  return aggregateConversations(userId, role);
 };
 
-//  Send message by connectionId
-export const sendMessage = async (senderId: string, connectionId: string, content: string) => {
-    const connection = await ConnectionModel.findById(connectionId);
+//  Send message — only allowed on accepted gig requests
+export const sendMessage = async (senderId: string, gigRequestId: string, content: string) => {
+  const request = await GigRequestModel.findById(gigRequestId);
 
-    if (!connection) {
-        throw new Error("Connection not found");
-    }
+  if (!request) {
+    throw new Error("Gig request not found");
+  }
 
-    const receiverId = connection.brandId.toString() === senderId 
-        ? connection.influencerId.toString() 
-        : connection.brandId.toString();
+  if (request.status !== "accepted") {
+    throw new Error("Chat is only available for accepted gig requests");
+  }
 
-    return addMessage({
-        connectionId: new mongoose.Types.ObjectId(connectionId),
-        senderId,
-        receiverId,
-        content,
-        status: "SENT"
-    });
+  const receiverId = request.brandId.toString() === senderId
+    ? request.influencerId.toString()
+    : request.brandId.toString();
+
+  return addMessage({
+    gigRequestId: new mongoose.Types.ObjectId(gigRequestId),
+    senderId,
+    receiverId,
+    content,
+    status: "SENT"
+  });
 }

@@ -10,8 +10,8 @@ export const create_gig = async (
 };
 
 /* ================= FGET ALL GIGS ================= */
-export const getAllGigs=async ()=>{
-      return GigModel.find();
+export const getAllGigs = async () => {
+  return GigModel.find();
 }
 
 /* ================= FIND BY ID ================= */
@@ -55,7 +55,7 @@ export const findPublishedGigs = async (
   const [gigs, total] = await Promise.all([
     GigModel.find(filter)
       .select(
-        "title category pricing.basePrice pricing.currency primaryInfluencerId createdAt influencer"
+        "title shortDescription category pricing.basePrice pricing.currency primaryInfluencerId createdAt influencer"
       )
       .populate("primaryInfluencerId", "userId fullName profileImageUrl categories")
       .sort(sort)

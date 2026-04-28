@@ -3,6 +3,7 @@ import mongoose, { Types } from "mongoose";
 import { publishEvent } from "../queue/publisher.js";
 import { OrderModel } from "../models/order.model.js";
 import { GigModel } from "../models/gig.model.js";
+import { GigRequestModel } from "../models/gig-request.model.js";
 
 // ✅ Define input type
 interface CreateOrderInput {
@@ -17,18 +18,16 @@ interface CreateOrderInput {
 export const createOrderService = async (data: CreateOrderInput) => {
   const { gigId, buyerId, influencerId, amount, connectionId } = data;
 
-  // 🔥 STEP 1: Validate connection exists
-  const connection = await mongoose
-    .model("Connection")
-    .findById(new Types.ObjectId(connectionId));
+  // 🔥 STEP 1: Validate gig request exists
+  const connection = await GigRequestModel.findById(new Types.ObjectId(connectionId));
 
   if (!connection) {
-    throw new Error("Connection not found");
+    throw new Error("Gig request not found");
   }
 
-  // 🔥 STEP 2: Check connection accepted
+  // 🔥 STEP 2: Check gig request accepted
   if (connection.status !== "accepted") {
-    throw new Error("Connection not accepted");
+    throw new Error("Gig request not accepted");
   }
 
   // 🔥 STEP 3: Handle existing orders (Idempotency)
@@ -41,11 +40,11 @@ export const createOrderService = async (data: CreateOrderInput) => {
   if (existingOrderModel) {
     // If it's just PENDING, return it so the user can continue to payment
     if (existingOrderModel.status === "PENDING") {
-        return {
-          orderId: existingOrderModel._id,
-          amount: existingOrderModel.amount,
-          alreadyExisted: true
-        };
+      return {
+        orderId: existingOrderModel._id,
+        amount: existingOrderModel.amount,
+        alreadyExisted: true
+      };
     }
     // If it's already in ESCROW, then we block (already paid)
     throw new Error("You have already paid for this gig.");
@@ -71,13 +70,13 @@ export const createOrderService = async (data: CreateOrderInput) => {
     escrowStatus: "HOLD",
     workStatus: "NOT_STARTED",
   });
-await publishEvent("order.created", {
-  orderId: order._id.toString(),
-  buyerId: order.buyerId,
-  influencerId: order.influencerId,
-  amount: order.amount,
-});
-console.log("🚀 order.created event published");
+  await publishEvent("order.created", {
+    orderId: order._id.toString(),
+    buyerId: order.buyerId,
+    influencerId: order.influencerId,
+    amount: order.amount,
+  });
+  console.log("🚀 order.created event published");
   return {
     orderId: order._id,
     amount: order.amount,
