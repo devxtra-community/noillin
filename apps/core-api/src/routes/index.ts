@@ -10,6 +10,7 @@ import availabilityRoutes from "./availability.routes.js";
 import bookingRoutes from "./bookings.routes.js";
 import orderRoutes from "./orders.routes.js";
 import paymentRoutes from "./payments.routes.js";
+import payoutRoutes from "./payout.routes.js";
 import searchRoutes from "./search.routes.js";
 import healthRoutes from "./health.routes.js";
 import adminRoutes from "./admin.route.js"
@@ -19,7 +20,7 @@ import reportRoutes from "./report.route.js";
 import connectionRoutes from "./connection.route.js";
 
 
-const router:Router = Router()
+const router: Router = Router()
 router.use("/health", healthRoutes)
 router.use("/auth", authRoutes)
 router.use("/admin", adminRoutes)
@@ -30,11 +31,12 @@ router.use("/availability", availabilityRoutes);
 router.use("/bookings", bookingRoutes);
 router.use("/orders", orderRoutes);
 router.use("/payments", paymentRoutes);
+router.use("/payouts", payoutRoutes);
 router.use("/search", searchRoutes);
 router.use("/media", mediaRoutes);
 router.use("/chat", chatRoutes);
 router.use("/brands", brandRoutes);
-router.use("/reports",reportRoutes );
+router.use("/reports", reportRoutes);
 router.use("/connections", connectionRoutes);
 
 

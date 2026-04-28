@@ -31,7 +31,7 @@ app.use(httpLogger);
 app.use(express.json())
 app.use("/api", router);
 app.use(
-"/payments/webhook",
+  "/payments/webhook",
   express.raw({ type: "application/json" })
 );
 
@@ -60,6 +60,7 @@ await setupMeili();
 // Ensure gig.created queue exists
 await getChannel().assertQueue(GIG_CREATED_EVENT,{durable: true});
 await getChannel().assertQueue("order.created", { durable: true });
+await getChannel().assertQueue(GIG_CREATED_EVENT, { durable: true });
 
 
 app.listen(PORT, "127.0.0.1", () => {

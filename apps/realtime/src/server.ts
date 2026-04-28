@@ -7,8 +7,7 @@ import express from "express";
 import cors from "cors";
 import { Server } from "socket.io";
 
-import {connectDB} from "../src/db/db"
-
+import {connectDB} from "./db/db"
 import { httpLogger } from "./middlewares/httpLogger";
 import { logger } from "./utils/logger";
 import { errorHandler, notFound } from "./middlewares/errorHandler";

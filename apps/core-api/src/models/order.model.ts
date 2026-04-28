@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { model } from "mongoose";
-import type { OrderDocument } from "src/types/order.types.js";
+
+import type { OrderDocument } from "../types/order.types.js";
 
 const orderSchema = new mongoose.Schema(
   {
@@ -37,6 +38,16 @@ const orderSchema = new mongoose.Schema(
     },
 
     stripePaymentIntentId: String,
+    platformFee: Number, // 10% fee
+    influencerAmount: Number, // 90% share
+
+    payoutStatus: {
+      type: String,
+      enum: ["HOLD", "AVAILABLE", "PROCESSING", "PAID"],
+      default: "HOLD",
+    },
+    availableAt: Date,
+    stripePayoutId: String,
   },
   { timestamps: true }
 );

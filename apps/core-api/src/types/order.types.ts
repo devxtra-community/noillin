@@ -15,6 +15,14 @@ export interface OrderDocument {
     workStatus: "NOT_STARTED" | "SUBMITTED" | "APPROVED";
 
     stripePaymentIntentId?: string;
+    platformFee?: number;
+    influencerAmount?: number;
+
+    payoutStatus: "HOLD" | "AVAILABLE" | "PROCESSING" | "PAID";
+    availableAt?: Date;
+    withdrawRequestedAt?: Date;
+    releaseAt?: Date;
+    stripePayoutId?: string;
 
     createdAt: Date;
     updatedAt: Date;
