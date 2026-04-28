@@ -3,6 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, useInView, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -161,6 +162,7 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
 }
 
 export default function HomePage() {
+  const pathname = usePathname();
   return (
     <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       {/* Navbar */}
@@ -181,16 +183,20 @@ export default function HomePage() {
 
           <div className="hidden md:flex items-center gap-10 text-[13px] font-semibold text-slate-500 uppercase tracking-wider">
             {[
+              { name: "Home", href: "/" },
               { name: "About", href: "#" },
               { name: "Influencers", href: "#" },
               { name: "Gigs", href: "/gig-list" },
               { name: "Support", href: "#" }
-            ].map((item) => (
-              <Link key={item.name} href={item.href} className="hover:text-emerald-600 transition-colors relative group">
-                {item.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full" />
-              </Link>
-            ))}
+            ].map((item) => {
+              const isActive = item.href !== "#" && pathname === item.href;
+              return (
+                <Link key={item.name} href={item.href} className={`transition-colors relative group ${isActive ? "text-emerald-600" : "hover:text-emerald-600"}`}>
+                  {item.name}
+                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-emerald-500 transition-all ${isActive ? "w-full" : "w-0 group-hover:w-full"}`} />
+                </Link>
+              );
+            })}
           </div>
 
           <motion.div

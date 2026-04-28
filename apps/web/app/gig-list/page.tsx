@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 import { useAuthStore } from "@/store/auth.store";
@@ -277,6 +278,7 @@ const MAX_PRICE_LIMIT = 50000;
 
 export default function ExploreGigs() {
   useAuthStore();
+  const pathname = usePathname();
   const [search, setSearch] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activePlatform, setActivePlatform] = useState<string | null>(null);
@@ -418,16 +420,20 @@ export default function ExploreGigs() {
 
           <div className="hidden md:flex items-center gap-10 text-[13px] font-semibold text-slate-500 uppercase tracking-wider">
             {[
+              { name: "Home", href: "/" },
               { name: "About", href: "#" },
               { name: "Influencers", href: "#" },
               { name: "Gigs", href: "/gig-list" },
               { name: "Support", href: "#" }
-            ].map((item) => (
-              <Link key={item.name} href={item.href} className="hover:text-emerald-600 transition-colors relative group">
-                {item.name}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full" />
-              </Link>
-            ))}
+            ].map((item) => {
+              const isActive = item.href !== "#" && pathname === item.href;
+              return (
+                <Link key={item.name} href={item.href} className={`transition-colors relative group ${isActive ? "text-emerald-600" : "hover:text-emerald-600"}`}>
+                  {item.name}
+                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-emerald-500 transition-all ${isActive ? "w-full" : "w-0 group-hover:w-full"}`} />
+                </Link>
+              );
+            })}
           </div>
 
           <motion.div
