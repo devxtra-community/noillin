@@ -14,7 +14,10 @@ export class GigRequestRepository {
 
     // Find by ID
     async findById(id: string) {
-        return GigRequestModel.findById(id);
+        return GigRequestModel.findById(id)
+            .populate("gigId")
+            .populate("brandId", "fullName profileImageUrl email")
+            .populate("influencerId", "fullName profileImageUrl email");
     }
 
     // Check existing request (prevent duplicate per gig)
