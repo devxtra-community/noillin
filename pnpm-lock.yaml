@@ -1537,13 +1537,7 @@ packages:
   "@ioredis/commands@1.5.1":
     resolution:
       {
-        integrity: sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw==,
-      }
-
-  "@ioredis/commands@1.5.1":
-    resolution:
-      {
-        integrity: sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw==,
+    integrity: sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw==,
       }
 
   "@jridgewell/gen-mapping@0.3.13":
@@ -8638,8 +8632,6 @@ snapshots:
   "@inquirer/type@3.0.10(@types/node@20.19.30)":
     optionalDependencies:
       "@types/node": 20.19.30
-
-  "@ioredis/commands@1.5.1": {}
 
   "@ioredis/commands@1.5.1": {}
 
