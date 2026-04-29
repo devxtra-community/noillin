@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Search, ChevronRight, Globe, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 
 const bookingsData = [
@@ -127,7 +128,7 @@ export default function BrandBookingsPage() {
                                     >
                                         <td className="py-5 px-6">
                                             <div className="flex items-center gap-3">
-                                                <img src={booking.image} alt="" className="w-8 h-8 rounded-full object-cover shadow-sm bg-gray-100" />
+                                                <Image width={32} height={32} src={booking.image} alt="" className="w-8 h-8 rounded-full object-cover shadow-sm bg-gray-100" />
                                                 <span className="text-sm font-bold text-gray-900">{booking.influencer}</span>
                                             </div>
                                         </td>
@@ -152,7 +153,7 @@ export default function BrandBookingsPage() {
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 h-full flex flex-col">
                         <div className="flex flex-col items-center mb-8 text-center">
                             <div className="relative mb-4">
-                                <img src={selectedBooking.image} alt="" className="w-24 h-24 rounded-full object-cover p-1 border-2 border-emerald-50 shadow-sm" />
+                                <Image width={96} height={96} src={selectedBooking.image} alt="" className="w-24 h-24 rounded-full object-cover p-1 border-2 border-emerald-50 shadow-sm" />
                             </div>
                             <h2 className="text-xl font-bold text-gray-900">{selectedBooking.influencer}</h2>
                             <span className="mt-2 px-3 py-0.5 bg-emerald-50 text-emerald-500 text-[10px] font-bold rounded-full uppercase tracking-wider">

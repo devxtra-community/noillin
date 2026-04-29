@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 import api from "@/lib/axios.client";
+import { useAuthStore } from "@/store/auth.store";
 
 function SignupForm() {
   const [role, setRole] = useState<"BRAND" | "INFLUENCER">("BRAND");
@@ -31,14 +32,6 @@ function SignupForm() {
     }
   }, [searchParams]);
 
-  const isValidBusinessInfo = (info: string) => {
-    const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-    const cinRegex = /^[LUu]{1}[0-9]{5}[A-Z]{2}[0-9]{4}[A-Z]{3}[0-9]{6}$/;
-    const llpRegex = /^[A-Z]{3}-[0-9]{4}$/;
-
-    return gstRegex.test(info) || cinRegex.test(info) || llpRegex.test(info);
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -56,11 +49,6 @@ function SignupForm() {
       return;
     }
 
-    if (role === "BRAND" && !isValidBusinessInfo(formData.businessInfo)) {
-      setError("Please enter a valid GST, CIN, or LLP Number (e.g., AAA-1234)");
-      return;
-    }
-
     setLoading(true);
     try {
       const payload = {
@@ -68,31 +56,23 @@ function SignupForm() {
         email: formData.email,
         password: formData.password,
         role: role,
-        ...(role === "BRAND"
-          ? { gstNumber: formData.businessInfo }
-          : { socialMediaHandle: formData.businessInfo }
-        ),
       };
 
       const response = await api.post("/auth/signup", payload);
 
-      if (response.data.role === "BRAND") {
-        router.push("/profile-setup")
-      } else {
-        router.push("/")
+      if (response.data.success) {
+        // Set a pending user in the store so profile-setup can work
+        useAuthStore.getState().setAuth("", {
+          id: "pending", // Temporary ID
+          email: formData.email,
+          fullName: formData.fullName,
+          role: role,
+          status: "PENDING"
+        });
+        
+        router.push("/profile-setup");
       }
 
-      if (response.data.accessToken) {
-        // localStorage.setItem("accessToken", response.data.accessToken);
-        // window.location.href = "/admindashboard";
-        setFormData({
-          fullName: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-          businessInfo: ""
-        });
-      }
       setSuccess(true);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Signup failed. Please try again.";
@@ -270,40 +250,6 @@ function SignupForm() {
                   className="w-full border border-gray-200 text-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-50 focus:border-emerald-500 bg-gray-50/50"
                 />
               </div>
-              <div>
-                {role === "BRAND" ? (
-                  <>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">
-                      GST/CIN/LLP Number
-                    </label>
-                    <motion.input
-                      whileFocus={{ scale: 1.01 }}
-                      type="text"
-                      name="businessInfo"
-                      value={formData.businessInfo}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full border border-gray-200 text-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-50 focus:border-emerald-500 bg-gray-50/50"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <label className="block text-sm font-medium text-gray-600 mb-1">
-                      Social Media Handle (Instagram, YouTube, etc.)
-                    </label>
-                    <motion.input
-                      whileFocus={{ scale: 1.01 }}
-                      type="text"
-                      name="businessInfo"
-                      value={formData.businessInfo}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full border border-gray-200 text-gray-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-50 focus:border-emerald-500 bg-gray-50/50"
-                    />
-                  </>
-                )}
-              </div>
-
 
               <motion.button
                 whileHover={{ scale: 1.01 }}
