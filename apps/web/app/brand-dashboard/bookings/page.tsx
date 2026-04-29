@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Search, ChevronRight, Globe, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { Search, ChevronRight, CheckCircle2 } from "lucide-react";
 
 const bookingsData = [
     {

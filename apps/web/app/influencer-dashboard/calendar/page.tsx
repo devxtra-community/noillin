@@ -21,15 +21,7 @@ interface Order {
     };
 }
 
-interface _Gig {
-    id: number;
-    title: string;
-    description: string;
-    time: string;
-    platform: string;
-    platformIcon: React.ReactNode;
-    color: string;
-}
+
 
 export default function CalendarPage() {
     const [orders, setOrders] = useState<Order[]>([]);
