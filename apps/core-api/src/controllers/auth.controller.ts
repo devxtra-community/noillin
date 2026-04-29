@@ -9,6 +9,7 @@ import {
   verifyOtpService,
   resetPasswordService,
   verifySignupOtpService,
+  pendingProfileService,
 
 } from "../services/auth.service.js";
 import type { HttpError } from "../modules/auth/http-error.js";
@@ -23,15 +24,16 @@ export const signupController = async (
 ) => {
   try {
 
-    const { email, password, role, documents: businessInfo } = req.body;
+    const { fullName, email, password, role, documents: businessInfo } = req.body;
 
-    if (!email || !password || !role) {
+    if (!fullName || !email || !password || !role) {
       const err: HttpError = new Error("Missing required fields");
       err.statusCode = 400;
       throw err;
     }
 
     const result = await signupService({
+      fullName,
       email,
       password,
       role,
@@ -265,6 +267,32 @@ export const resetPasswordController = async (
     res.status(200).json({
       success: true,
       message: "Password reset successful",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const pendingProfileController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, profileData } = req.body;
+
+    if (!email || !profileData) {
+      const err: HttpError = new Error("Email and profile data required");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const result = await pendingProfileService(email, profileData);
+
+    res.status(200).json({
+      success: true,
+      data: result,
     });
   } catch (error) {
     next(error);

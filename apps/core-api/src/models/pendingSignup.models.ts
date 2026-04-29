@@ -12,6 +12,7 @@ export enum PendingSignupRole {
 }
 
 export interface IPendingSignup extends Document {
+  fullName: string;
   email: string;
   passwordHash: string;
   role: PendingSignupRole;
@@ -27,12 +28,39 @@ export interface IPendingSignup extends Document {
   otpLockedUntil?: Date | null;
   isEmailVerified: boolean;
 
+  profileData?: {
+    bio?: string;
+    location?: string;
+    phoneNumber?: string;
+    // Influencer specific
+    username?: string;
+    niche?: string;
+    gender?: string;
+    dob?: string;
+    socialLinks?: {
+      instagram?: string;
+      youtube?: string;
+      tiktok?: string;
+    };
+    // Brand specific
+    companyName?: string;
+    industry?: string;
+    website?: string;
+    companySize?: string;
+  };
+
   createdAt: Date;
   updatedAt: Date;
 }
 
 const PendingSignupSchema = new Schema<IPendingSignup>(
   {
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     email: {
       type: String,
       required: true,
@@ -58,6 +86,11 @@ const PendingSignupSchema = new Schema<IPendingSignup>(
       type: String,
       enum: Object.values(PendingSignupStatus),
       default: PendingSignupStatus.PENDING,
+    },
+
+    profileData: {
+      type: Object,
+      default: {},
     },
 
     // OTP fields

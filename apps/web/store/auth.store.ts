@@ -4,8 +4,11 @@ import { persist } from "zustand/middleware";
 interface User {
   id: string;
   email: string;
+  fullName?: string;
+  profilePicture?: string;
   role: "ADMIN" | "BRAND" | "INFLUENCER";
   adminLevel?: "SUPER" | "NORMAL" | null;
+  status?: "PENDING" | "ACTIVE";
 }
 
 interface AuthState {
