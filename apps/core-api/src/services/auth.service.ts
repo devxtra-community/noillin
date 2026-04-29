@@ -50,7 +50,7 @@ export const signupService = async (data: SignupInput) => {
     email: data.email.toLowerCase(),
     passwordHash,
     role: data.role,
-    documents: data.documents,
+    documents: data.documents || "",
     status: "PENDING",
 
     emailOtpHash: hashedOtp,

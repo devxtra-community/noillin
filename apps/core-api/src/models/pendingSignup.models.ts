@@ -47,6 +47,7 @@ export interface IPendingSignup extends Document {
     industry?: string;
     website?: string;
     companySize?: string;
+    profileImageUrl?: string;
   };
 
   createdAt: Date;
