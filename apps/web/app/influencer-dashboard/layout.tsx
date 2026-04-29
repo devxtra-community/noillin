@@ -30,6 +30,9 @@ export default function InfluencerDashboardLayout({
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+    const displayName = user?.fullName || user?.contactPersonName || user?.email?.split("@")[0] || "User";
+    const profileImage = user?.profileImageUrl || user?.profileImage || null;
+
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown on outside click
