@@ -30,8 +30,8 @@ export default function BrandDashboardLayout({
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const displayName = user?.fullName || user?.contactPersonName || user?.email?.split("@")[0] || "User";
-    const profileImage = user?.profileImageUrl || user?.profileImage || null;
+    const displayName = user?.fullName || user?.email?.split("@")[0] || "User";
+    const profileImage = user?.profilePicture || null;
 
     const dropdownRef = useRef<HTMLDivElement>(null);
 
