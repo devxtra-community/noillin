@@ -132,7 +132,7 @@ export default function BrandDashboardLayout({
                         <div className="flex items-center gap-6 ml-auto">
                             {/* Explore Gigs Button - No icon as requested */}
                             <Link
-                                href="/search"
+                                href="/gig-list"
                                 className="hidden md:flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold text-sm transition-colors shadow-sm"
                             >
                                 Explore gigs

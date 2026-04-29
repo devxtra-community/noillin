@@ -1,176 +1,214 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, Paperclip, Send, MoreHorizontal, Circle } from "lucide-react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
+import { Search, Loader2, MessageSquare } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
-const conversations = [
-    {
-        id: 1,
-        name: "Sarah Jenkins",
-        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-        lastMessage: "Looking forward to the IG Reel collabor.",
-        time: "10:30 AM",
-        status: "Booking Pending",
-        unread: false,
-        online: false,
-    },
-    {
-        id: 2,
-        name: "Marcus Chen",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-        lastMessage: "Can we adjust the TikTok campaign tim",
-        time: "Yesterday",
-        status: "Active",
-        unread: false,
-        online: false,
-    },
-    {
-        id: 3,
-        name: "Elena",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-        lastMessage: "Content draft ready for review.",
-        time: "2m ago",
-        status: "Active",
-        unread: false,
-        online: true,
-    },
-];
+import api from "@/lib/axios.client";
+import { ChatWindow } from "@/components/chat/ChatWindow";
+import { useAuthStore } from "@/store/auth.store";
 
-const chatMessages = [
-    { id: 1, type: "system", text: "Booking request sent" },
-    {
-        id: 2,
-        type: "received",
-        text: "Hi! I saw your request for the IG Reel. I'd love to work with you on this campaign. Do you have a specific deadline in mind?",
-    },
-    { id: 3, type: "system", text: "Payment secured in escrow" },
-    {
-        id: 4,
-        type: "sent",
-        text: "That sounds great! We are looking to go live by next Friday. Does that timeline work for your content creation process?",
-    },
-    {
-        id: 5,
-        type: "received",
-        text: "Perfect, that's definitely doable. I'll start working on the draft concepts today!",
-    },
-];
+interface Conversation {
+    gigRequestId: string;
+    lastMessage: string;
+    lastMessageTime: string;
+    unreadCount: number;
+    gigTitle: string;
+    user: {
+        _id: string;
+        name: string;
+        role: string;
+        profileImage: string | null;
+    };
+}
 
-export default function BrandMessagesPage() {
-    const [selectedId, setSelectedId] = useState(1);
-    const [message, setMessage] = useState("");
+interface Message {
+    _id: string;
+    gigRequestId: string;
+    senderId: string;
+    receiverId: string;
+    content: string;
+    status: "SENT" | "DELIVERED" | "READ";
+    createdAt: string;
+}
 
-    const selectedConversation = conversations.find(c => c.id === selectedId) || conversations[0];
+function MessagesContent() {
+    const searchParams = useSearchParams();
+    const initialGigRequestId = searchParams.get("gigRequestId");
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const [selectedConvId, setSelectedConvId] = useState<string | null>(initialGigRequestId);
+    const [loadingConvs, setLoadingConvs] = useState(true);
+    const [fetchedConv, setFetchedConv] = useState<Conversation | null>(null);
+    const { user } = useAuthStore();
+    const currentUserId = user?.id;
+
+    // Fallback for historical gig requests with no existing messages
+    useEffect(() => {
+        if (!selectedConvId || !currentUserId) return;
+        const exists = conversations.find(c => c.gigRequestId === selectedConvId);
+        if (exists) {
+            setFetchedConv(exists);
+            return;
+        }
+
+        api.get(`/connections/details/${selectedConvId}`).then(res => {
+            const gr = res.data?.connection || res.data?.gigRequest;
+            if (gr) {
+                const brand = gr.brandId;
+                const influencer = gr.influencerId;
+
+                const isBrand = currentUserId === (brand?._id || brand?.id);
+                const otherUser = isBrand ? influencer : brand;
+
+                if (!otherUser) return;
+
+                setFetchedConv({
+                    gigRequestId: gr._id,
+                    lastMessage: "No messages yet",
+                    lastMessageTime: gr.updatedAt || gr.createdAt,
+                    unreadCount: 0,
+                    gigTitle: gr.gigId?.title || "Gig Collaboration",
+                    user: {
+                        _id: otherUser._id || otherUser.id,
+                        name: otherUser.fullName || otherUser.name || "Unknown",
+                        role: isBrand ? "INFLUENCER" : "BRAND",
+                        profileImage: otherUser.profileImageUrl || otherUser.profileImage || null
+                    }
+                });
+            }
+        }).catch(err => console.error("Failed to fetch legacy connection:", err));
+    }, [selectedConvId, conversations, currentUserId]);
+
+    const fetchConversations = async () => {
+        try {
+            setLoadingConvs(true);
+            const res = await api.get("/chat/conversations?role=brand");
+            setConversations(res.data.conversations || []);
+        } catch (err) {
+            console.error("Failed to fetch conversations:", err);
+        } finally {
+            setLoadingConvs(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchConversations();
+    }, []);
+
+    // Removed legacy fetchMessages and handleSend because ChatWindow handles it
+
+    const filteredConvs = conversations.filter(c =>
+        c.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.gigTitle.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const activeConv = fetchedConv;
+
+    const formatTime = (iso: string) => {
+        if (!iso) return "";
+        const date = new Date(iso);
+        const now = new Date();
+        const diff = now.getTime() - date.getTime();
+        if (diff < 86400000) return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        if (diff < 604800000) return date.toLocaleDateString([], { weekday: "short" });
+        return date.toLocaleDateString([], { month: "short", day: "numeric" });
+    };
 
     return (
-        <div className="h-full flex flex-col min-h-0 bg-[#f8fafc]">
-            <div className="flex flex-1 overflow-hidden">
-                {/* Left Column: Conversation List */}
-                <div className="w-full lg:w-[400px] border-r border-gray-100 bg-white flex flex-col">
-                    <div className="p-8">
-                        <h1 className="text-2xl font-bold text-gray-900 mb-6">Messages</h1>
+        <div className="px-2 sm:px-4 py-4 w-full h-[calc(100vh-80px)] lg:h-[calc(100vh-100px)] flex flex-col overflow-hidden">
+            <div className="flex bg-white rounded-[24px] lg:rounded-[32px] shadow-xl shadow-gray-100/50 border border-gray-100 flex-1 overflow-hidden">
+
+                {/* Sidebar */}
+                <div className="w-[340px] border-r border-gray-100 flex flex-col bg-gray-50/30 shrink-0">
+                    <div className="p-6">
+                        <h1 className="text-2xl font-black text-gray-900 mb-6">Messages</h1>
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Search className="w-4 h-4 text-gray-400" />
+                            </div>
                             <input
                                 type="text"
-                                placeholder="Search conversations..."
-                                className="w-full pl-9 pr-4 py-3 bg-gray-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-emerald-500/10 outline-none transition-all"
+                                placeholder="Search..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
                             />
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto px-4 pb-4">
-                        <div className="space-y-2">
-                            {conversations.map((conv) => (
-                                <div
-                                    key={conv.id}
-                                    onClick={() => setSelectedId(conv.id)}
-                                    className={`flex items-center gap-4 p-4 rounded-[2rem] cursor-pointer transition-all ${selectedId === conv.id
-                                            ? "bg-emerald-50 shadow-sm"
-                                            : "hover:bg-gray-50"
-                                        }`}
-                                >
-                                    <div className="relative shrink-0">
-                                        <img src={conv.image} alt="" className="w-12 h-12 rounded-full object-cover shadow-sm" />
-                                        {conv.online && (
-                                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
-                                        )}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex justify-between items-start mb-0.5">
-                                            <h3 className="text-sm font-bold text-gray-900 truncate">{conv.name}</h3>
-                                            <span className="text-[10px] font-medium text-gray-400 whitespace-nowrap">{conv.time}</span>
-                                        </div>
-                                        <p className="text-xs text-gray-400 truncate leading-relaxed">
-                                            {conv.lastMessage}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Right Column: Chat View */}
-                <div className="flex-1 flex flex-col bg-[#f8fafc]">
-                    {/* Chat Header */}
-                    <div className="px-8 py-4 bg-white border-b border-gray-100 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <img src={selectedConversation.image} alt="" className="w-10 h-10 rounded-full object-cover" />
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-900">{selectedConversation.name}</h3>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">{selectedConversation.status}</p>
+                    <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
+                        {loadingConvs ? (
+                            <div className="flex items-center justify-center py-20">
+                                <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />
                             </div>
-                        </div>
-                        <button className="p-2 hover:bg-gray-50 rounded-xl transition-colors">
-                            <MoreHorizontal className="w-5 h-5 text-gray-400" />
-                        </button>
-                    </div>
-
-                    {/* Messages Area */}
-                    <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                        {chatMessages.map((msg) => (
-                            <div key={msg.id} className="flex flex-col">
-                                {msg.type === "system" ? (
-                                    <div className="flex justify-center">
-                                        <span className="px-4 py-1.5 bg-gray-100 text-gray-400 text-[10px] font-bold rounded-full uppercase tracking-widest shadow-sm">
-                                            {msg.text}
-                                        </span>
+                        ) : filteredConvs.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
+                                <MessageSquare className="w-10 h-10" />
+                                <p className="text-sm font-medium">No conversations yet</p>
+                                <p className="text-xs text-center">Accepted gig collaborations will appear here</p>
+                            </div>
+                        ) : filteredConvs.map((conv) => (
+                            <button
+                                key={conv.gigRequestId}
+                                onClick={() => setSelectedConvId(conv.gigRequestId)}
+                                className={`w-full p-4 rounded-[20px] transition-all flex items-start gap-3 group text-left ${selectedConvId === conv.gigRequestId
+                                    ? "bg-white shadow-lg shadow-gray-200/50 border border-emerald-100"
+                                    : "hover:bg-white hover:shadow-md border border-transparent"
+                                    }`}
+                            >
+                                <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-sm font-black shrink-0 shadow-sm bg-emerald-50 text-emerald-700 relative">
+                                    {conv.user.name?.charAt(0) || "?"}
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between mb-0.5">
+                                        <span className="font-bold text-[14px] text-gray-900 truncate">{conv.user.name || "Unknown"}</span>
+                                        <span className="text-[11px] font-bold text-gray-400 shrink-0 ml-2">{formatTime(conv.lastMessageTime)}</span>
                                     </div>
-                                ) : (
-                                    <div className={`flex ${msg.type === "sent" ? "justify-end" : "justify-start"}`}>
-                                        <div className={`max-w-[80%] px-6 py-4 rounded-[2rem] text-sm leading-relaxed shadow-sm ${msg.type === "sent"
-                                                ? "bg-[#1CD36B] text-white rounded-tr-none"
-                                                : "bg-white text-gray-700 border border-gray-50 rounded-tl-none"
-                                            }`}>
-                                            {msg.text}
-                                        </div>
+                                    <p className="text-[11px] text-emerald-600 font-bold truncate mb-0.5">{conv.gigTitle}</p>
+                                    <p className={`text-[13px] truncate ${conv.unreadCount > 0 ? "font-bold text-gray-900" : "text-gray-500"}`}>
+                                        {conv.lastMessage}
+                                    </p>
+                                </div>
+                                {conv.unreadCount > 0 && (
+                                    <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shrink-0 text-white text-[10px] font-black">
+                                        {conv.unreadCount}
                                     </div>
                                 )}
-                            </div>
+                            </button>
                         ))}
                     </div>
-
-                    {/* Input Area */}
-                    <div className="p-8 pb-10 bg-white lg:bg-transparent">
-                        <div className="max-w-4xl mx-auto flex items-center gap-4 p-2 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                            <button className="p-3 hover:bg-gray-50 rounded-2xl transition-colors shrink-0">
-                                <Paperclip className="w-5 h-5 text-gray-400" />
-                            </button>
-                            <input
-                                type="text"
-                                placeholder="Type a message..."
-                                className="flex-1 px-4 py-2 text-sm bg-gray-50/50 border-none rounded-2xl outline-none focus:ring-0"
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                            />
-                            <button className="p-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all shadow-lg shadow-emerald-100 active:scale-95 shrink-0">
-                                <Send className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
                 </div>
+
+                {/* Main Chat Area */}
+                {selectedConvId && activeConv && currentUserId ? (
+                    <div className="flex-1 flex flex-col min-w-0 border-l border-gray-100">
+                        <ChatWindow
+                            currentUserId={currentUserId}
+                            gigRequestId={selectedConvId}
+                            receiverId={activeConv.user._id}
+                            receiverName={activeConv.user.name}
+                            receiverImage={activeConv.user.profileImage || undefined}
+                        />
+                    </div>
+                ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-4">
+                        <MessageSquare className="w-14 h-14 opacity-30" />
+                        <p className="font-medium text-sm">Select a conversation to start chatting</p>
+                        <p className="text-xs text-center max-w-[240px]">Conversations appear here once a brand&apos;s gig request is accepted</p>
+                    </div>
+                )}
             </div>
         </div>
+    );
+}
+
+export default function MessagesPage() {
+    return (
+        <Suspense fallback={<div className="h-full flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-emerald-500" /></div>}>
+            <MessagesContent />
+        </Suspense>
     );
 }

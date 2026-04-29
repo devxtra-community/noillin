@@ -6,6 +6,7 @@ export class ConnectionRepository {
     brandId: string;
     influencerId: string;
     gigId?: string | undefined;
+    note?: string | undefined;
   }) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return ConnectionModel.create(data as any);
@@ -35,14 +36,24 @@ export class ConnectionRepository {
   }
 
   // Get all connections for user
-  async findMyConnections(userId: string) {
-    return ConnectionModel.find({
-      $or: [
+  async findMyConnections(userId: string, role?: string) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filter: any = {};
+    if (role === "brand") {
+      filter.brandId = userId;
+    } else if (role === "influencer") {
+      filter.influencerId = userId;
+    } else {
+      filter.$or = [
         { brandId: userId },
         { influencerId: userId },
-      ],
-    })
-    .populate("gigId")
-    .sort({ createdAt: -1 });
+      ];
+    }
+
+    return ConnectionModel.find(filter)
+      .populate("gigId")
+      .populate("brandId", "fullName profileImageUrl")
+      .populate("influencerId", "fullName profileImageUrl")
+      .sort({ createdAt: -1 });
   }
 }

@@ -1,53 +1,47 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, ChevronRight, Globe, Calendar, Clock, DollarSign } from "lucide-react";
+import { Search, ChevronRight,  } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-const requestsData = [
-    {
-        id: 1,
-        influencer: "Sarah Jenkins",
-        image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-        gigName: "IG Reel Promotion",
-        platform: "Instagram",
-        price: "$150.00",
-        status: "Pending",
-        statusColor: "text-orange-600 bg-orange-50",
-        date: "Oct 24, 2023",
-        time: "02:30 PM"
-    },
-    {
-        id: 2,
-        influencer: "Marcus Chen",
-        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-        gigName: "TikTok Integration",
-        platform: "TikTok",
-        price: "$275.00",
-        status: "Accepted",
-        statusColor: "text-emerald-600 bg-emerald-50",
-        date: "Oct 25, 2023",
-        time: "11:15 AM"
-    },
-    {
-        id: 3,
-        influencer: "Elena Rodriguez",
-        image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-        gigName: "Product Unboxing",
-        platform: "Instagram",
-        price: "$210.00",
-        status: "Rejected",
-        statusColor: "text-rose-600 bg-rose-50",
-        date: "Oct 22, 2023",
-        time: "04:45 PM"
-    },
-];
+import api from "@/lib/axios.client";
+
+interface ConnectionRequest {
+    _id: string;
+    brandId: { _id: string; fullName: string; profileImageUrl?: string };
+    influencerId: { _id: string; fullName: string; profileImageUrl?: string };
+    gigId: { title: string; pricing?: { basePrice: number } };
+    status: "pending" | "accepted" | "rejected";
+    note?: string;
+    createdAt: string;
+}
 
 export default function BrandRequestsPage() {
-    const [selectedId, setSelectedId] = useState(1);
+    const router = useRouter();
+    const [selectedId, setSelectedId] = useState<string | null>(null);
     const [activeFilter, setActiveFilter] = useState("Pending");
     const [searchQuery, setSearchQuery] = useState("");
+    const [connections, setConnections] = useState<ConnectionRequest[]>([]);
 
-    const selectedRequest = requestsData.find(r => r.id === selectedId) || requestsData[0];
+    React.useEffect(() => {
+        api.get("/connections/my?role=brand").then(res => {
+            const data = res.data.data || [];
+            setConnections(data);
+            if (data.length > 0) setSelectedId(data[0]._id);
+        }).catch(err => console.error(err));
+    }, []);
+
+    const filteredRequests = connections.filter(c => {
+        const titleMatch = c.gigId?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            c.influencerId?.fullName?.toLowerCase().includes(searchQuery.toLowerCase());
+        let statusMatch = false;
+        if (activeFilter === "Pending") statusMatch = c.status === "pending";
+        else if (activeFilter === "Accepted") statusMatch = c.status === "accepted";
+        else if (activeFilter === "Rejected") statusMatch = c.status === "rejected";
+        return titleMatch && statusMatch;
+    });
+
+    const selectedRequest = connections.find(r => r._id === selectedId) || filteredRequests[0];
 
     return (
         <div className="px-4 sm:px-6 lg:px-8 py-8 h-full flex flex-col min-h-0 bg-[#f8fafc]">
@@ -66,8 +60,8 @@ export default function BrandRequestsPage() {
                                 key={filter}
                                 onClick={() => setActiveFilter(filter)}
                                 className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${activeFilter === filter
-                                        ? "bg-emerald-50 text-emerald-600"
-                                        : "text-gray-400 hover:text-gray-600"
+                                    ? "bg-emerald-50 text-emerald-600"
+                                    : "text-gray-400 hover:text-gray-600"
                                     }`}
                             >
                                 {filter}
@@ -104,35 +98,42 @@ export default function BrandRequestsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
-                                {requestsData.map((req) => (
+                                {filteredRequests.map((req) => (
                                     <tr
-                                        key={req.id}
-                                        onClick={() => setSelectedId(req.id)}
-                                        className={`transition-all cursor-pointer group ${selectedId === req.id ? "bg-emerald-50/30" : "hover:bg-gray-50/50"
+                                        key={req._id}
+                                        onClick={() => setSelectedId(req._id)}
+                                        className={`transition-all cursor-pointer group ${selectedId === req._id ? "bg-emerald-50/30" : "hover:bg-gray-50/50"
                                             }`}
                                     >
                                         <td className="py-5 px-6">
                                             <div className="flex items-center gap-3">
-                                                <img src={req.image} alt="" className="w-8 h-8 rounded-full object-cover" />
-                                                <span className="text-sm font-bold text-gray-900">{req.influencer}</span>
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600">
+                                                    {req.influencerId?.fullName?.charAt(0) || "I"}
+                                                </div>
+                                                <span className="text-sm font-bold text-gray-900">{req.influencerId?.fullName}</span>
                                             </div>
                                         </td>
                                         <td className="py-5 px-6">
-                                            <span className="text-sm text-gray-500 font-medium">{req.gigName}</span>
+                                            <span className="text-sm text-gray-500 font-medium">{req.gigId?.title}</span>
                                         </td>
                                         <td className="py-5 px-6">
-                                            <span className="text-sm font-bold text-gray-900">{req.price}</span>
+                                            <span className="text-sm font-bold text-gray-900">₹{req.gigId?.pricing?.basePrice?.toLocaleString()}</span>
                                         </td>
                                         <td className="py-5 px-6">
-                                            <span className={`px-4 py-1 text-[11px] font-bold rounded-full border border-current opacity-80 ${req.statusColor}`}>
+                                            <span className={`px-4 py-1 text-[11px] font-bold rounded-full border border-current opacity-80 ${req.status === 'pending' ? 'text-orange-600 bg-orange-50' : req.status === 'accepted' ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'}`}>
                                                 {req.status}
                                             </span>
                                         </td>
                                         <td className="py-5 px-6 text-right">
-                                            <ChevronRight className={`w-4 h-4 transition-colors ${selectedId === req.id ? "text-emerald-500" : "text-gray-300"}`} />
+                                            <ChevronRight className={`w-4 h-4 transition-colors ${selectedId === req._id ? "text-emerald-500" : "text-gray-300"}`} />
                                         </td>
                                     </tr>
                                 ))}
+                                {filteredRequests.length === 0 && (
+                                    <tr>
+                                        <td colSpan={5} className="py-20 text-center text-gray-400 text-sm italic">No requests found.</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -141,56 +142,60 @@ export default function BrandRequestsPage() {
                 {/* Right Column: Detail View */}
                 <div className="lg:w-[400px] flex flex-col gap-6">
                     <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 h-full flex flex-col">
-                        <div className="flex flex-col items-center mb-8">
-                            <div className="relative mb-4">
-                                <img src={selectedRequest.image} alt="" className="w-24 h-24 rounded-full object-cover p-1 border-2 border-emerald-50" />
-                                <div className="absolute bottom-1 right-1 w-6 h-6 bg-white border border-gray-100 rounded-full flex items-center justify-center shadow-sm">
-                                    <Globe className="w-3 h-3 text-emerald-500" />
+                        {selectedRequest ? (
+                            <>
+                                <div className="flex flex-col items-center mb-8">
+                                    <div className="relative mb-4">
+                                        <div className="w-24 h-24 rounded-[20px] flex items-center justify-center text-3xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
+                                            {selectedRequest.influencerId?.fullName?.charAt(0) || "I"}
+                                        </div>
+                                    </div>
+                                    <h2 className="text-xl font-bold text-gray-900">{selectedRequest.influencerId?.fullName}</h2>
+                                    <span className="mt-2 px-3 py-0.5 bg-emerald-50 text-emerald-500 text-[10px] font-bold rounded-full uppercase tracking-wider">
+                                        {selectedRequest.status}
+                                    </span>
                                 </div>
-                            </div>
-                            <h2 className="text-xl font-bold text-gray-900">{selectedRequest.influencer}</h2>
-                            <span className="mt-2 px-3 py-0.5 bg-emerald-50 text-emerald-500 text-[10px] font-bold rounded-full uppercase tracking-wider">
-                                {selectedRequest.platform}
-                            </span>
-                        </div>
 
-                        <div className="space-y-6 flex-1">
-                            <div className="flex justify-between items-center py-1">
-                                <span className="text-sm font-medium text-gray-400">Gig Name</span>
-                                <span className="text-sm font-bold text-gray-900">{selectedRequest.gigName}</span>
-                            </div>
-                            <div className="flex justify-between items-center py-1">
-                                <span className="text-sm font-medium text-gray-400">Platform</span>
-                                <span className="text-sm font-bold text-gray-900">{selectedRequest.platform}</span>
-                            </div>
-                            <div className="flex justify-between items-center py-1">
-                                <span className="text-sm font-medium text-gray-400">Status</span>
-                                <span className={`px-4 py-1 text-[11px] font-bold rounded-full ${selectedRequest.statusColor}`}>
-                                    {selectedRequest.status}
-                                </span>
-                            </div>
-                            <div className="flex justify-between items-center py-1">
-                                <span className="text-sm font-medium text-gray-400">Requested Date</span>
-                                <span className="text-sm font-bold text-gray-900">{selectedRequest.date}</span>
-                            </div>
-                            <div className="flex justify-between items-center py-1">
-                                <span className="text-sm font-medium text-gray-400">Requested Time</span>
-                                <span className="text-sm font-bold text-gray-900">{selectedRequest.time}</span>
-                            </div>
-                            <div className="flex justify-between items-center pt-6 border-t border-gray-50">
-                                <span className="text-sm font-medium text-gray-400">Price</span>
-                                <span className="text-xl font-black text-emerald-500">{selectedRequest.price}</span>
-                            </div>
-                        </div>
+                                <div className="space-y-6 flex-1">
+                                    <div className="flex justify-between items-center py-1 border-b border-gray-50 pb-3">
+                                        <span className="text-sm font-medium text-gray-400">Gig Name</span>
+                                        <span className="text-sm font-bold text-gray-900 text-right">{selectedRequest.gigId?.title}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center py-1 border-b border-gray-50 pb-3">
+                                        <span className="text-sm font-medium text-gray-400">Requested Date</span>
+                                        <span className="text-sm font-bold text-gray-900">{new Date(selectedRequest.createdAt).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center pt-3 border-t border-gray-50">
+                                        <span className="text-sm font-medium text-gray-400">Price</span>
+                                        <span className="text-xl font-black text-emerald-500">₹{selectedRequest.gigId?.pricing?.basePrice?.toLocaleString()}</span>
+                                    </div>
+                                </div>
 
-                        <div className="mt-10 flex flex-col gap-4">
-                            <button className="w-full bg-[#1CD36B] hover:bg-[#19C061] text-white py-4 rounded-2xl font-bold text-sm shadow-lg shadow-emerald-100 transition-all hover:-translate-y-0.5 active:scale-95">
-                                Accept Collaboration
-                            </button>
-                            <button className="w-full py-2 text-sm font-bold text-rose-500 hover:text-rose-600 transition-colors">
-                                Ignore Request
-                            </button>
-                        </div>
+                                {/* Brand Note (If provided) */}
+                                {selectedRequest.note && (
+                                    <div className="mt-4 bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-2">
+                                        <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Your Initial Note</h4>
+                                        <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{selectedRequest.note}</p>
+                                    </div>
+                                )}
+
+                                <div className="mt-10 flex flex-col gap-4">
+                                    {selectedRequest.status === "pending" && (
+                                        <p className="text-center text-sm font-bold text-gray-400 italic">Waiting for influencer to accept...</p>
+                                    )}
+                                    {selectedRequest.status === "accepted" && (
+                                        <button
+                                            onClick={() => router.push(`/brand-dashboard/messages?gigRequestId=${selectedRequest._id}`)}
+                                            className="w-full bg-[#1CD36B] hover:bg-[#19C061] text-white py-4 rounded-2xl font-bold text-sm shadow-lg shadow-emerald-100 transition-all hover:-translate-y-0.5 active:scale-95"
+                                        >
+                                            Message Influencer
+                                        </button>
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-gray-400 italic text-sm">Select a request to see details</div>
+                        )}
                     </div>
                 </div>
             </div>

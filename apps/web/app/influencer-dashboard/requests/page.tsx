@@ -1,86 +1,94 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, Check, X, ChevronRight, Calendar, Clock, Globe } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Search, Check, ChevronRight, Calendar, Globe, Loader2 } from "lucide-react";
+
+import api from "@/lib/axios.client";
+
+interface ConnectionRequest {
+    _id: string;
+    brandId: { _id: string; fullName: string; profileImageUrl?: string };
+    influencerId: string;
+    gigId: { title: string; description?: string; pricing?: { basePrice: number } };
+    status: "pending" | "accepted" | "rejected";
+    note?: string;
+    createdAt: string;
+}
 
 export default function RequestsPage() {
+    const router = useRouter();
+    const [orders, setOrders] = useState<ConnectionRequest[]>([]);
+    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilter, setActiveFilter] = useState("Pending");
-    const [requests] = useState([
-        {
-            id: 1,
-            brand: "Nike",
-            gig: "IG Reel Promotion",
-            price: "$150.00",
-            platform: "Instagram",
-            platformColor: "bg-rose-50 text-rose-600",
-            color: "bg-black text-white",
-            status: "Pending",
-            date: "May 24, 2024",
-            time: "10:30 AM"
-        },
-        {
-            id: 2,
-            brand: "Apple",
-            gig: "TikTok Ad Integration",
-            price: "$275.00",
-            platform: "TikTok",
-            platformColor: "bg-gray-100 text-gray-600",
-            color: "bg-[#F5F5F7] text-gray-900 border border-gray-200",
-            status: "Pending",
-            date: "May 25, 2024",
-            time: "02:15 PM"
-        },
-        {
-            id: 3,
-            brand: "Coca-Cola",
-            gig: "YouTube Product Review",
-            price: "$500.00",
-            platform: "YouTube",
-            platformColor: "bg-indigo-50 text-indigo-600",
-            color: "bg-red-600 text-white",
-            status: "Accepted",
-            date: "May 22, 2024",
-            time: "09:00 AM"
-        },
-        {
-            id: 4,
-            brand: "Samsung",
-            gig: "Product Unboxing",
-            price: "$210.00",
-            platform: "Instagram",
-            platformColor: "bg-rose-50 text-rose-600",
-            color: "bg-blue-600 text-white",
-            status: "Pending",
-            date: "May 26, 2024",
-            time: "11:45 AM"
-        },
-        {
-            id: 5,
-            brand: "Tesla",
-            gig: "Eco Campaign",
-            price: "$325.00",
-            platform: "Instagram",
-            platformColor: "bg-rose-50 text-rose-600",
-            color: "bg-gray-800 text-white",
-            status: "Pending",
-            date: "May 28, 2024",
-            time: "04:30 PM"
-        },
-    ]);
 
-    const filteredByStatus = requests.filter(req => req.status === activeFilter);
+    const fetchRequests = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get("/connections/my?role=influencer");
+            setOrders(response.data.data || []);
+        } catch (error) {
+            console.error("Failed to fetch requests:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const filteredRequests = filteredByStatus.filter(req =>
-        req.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        req.gig.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    useEffect(() => {
+        fetchRequests();
+    }, []);
 
-    const [selectedRequestId, setSelectedRequestId] = useState(filteredRequests[0]?.id || requests[0].id);
+    const filteredRequests = orders.filter(o => {
+        const titleMatch = o.gigId?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            o.brandId?.fullName?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const selectedRequest = requests.find(req => req.id === selectedRequestId) || requests[0];
+        let statusMatch = false;
+        if (activeFilter === "Pending") statusMatch = o.status === "pending";
+        else if (activeFilter === "Accepted") statusMatch = o.status === "accepted";
+        else if (activeFilter === "Rejected") statusMatch = o.status === "rejected";
+
+        return titleMatch && statusMatch;
+    });
+
+    const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (filteredRequests.length > 0 && !selectedRequestId) {
+            setSelectedRequestId(filteredRequests[0]._id);
+        }
+    }, [filteredRequests, selectedRequestId]);
+
+    const selectedRequest = orders.find(o => o._id === selectedRequestId) || filteredRequests[0];
 
     const filters = ["Pending", "Accepted", "Rejected"];
+
+    const handleAccept = async (connectionId: string) => {
+        try {
+            await api.patch(`/connections/${connectionId}/accept`);
+            fetchRequests();
+        } catch (error) {
+            console.error("Failed to accept request:", error);
+        }
+    };
+
+    const handleReject = async (connectionId: string) => {
+        try {
+            await api.patch(`/connections/${connectionId}/reject`);
+            fetchRequests();
+        } catch (error) {
+            console.error("Failed to reject request:", error);
+        }
+    };
+
+
+    if (loading) {
+        return (
+            <div className="h-[80vh] w-full flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+            </div>
+        );
+    }
 
     return (
         <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1500px] mx-auto w-full h-full flex flex-col overflow-hidden">
@@ -140,23 +148,23 @@ export default function RequestsPage() {
                             <tbody className="divide-y divide-gray-50">
                                 {filteredRequests.map((req) => (
                                     <tr
-                                        key={req.id}
-                                        onClick={() => setSelectedRequestId(req.id)}
-                                        className={`group cursor-pointer transition-all ${selectedRequestId === req.id ? "bg-emerald-50/40" : "hover:bg-gray-50/50"}`}
+                                        key={req._id}
+                                        onClick={() => setSelectedRequestId(req._id)}
+                                        className={`group cursor-pointer transition-all ${selectedRequestId === req._id ? "bg-emerald-50/40" : "hover:bg-gray-50/50"}`}
                                     >
                                         <td className="py-4 px-6 text-center">
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm ${req.color}`}>
-                                                    {req.brand.charAt(0)}
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600">
+                                                    {req.brandId?.fullName?.charAt(0) || "B"}
                                                 </div>
-                                                <span className="font-bold text-[14px] text-gray-900">{req.brand}</span>
+                                                <span className="font-bold text-[14px] text-gray-900 truncate max-w-[150px]">{req.brandId?.fullName || "Brand User"}</span>
                                             </div>
                                         </td>
-                                        <td className="py-4 px-6 text-[14px] font-medium text-gray-500">{req.gig}</td>
-                                        <td className="py-4 px-6 text-[14px] font-bold text-gray-900 text-right">{req.price}</td>
+                                        <td className="py-4 px-6 text-[14px] font-medium text-gray-500 truncate max-w-[200px]">{req.gigId?.title || "Gig Request"}</td>
+                                        <td className="py-4 px-6 text-[14px] font-bold text-gray-900 text-right">₹{((req.gigId?.pricing?.basePrice || 0) * 0.9).toLocaleString()}</td>
                                         <td className="py-4 px-6 text-center">
                                             <div className="flex items-center justify-center">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${selectedRequestId === req.id ? "bg-emerald-500 text-white shadow-md shadow-emerald-100" : "text-gray-300 group-hover:text-gray-500"}`}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${selectedRequestId === req._id ? "bg-emerald-500 text-white shadow-md shadow-emerald-100" : "text-gray-300 group-hover:text-gray-500"}`}>
                                                     <ChevronRight className="w-4 h-4" />
                                                 </div>
                                             </div>
@@ -179,72 +187,97 @@ export default function RequestsPage() {
                         <div className="p-6 flex flex-col h-full">
                             <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-6">Request Details</h2>
 
-                            {/* Brand Profile */}
-                            <div className="flex flex-col items-center text-center mb-8">
-                                <div className={`w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 ${selectedRequest.color}`}>
-                                    {selectedRequest.brand.charAt(0)}
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedRequest.brand}</h3>
-                                <div className="flex items-center justify-center gap-2">
-                                    <span className={`px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide rounded-full ${selectedRequest.platformColor} flex items-center gap-1.5`}>
-                                        <Globe className="w-2.5 h-2.5" />
-                                        {selectedRequest.platform}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Simple Details List */}
-                            <div className="space-y-1.5 flex-grow">
-                                <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
-                                            <Globe className="w-4 h-4" />
+                            {selectedRequest ? (
+                                <>
+                                    {/* Brand Profile */}
+                                    <div className="flex flex-col items-center text-center mb-8">
+                                        <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
+                                            {selectedRequest.brandId?.fullName?.charAt(0) || "B"}
                                         </div>
-                                        <span className="text-[13px] font-bold text-gray-400">Platform</span>
-                                    </div>
-                                    <span className="text-[13px] font-bold text-gray-900">{selectedRequest.platform}</span>
-                                </div>
-
-                                <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
-                                            <Calendar className="w-4 h-4" />
+                                        <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedRequest.brandId?.fullName || "Brand User"}</h3>
+                                        <p className="text-xs text-gray-500 font-medium mb-3">{selectedRequest.gigId?.title}</p>
+                                        <div className="flex items-center justify-center gap-2">
+                                            <span className="px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide rounded-full bg-emerald-50 text-emerald-600 flex items-center gap-1.5">
+                                                <Globe className="w-2.5 h-2.5" />
+                                                {selectedRequest.status}
+                                            </span>
                                         </div>
-                                        <span className="text-[13px] font-bold text-gray-400">Received Date</span>
                                     </div>
-                                    <span className="text-[13px] font-bold text-gray-900">{selectedRequest.date}</span>
-                                </div>
 
-                                <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
-                                            <Clock className="w-4 h-4" />
+                                    {/* Simple Details List */}
+                                    <div className="space-y-1.5 flex-grow">
+                                        <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                                    <Globe className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-[13px] font-bold text-gray-400">Status</span>
+                                            </div>
+                                            <span className="text-[13px] font-bold text-gray-900">{selectedRequest.status}</span>
                                         </div>
-                                        <span className="text-[13px] font-bold text-gray-400">Received Time</span>
-                                    </div>
-                                    <span className="text-[13px] font-bold text-gray-900">{selectedRequest.time}</span>
-                                </div>
 
-                                <div className="flex items-center justify-between py-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                                            <Check className="w-4 h-4" />
+                                        <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                                    <Calendar className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-[13px] font-bold text-gray-400">Received Date</span>
+                                            </div>
+                                            <span className="text-[13px] font-bold text-gray-900">{new Date(selectedRequest.createdAt).toLocaleDateString()}</span>
                                         </div>
-                                        <span className="text-[13px] font-bold text-gray-400">Base Price</span>
-                                    </div>
-                                    <span className="text-[17px] font-black text-emerald-600">{selectedRequest.price}</span>
-                                </div>
-                            </div>
 
-                            {/* Actions */}
-                            <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-3">
-                                <button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-[16px] text-sm shadow-lg shadow-emerald-200/50 transition-all hover:-translate-y-0.5 active:scale-[0.98]">
-                                    Accept Collaboration
-                                </button>
-                                <button className="w-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold py-3.5 px-4 rounded-[16px] text-sm transition-all hover:-translate-y-0.5 active:scale-[0.98]">
-                                    Ignore Request
-                                </button>
-                            </div>
+                                        <div className="flex items-center justify-between py-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
+                                                    <Check className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-[13px] font-bold text-gray-400">Est. Payout</span>
+                                            </div>
+                                            <span className="text-[17px] font-black text-emerald-600">₹{((selectedRequest.gigId?.pricing?.basePrice || 0) * 0.9).toLocaleString()}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Brand Note (If provided) */}
+                                    {selectedRequest.note && (
+                                        <div className="mt-4 bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-2">
+                                            <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Message from Brand</h4>
+                                            <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{selectedRequest.note}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Actions */}
+                                    {selectedRequest.status === "pending" && (
+                                        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-3">
+                                            <button
+                                                onClick={() => handleAccept(selectedRequest._id)}
+                                                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-[16px] text-sm shadow-lg shadow-emerald-200/50 transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                                            >
+                                                Accept Collaboration
+                                            </button>
+                                            <button
+                                                onClick={() => handleReject(selectedRequest._id)}
+                                                className="w-full bg-rose-50 text-rose-600 hover:bg-rose-100 font-bold py-3.5 px-4 rounded-[16px] text-sm transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                                            >
+                                                Ignore Request
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {selectedRequest.status === "accepted" && (
+                                        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-3">
+                                            <button
+                                                onClick={() => router.push(`/influencer-dashboard/messages?gigRequestId=${selectedRequest._id}`)}
+
+                                                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 px-4 rounded-[16px] text-sm shadow-lg shadow-blue-200/50 transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                                            >
+                                                Message Brand
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-gray-400 italic text-sm">Select a request to see details</div>
+                            )}
                         </div>
                     </div>
                 </div>

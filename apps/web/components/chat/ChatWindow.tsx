@@ -18,13 +18,13 @@ export interface Message {
   receiverId: string;
   content: string;
   createdAt: string;
-  connectionId: string;
+  gigRequestId: string;
   status: "SENT" | "DELIVERED" | "READ";
 }
 
 interface ChatWindowProps {
   currentUserId: string;
-  connectionId: string;
+  gigRequestId: string;
   receiverId: string;
   receiverName?: string;
   receiverImage?: string;
@@ -33,7 +33,7 @@ interface ChatWindowProps {
 
 export function ChatWindow({
   currentUserId,
-  connectionId,
+  gigRequestId,
   receiverId,
   receiverName,
   receiverImage,
@@ -53,39 +53,39 @@ export function ChatWindow({
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const res = await api.get(`/chat/${connectionId}`);
+        const res = await api.get(`/chat/${gigRequestId}`);
         setMessages(res.data.messages || []);
       } catch (err) {
         console.error(err);
       }
     };
 
-    if (connectionId) {
+    if (gigRequestId) {
       setTimeout(() => {
         fetchMessages();
       }, 0);
     }
-  }, [connectionId, accessToken]);
+  }, [gigRequestId, accessToken]);
 
-  // ✅ load connection
+  // ✅ load gig request details
   const fetchConnection = useCallback(async () => {
     try {
-      const res = await api.get(`/connections/details/${connectionId}`);
-      if (res.data && res.data.connection) {
-        setConnection(res.data.connection);
+      const res = await api.get(`/connections/details/${gigRequestId}`);
+      if (res.data && res.data.gigRequest) {
+        setConnection(res.data.gigRequest);
       }
     } catch (err) {
       console.error(err);
     }
-  }, [connectionId]);
+  }, [gigRequestId]);
 
   useEffect(() => {
-    if (connectionId && accessToken) {
+    if (gigRequestId && accessToken) {
       setTimeout(() => {
         fetchConnection();
       }, 0);
     }
-  }, [connectionId, accessToken, fetchConnection]);
+  }, [gigRequestId, accessToken, fetchConnection]);
 
   // ✅ socket
   useEffect(() => {
@@ -93,7 +93,7 @@ export function ChatWindow({
 
     const socketInstance = io("http://localhost:6001", {
       auth: { userId: currentUserId },
-      transports: ["websocket"], // Force websocket for faster/more stable connection
+      transports: ["websocket"],
       reconnection: true,
       reconnectionAttempts: 10,
       reconnectionDelay: 1000,
@@ -101,16 +101,20 @@ export function ChatWindow({
 
     socketInstance.on("connect", () => {
       console.log("Chat socket connected ✅");
+      // Join the shared conversation room as soon as connected
+      if (gigRequestId) {
+        socketInstance.emit("join_conversation", gigRequestId);
+      }
     });
 
     socketInstance.on("receive_message", (message: Message) => {
       console.log("New message received via socket:", message);
       setMessages((prev) => {
         // Remove matching optimistic message if any
-        const withoutTemp = prev.filter(m => 
+        const withoutTemp = prev.filter(m =>
           !(m._id.startsWith("temp-") && m.content === message.content && m.senderId === message.senderId)
         );
-        
+
         // Final check against IDs to avoid any duplication
         const exists = withoutTemp.some((m) => m._id === message._id);
         if (exists) return prev;
@@ -124,10 +128,11 @@ export function ChatWindow({
       }
     });
 
-    socketInstance.on("messages_read", ({ connectionId: readConnectionId }) => {
+    // ✅ When other user reads our messages → update tick colour to blue
+    socketInstance.on("messages_read", ({ gigRequestId: readGigRequestId }: { gigRequestId: string; readByUserId: string }) => {
       setMessages((prev) =>
         prev.map((m) =>
-          m.connectionId === readConnectionId && m.senderId === currentUserId
+          m.gigRequestId === readGigRequestId && m.senderId === currentUserId
             ? { ...m, status: "READ" }
             : m
         )
@@ -137,10 +142,14 @@ export function ChatWindow({
     socketRef.current = socketInstance;
 
     return () => {
+      // Leave conversation room cleanly
+      if (gigRequestId) {
+        socketInstance.emit("leave_conversation", gigRequestId);
+      }
       console.log("Disconnecting chat socket...");
       socketInstance.disconnect();
     };
-  }, [currentUserId, connectionId, fetchConnection]); // Reconnect when connectionId changes to be safe, but keep it stable
+  }, [currentUserId, gigRequestId, fetchConnection]);
 
 
   // ✅ auto scroll
@@ -160,7 +169,7 @@ export function ChatWindow({
       receiverId,
       content,
       createdAt: new Date().toISOString(),
-      connectionId,
+      gigRequestId,
       status: "SENT"
     };
 
@@ -169,7 +178,7 @@ export function ChatWindow({
     try {
       // 🔥 1. Save to DB via API (Guaranteed Persistence)
       const res = await api.post("/chat/send", {
-        connectionId,
+        gigRequestId,
         content
       });
 
@@ -183,7 +192,7 @@ export function ChatWindow({
       }
 
       // Update the optimistic message with the real one from DB
-      setMessages((prev) => 
+      setMessages((prev) =>
         prev.map(m => m._id === tempId ? savedMessage : m)
       );
 
@@ -199,15 +208,15 @@ export function ChatWindow({
   const handleUpdateConnection = async (status: "accepted" | "rejected") => {
     try {
       if (!connection?._id) return;
-      
+
       const action = status === "accepted" ? "accept" : "reject";
       await api.patch(`/connections/${connection._id}/${action}`);
       await fetchConnection();
-      
+
       // ✅ Optional: Send a system message via socket if possible, 
       // or just refresh messages
       const statusMsg = status === "accepted" ? "✅ Influencer accepted the request" : "❌ Influencer rejected the request";
-      handleSendMessage(statusMsg); 
+      handleSendMessage(statusMsg);
     } catch (err) {
       console.error(err);
     }
@@ -218,12 +227,16 @@ export function ChatWindow({
   const isBrand = user?.role === "BRAND";
   const isChatDisabled = isPending && isBrand;
 
-  // ✅ mark as read
+  // ✅ mark as read — via REST (persists to DB) + socket (live double-tick)
   useEffect(() => {
-    if (!connectionId) return;
-
-    api.post(`/chat/read/${connectionId}`).catch(console.error);
-  }, [connectionId, accessToken]);
+    if (!gigRequestId) return;
+    // REST: Update DB status for unread messages
+    api.post(`/chat/read/${gigRequestId}`).catch(console.error);
+    // Socket: Notify sender their messages are now READ (blue ticks)
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("mark_read", gigRequestId);
+    }
+  }, [gigRequestId, accessToken]);
 
   return (
     <div className="flex flex-col h-full bg-[#f8f9fa] shadow-2xl relative w-full overflow-hidden">
@@ -265,40 +278,40 @@ export function ChatWindow({
       {/* Connection Banners */}
       {isPending && isBrand && (
         <div className="bg-blue-50 border-b border-blue-100 p-3 flex items-center justify-center gap-2">
-            <Info className="w-4 h-4 text-blue-600" />
-            <p className="text-xs font-bold text-blue-900 text-center">Booking request sent. Waiting for approval...</p>
+          <Info className="w-4 h-4 text-blue-600" />
+          <p className="text-xs font-bold text-blue-900 text-center">Booking request sent. Waiting for approval...</p>
         </div>
       )}
 
       {isPending && isInfluencer && (
         <div className="bg-emerald-50 border-b border-emerald-100 p-4 flex items-center justify-between shadow-sm">
-            <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
-                    <MessageSquare className="w-4 h-4" />
-                </div>
-                <div>
-                   <p className="text-sm font-bold text-emerald-900 leading-none">New Booking Request</p>
-                   <p className="text-xs text-emerald-600 mt-1 font-medium">Review to enable chat</p>
-                </div>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
+              <MessageSquare className="w-4 h-4" />
             </div>
-            <div className="flex gap-2">
-                <button onClick={() => handleUpdateConnection("rejected")} className="bg-white border border-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors">Reject</button>
-                <button onClick={() => handleUpdateConnection("accepted")} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-shadow shadow-md">Accept Request</button>
+            <div>
+              <p className="text-sm font-bold text-emerald-900 leading-none">New Booking Request</p>
+              <p className="text-xs text-emerald-600 mt-1 font-medium">Review to enable chat</p>
             </div>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => handleUpdateConnection("rejected")} className="bg-white border border-red-100 text-red-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-red-50 transition-colors">Reject</button>
+            <button onClick={() => handleUpdateConnection("accepted")} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700 transition-shadow shadow-md">Accept Request</button>
+          </div>
         </div>
       )}
 
       {connection?.status === "accepted" && (
         <div className="bg-emerald-50/50 border-b border-emerald-100/50 p-2 flex items-center justify-center gap-2">
-            <Check className="w-3.5 h-3.5 text-emerald-500" />
-            <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Request Accepted · Chat Enabled</p>
+          <Check className="w-3.5 h-3.5 text-emerald-500" />
+          <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">Request Accepted · Chat Enabled</p>
         </div>
       )}
 
       {connection?.status === "rejected" && (
         <div className="bg-red-50 border-b border-red-100 p-2 flex items-center justify-center gap-2">
-            <X className="w-3.5 h-3.5 text-red-500" />
-            <p className="text-[11px] font-bold text-red-700 uppercase tracking-wider">Request Rejected</p>
+          <X className="w-3.5 h-3.5 text-red-500" />
+          <p className="text-[11px] font-bold text-red-700 uppercase tracking-wider">Request Rejected</p>
         </div>
       )}
 
@@ -331,38 +344,38 @@ export function ChatWindow({
       {/* Input */}
       <div className="relative bg-[#f8f9fa] z-20 border-t">
         <ChatInput onSend={handleSendMessage} disabled={isChatDisabled || connection?.status === "rejected"} />
-        
+
         {/* Footer Actions (Brand Only) */}
         {isBrand && (
-            <div className="p-3 px-6 flex justify-end bg-white">
-                <button
-                    onClick={async () => {
-                        if (!connection?._id) return;
-                        
-                        // 🔥 Use Gig from URL if available, otherwise fallback to connection's default gig
-                        const activeGigId = urlGigId || connection.gigId;
+          <div className="p-3 px-6 flex justify-end bg-white">
+            <button
+              onClick={async () => {
+                if (!connection?._id) return;
 
-                        try {
-                            const res = await api.post("/orders", {
-                                gigId: activeGigId,
-                                buyerId: user?.id,
-                                influencerId: receiverId,
-                                connectionId: connection._id,
-                            });
-                            window.location.href = `/payment?orderId=${res.data.orderId}`;
-                        } catch (err: unknown) {
-                            const errorResponse = err as { response?: { data?: { message?: string } } };
-                            alert(errorResponse.response?.data?.message || "Failed to create order");
-                        }
-                    }}
-                    disabled={connection?.status !== "accepted"}
-                    className="bg-[#059669] text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 hover:bg-[#047857] transition-all disabled:opacity-50 disabled:grayscale text-sm"
-                >
-                    {connection?.status === "accepted" 
-                        ? (urlGigId ? "Confirm & Place Order" : "Place Order Now") 
-                        : "Waiting for Acceptance..."}
-                </button>
-            </div>
+                // 🔥 Use Gig from URL if available, otherwise fallback to connection's default gig
+                const activeGigId = urlGigId || connection.gigId;
+
+                try {
+                  const res = await api.post("/orders", {
+                    gigId: activeGigId,
+                    buyerId: user?.id,
+                    influencerId: receiverId,
+                    connectionId: gigRequestId,
+                  });
+                  window.location.href = `/payment?orderId=${res.data.orderId}`;
+                } catch (err: unknown) {
+                  const errorResponse = err as { response?: { data?: { message?: string } } };
+                  alert(errorResponse.response?.data?.message || "Failed to create order");
+                }
+              }}
+              disabled={connection?.status !== "accepted"}
+              className="bg-[#059669] text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-emerald-500/20 hover:bg-[#047857] transition-all disabled:opacity-50 disabled:grayscale text-sm"
+            >
+              {connection?.status === "accepted"
+                ? (urlGigId ? "Confirm & Place Order" : "Place Order Now")
+                : "Waiting for Acceptance..."}
+            </button>
+          </div>
         )}
       </div>
     </div>
