@@ -5,7 +5,10 @@ interface User {
   id: string;
   email: string;
   fullName?: string;
+  contactPersonName?: string;
   profilePicture?: string;
+  profileImage?: string;
+  profileImageUrl?: string;
   role: "ADMIN" | "BRAND" | "INFLUENCER";
   adminLevel?: "SUPER" | "NORMAL" | null;
   status?: "PENDING" | "ACTIVE";
