@@ -489,7 +489,7 @@ export default function ProfileSetupPage() {
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-2">Profile Submitted!</h3>
                         <p className="text-gray-500 mb-8">
-                            Your details are being reviewed by our team. We'll notify you once your account is verified.
+                            Your details are being reviewed by our team. We&apos;ll notify you once your account is verified.
                         </p>
                         <button
                             onClick={() => {
