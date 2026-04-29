@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 
 import { publishEvent } from "../queue/publisher.js";
 import { ORDER_CREATED_EVENT } from "../queue/events.js";
@@ -13,11 +13,12 @@ interface CreateOrderInput {
   influencerId: string;
   amount?: number;
   connectionId: string;
+  dueDate?: string;
 }
 
 // 🟢 CREATE ORDER
 export const createOrderService = async (data: CreateOrderInput) => {
-  const { gigId, buyerId, influencerId, amount, connectionId } = data;
+  const { gigId, buyerId, influencerId, amount, connectionId, dueDate } = data;
 
   // 🔥 STEP 1: Validate gig request exists
   const connection = await GigRequestModel.findById(new Types.ObjectId(connectionId));
@@ -70,14 +71,15 @@ export const createOrderService = async (data: CreateOrderInput) => {
     status: "PENDING",
     escrowStatus: "HOLD",
     workStatus: "NOT_STARTED",
+    dueDate: dueDate ? new Date(dueDate) : undefined,
   });
-await publishEvent(ORDER_CREATED_EVENT, {
-  orderId: order._id.toString(),
-  buyerId: order.buyerId.toString(),
-  influencerId: order.influencerId.toString(),
-  amount: order.amount,
-});
-console.log("🚀 order.created event published");
+  await publishEvent(ORDER_CREATED_EVENT, {
+    orderId: order._id.toString(),
+    buyerId: order.buyerId.toString(),
+    influencerId: order.influencerId.toString(),
+    amount: order.amount,
+  });
+  console.log("🚀 order.created event published");
   await publishEvent("order.created", {
     orderId: order._id.toString(),
     buyerId: order.buyerId,

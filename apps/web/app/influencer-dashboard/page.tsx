@@ -21,8 +21,19 @@ interface Order {
   };
 }
 
+interface Proposal {
+  _id: string;
+  proposalData: {
+    date: string;
+    time: string;
+    status: string;
+  };
+  content: string;
+}
+
 export default function InfluencerDashboardPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -30,8 +41,12 @@ export default function InfluencerDashboardPage() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/orders/history");
-        setOrders(response.data);
+        const [ordersRes, proposalsRes] = await Promise.all([
+          api.get("/orders/history"),
+          api.get("/chat/agreed-proposals")
+        ]);
+        setOrders(ordersRes.data);
+        setProposals(proposalsRes.data.proposals || []);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       } finally {
@@ -221,9 +236,10 @@ export default function InfluencerDashboardPage() {
                   } relative`}
               >
                 {day}
-                {(day === 7 || day === 14) && (
-                  <div className="w-1 h-1 bg-emerald-500 rounded-full absolute bottom-1 left-1/2 -translate-x-1/2"></div>
-                )}
+                {(orders.some(o => o.dueDate && new Date(o.dueDate).getDate() === day) ||
+                  proposals.some(p => p.proposalData.date && new Date(p.proposalData.date).getDate() === day)) && (
+                    <div className="w-1 h-1 bg-emerald-500 rounded-full absolute bottom-1 left-1/2 -translate-x-1/2"></div>
+                  )}
               </div>
             ))}
             <div className="flex justify-center items-center h-8 w-8 mx-auto text-gray-300 font-medium">1</div>
@@ -260,6 +276,7 @@ export default function InfluencerDashboardPage() {
               </div>
 
               <div className="space-y-3 mb-6">
+                {/* Orders */}
                 {orders
                   .filter(o => o.dueDate && new Date(o.dueDate).toLocaleDateString() === selectedDate)
                   .map((order) => (
@@ -277,14 +294,35 @@ export default function InfluencerDashboardPage() {
                       </div>
                     </div>
                   ))}
-                {orders.filter(o => o.dueDate && new Date(o.dueDate).toLocaleDateString() === selectedDate).length === 0 && (
-                  <p className="text-center py-10 text-gray-400 text-sm italic">No gigs due on this date</p>
-                )}
+
+                {/* Proposals */}
+                {proposals
+                  .filter(p => p.proposalData.date && new Date(p.proposalData.date).toLocaleDateString() === selectedDate)
+                  .map((proposal) => (
+                    <div key={proposal._id} className="border border-emerald-100 bg-emerald-50/20 shadow-sm rounded-[16px] p-4 hover:border-emerald-200 transition-all cursor-pointer group flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-emerald-100 text-emerald-600 font-bold">
+                        📅
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-[14px] font-bold text-emerald-900 truncate">Negotiated Date</h4>
+                        <p className="text-[12px] text-emerald-600 mt-0.5 font-medium truncate">Time: {proposal.proposalData.time}</p>
+                        <p className="text-[11px] text-gray-500 mt-1 italic break-words">{proposal.content}</p>
+                      </div>
+                    </div>
+                  ))}
+
+                {orders.filter(o => o.dueDate && new Date(o.dueDate).toLocaleDateString() === selectedDate).length === 0 &&
+                  proposals.filter(p => p.proposalData.date && new Date(p.proposalData.date).toLocaleDateString() === selectedDate).length === 0 && (
+                    <p className="text-center py-10 text-gray-400 text-sm italic">No events on this date</p>
+                  )}
               </div>
 
               <div className="flex flex-col gap-2">
-                <button className="w-full bg-[#1CD36B] hover:bg-[#19C061] text-white font-bold py-3.5 px-4 rounded-[14px] text-[14px] shadow-sm transition-colors">
-                  View All Gigs
+                <button
+                  onClick={() => window.location.href = "/influencer-dashboard/bookings"}
+                  className="w-full bg-[#1CD36B] hover:bg-[#19C061] text-white font-bold py-3.5 px-4 rounded-[14px] text-[14px] shadow-sm transition-colors"
+                >
+                  View All Bookings
                 </button>
                 <button
                   onClick={() => setSelectedDate(null)}

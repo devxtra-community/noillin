@@ -9,7 +9,7 @@ import {
   verifyOtpService,
   resetPasswordService,
   verifySignupOtpService,
-
+  resendSignupOtpService,
 } from "../services/auth.service.js";
 import type { HttpError } from "../modules/auth/http-error.js";
 // import { log } from "winston";
@@ -183,6 +183,32 @@ export const verifySignupOtpController = async (
     res.status(200).json({
       success: true,
       message: "Email verified successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ================= RESEND SIGNUP OTP =================
+export const resendSignupOtpController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      const err: HttpError = new Error("Email is required");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    await resendSignupOtpService(email);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP resent successfully",
     });
   } catch (error) {
     next(error);

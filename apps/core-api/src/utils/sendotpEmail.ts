@@ -15,4 +15,5 @@ export const sendOtpEmail = async (to: string,otp: string) => {
     subject: "Your OTP Code",
     text: `Your verification OTP is: ${otp}`,
   });
+  
 };

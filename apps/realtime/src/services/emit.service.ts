@@ -61,6 +61,18 @@ export const emitMessagesRead = (
 };
 
 /**
+ * Notify all participants that a proposal has been accepted or rejected.
+ */
+export const emitProposalUpdate = (
+    io: Server,
+    gigRequestId: string,
+    message: unknown
+): void => {
+    const convRoom = getConversationRoom(gigRequestId);
+    io.to(convRoom).emit("receive_proposal_update", message);
+};
+
+/**
  * Notify a specific user about an unread count update.
  * Used to refresh their sidebar badge without a full page reload.
  */

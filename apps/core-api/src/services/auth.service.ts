@@ -61,9 +61,51 @@ export const signupService = async (data: SignupInput) => {
 
   //  Send REAL Gmail OTP
   await sendOtpEmail(data.email, otp);
-
   return { message: "OTP sent to your email" };
-  
+
+};
+
+
+export const resendSignupOtpService = async (email: string) => {
+  const pending = await pendingSignupRepository.findByEmail(email);
+
+  if (!pending) {
+    throw createHttpError("Signup request not found", 404);
+  }
+
+  if (pending.isEmailVerified) {
+    throw createHttpError("Email already verified", 400);
+  }
+
+  const now = new Date();
+
+  // ⏳ Cooldown check (60 seconds)
+  if (
+    pending.otpLastSentAt &&
+    now.getTime() - pending.otpLastSentAt.getTime() < 60 * 1000
+  ) {
+    throw createHttpError("Please wait before requesting another OTP", 429);
+  }
+
+  // 🔁 Max resend limit
+  if ((pending.otpResendCount || 0) >= 5) {
+    throw createHttpError("Maximum resend attempts reached", 403);
+  }
+
+  // 🔐 Generate new OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const hashedOtp = await bcrypt.hash(otp, 10);
+
+  pending.emailOtpHash = hashedOtp;
+  pending.emailOtpExpiresAt = new Date(now.getTime() + 5 * 60 * 1000);
+  pending.otpResendCount = (pending.otpResendCount || 0) + 1;
+  pending.otpLastSentAt = now;
+
+  await pending.save();
+
+  await sendOtpEmail(email, otp);
+
+  return { message: "OTP resent successfully" };
 };
 
 
@@ -327,7 +369,7 @@ export const verifySignupOtpService = async (
 export const forgotPasswordService = async (email: string) => {
   const user = await userRepository.findEmailWithPassword(email);
 
-  if (!user) return;  
+  if (!user) return;
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   console.log("RESET OTP:", otp);

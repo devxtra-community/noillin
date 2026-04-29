@@ -76,11 +76,8 @@ function SignupForm() {
 
       const response = await api.post("/auth/signup", payload);
 
-      if (response.data.role === "BRAND") {
-        router.push("/profile-setup")
-      } else {
-        router.push("/")
-      }
+      const targetEmail = encodeURIComponent(formData.email);
+      router.push(`/verify-otp?email=${targetEmail}&type=signup`);
 
       if (response.data.accessToken) {
         // localStorage.setItem("accessToken", response.data.accessToken);
