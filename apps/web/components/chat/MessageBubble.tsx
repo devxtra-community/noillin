@@ -20,11 +20,13 @@ export interface Message {
 interface Props {
   message: Message;
   currentUserId: string;
+  isBrand?: boolean;
   onRespond?: (messageId: string, status: "ACCEPTED" | "REJECTED") => void;
   onTryAgain?: () => void;
+  onPay?: () => void;
 }
 
-export function MessageBubble({ message, currentUserId, onRespond, onTryAgain }: Props) {
+export function MessageBubble({ message, currentUserId, isBrand, onRespond, onTryAgain, onPay }: Props) {
   const isMine = message.senderId.toString() === currentUserId.toString();
   const isProposal = message.messageType === "PROPOSAL";
   const pData = message.proposalData;
@@ -87,6 +89,18 @@ export function MessageBubble({ message, currentUserId, onRespond, onTryAgain }:
                 </div>
               </div>
             </div>
+
+            {pData.status === "ACCEPTED" && isBrand && (
+              <div className="p-4 bg-emerald-50/50 border-t border-emerald-100 flex flex-col items-center">
+                <button
+                  onClick={() => onPay?.()}
+                  className="w-full py-3 rounded-2xl text-[13px] font-black text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all active:scale-95 uppercase tracking-[0.2em]"
+                >
+                  Pay Now & Place Order
+                </button>
+                <p className="text-[9px] font-black text-emerald-600/60 uppercase tracking-widest mt-3">Final step to secure booking</p>
+              </div>
+            )}
 
             {pData.status === "PENDING" && !isMine && (
               <div className="p-4 bg-white border-t border-gray-50 space-y-3">

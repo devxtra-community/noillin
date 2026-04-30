@@ -20,6 +20,12 @@ interface CreateOrderInput {
 export const createOrderService = async (data: CreateOrderInput) => {
   const { gigId, buyerId, influencerId, amount, connectionId, dueDate } = data;
 
+  // 🔥 ID VALIDATION
+  if (!Types.ObjectId.isValid(gigId)) throw new Error(`Invalid Gig ID: ${gigId}`);
+  if (!Types.ObjectId.isValid(buyerId)) throw new Error(`Invalid Buyer ID: ${buyerId}`);
+  if (!Types.ObjectId.isValid(influencerId)) throw new Error(`Invalid Influencer ID: ${influencerId}`);
+  if (!Types.ObjectId.isValid(connectionId)) throw new Error(`Invalid Connection ID: ${connectionId}`);
+
   // 🔥 STEP 1: Validate gig request exists
   const connection = await GigRequestModel.findById(new Types.ObjectId(connectionId));
 

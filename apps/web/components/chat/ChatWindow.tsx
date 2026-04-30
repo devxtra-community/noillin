@@ -377,25 +377,28 @@ export function ChatWindow({
                 key={msg._id}
                 message={msg}
                 currentUserId={currentUserId}
+                isBrand={isBrand}
+                onPay={async () => {
+                  const gigData = urlGigId || connection?.gigId;
+                  const activeGigId = typeof gigData === 'object' && gigData !== null ? (gigData as { _id: string })._id : gigData;
+                  const acceptedProposal = messages.find(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED");
+                  if (!activeGigId) return alert("Gig ID not found");
+                  try {
+                    const res = await api.post("/orders", {
+                      gigId: activeGigId,
+                      buyerId: user?.id,
+                      influencerId: receiverId,
+                      connectionId: gigRequestId,
+                      dueDate: acceptedProposal?.proposalData?.date
+                    });
+                    window.location.href = `/payment?orderId=${res.data.orderId}`;
+                  } catch (err: unknown) {
+                    const error = err as { response?: { data?: { message?: string } } };
+                    alert(error.response?.data?.message || "Failed to create order");
+                  }
+                }}
                 onRespond={async (id, status) => {
                   await handleRespondToProposal(id, status);
-                  if (status === "ACCEPTED" && isBrand) {
-                    setTimeout(() => {
-                      const activeGigId = urlGigId || connection?.gigId;
-                      const acceptedProposal = messages.find(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED");
-                      if (activeGigId) {
-                        api.post("/orders", {
-                          gigId: activeGigId,
-                          buyerId: user?.id,
-                          influencerId: receiverId,
-                          connectionId: gigRequestId,
-                          dueDate: acceptedProposal?.proposalData?.date
-                        })
-                          .then(res => { window.location.href = `/payment?orderId=${res.data.orderId}`; })
-                          .catch(console.error);
-                      }
-                    }, 800);
-                  }
                 }}
                 onTryAgain={handleTryAnotherDay}
               />
@@ -475,34 +478,44 @@ export function ChatWindow({
       {/* Input & Actions Area */}
       <div className="bg-white border-t border-gray-100 z-30">
         <div className="relative"><ChatInput onSend={handleSendMessage} disabled={isChatDisabled || connection?.status === "rejected"} /></div>
-        {connection?.status === "accepted" && (
-          <div className="px-6 pb-4 pt-1 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <button onClick={() => setIsProposing(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 text-emerald-600 hover:text-emerald-700 font-bold text-[13px] px-5 py-2.5 rounded-xl border border-emerald-100 hover:bg-emerald-50 transition-all uppercase tracking-wider"><Calendar className="w-4 h-4" /> Propose Due Date</button>
-            {isBrand && (
-              <button
-                onClick={async () => {
-                  if (!connection?._id) return;
-                  const activeGigId = urlGigId || connection.gigId;
-                  const acceptedProposal = messages.find(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED");
-                  try {
-                    const res = await api.post("/orders", {
-                      gigId: activeGigId,
-                      buyerId: user?.id,
-                      influencerId: receiverId,
-                      connectionId: gigRequestId,
-                      dueDate: acceptedProposal?.proposalData?.date
-                    });
-                    window.location.href = `/payment?orderId=${res.data.orderId}`;
-                  } catch (err: unknown) { alert((err as { response?: { data?: { message?: string } } }).response?.data?.message || "Failed to create order"); }
-                }}
-                disabled={!messages.some(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED")}
-                className="w-full sm:w-auto bg-[#059669] text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-emerald-500/10 hover:bg-[#047857] transition-all disabled:opacity-50 disabled:grayscale text-sm uppercase tracking-wider"
-              >
-                {messages.some(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED") ? "Place Order Now" : "Agree on Date First"}
-              </button>
-            )}
-          </div>
-        )}
+        <div className="px-6 pb-4 pt-1 flex flex-col sm:flex-row items-center justify-between gap-3">
+          {connection?.status === "accepted" && (
+            <button onClick={() => setIsProposing(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 text-emerald-600 hover:text-emerald-700 font-bold text-[13px] px-5 py-2.5 rounded-xl border border-emerald-100 hover:bg-emerald-50 transition-all uppercase tracking-wider">
+              <Calendar className="w-4 h-4" /> Propose Due Date
+            </button>
+          )}
+
+          {isBrand && (
+            <button
+              onClick={async () => {
+                if (!connection?._id) return;
+                const gigData = urlGigId || connection.gigId;
+                const activeGigId = typeof gigData === 'object' && gigData !== null ? (gigData as { _id: string })._id : gigData;
+                const acceptedProposal = messages.find(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED");
+                try {
+                  const res = await api.post("/orders", {
+                    gigId: activeGigId,
+                    buyerId: user?.id,
+                    influencerId: receiverId,
+                    connectionId: gigRequestId,
+                    dueDate: acceptedProposal?.proposalData?.date
+                  });
+                  window.location.href = `/payment?orderId=${res.data.orderId}`;
+                } catch (err: unknown) {
+                  const error = err as { response?: { data?: { message?: string } } };
+                  alert(error.response?.data?.message || "Failed to create order");
+                }
+              }}
+              disabled={!messages.some(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED")}
+              className={`w-full sm:w-auto px-8 py-2.5 rounded-xl font-bold shadow-lg transition-all text-sm uppercase tracking-wider ${messages.some(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED")
+                ? "bg-[#059669] text-white shadow-emerald-500/10 hover:bg-[#047857]"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed shadow-none"
+                }`}
+            >
+              {messages.some(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED") ? "Pay Now & Place Order" : "Agree on Date to Pay"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
