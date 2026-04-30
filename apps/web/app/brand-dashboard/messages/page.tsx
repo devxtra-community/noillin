@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Search, Loader2, MessageSquare } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
@@ -20,16 +20,6 @@ interface Conversation {
         role: string;
         profileImage: string | null;
     };
-}
-
-interface Message {
-    _id: string;
-    gigRequestId: string;
-    senderId: string;
-    receiverId: string;
-    content: string;
-    status: "SENT" | "DELIVERED" | "READ";
-    createdAt: string;
 }
 
 function MessagesContent() {

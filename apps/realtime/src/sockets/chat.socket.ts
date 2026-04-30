@@ -5,7 +5,7 @@ import {
   registerUserSocket,
   removeUserSocket,
 } from "../services/connection.service.js";
-import { emitNewMessage, emitMessagesRead } from "../services/emit.service.js";
+import { emitNewMessage, emitMessagesRead, emitProposalUpdate } from "../services/emit.service.js";
 
 /**
  * chat.socket.ts
@@ -112,6 +112,13 @@ export const registerChatHandlers = (io: Server, socket: Socket): void => {
     if (!gigRequestId) return;
     console.log(`[socket] User ${userId} marked ${gigRequestId} as read`);
     emitMessagesRead(io, gigRequestId, userId);
+  });
+
+  socket.on("proposal_update", (data: { gigRequestId: string; message: unknown }) => {
+    const { gigRequestId, message } = data;
+    if (!gigRequestId || !message) return;
+    console.log(`[socket] Relaying proposal update for gigRequest ${gigRequestId}`);
+    emitProposalUpdate(io, gigRequestId, message);
   });
 
   // ──────────────────────────────────────────

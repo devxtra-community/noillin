@@ -60,14 +60,18 @@ function SignupForm() {
 
       const response = await api.post("/auth/signup", payload);
 
-      if (response.data.success) {
-        // Set a pending user in the store so profile-setup can work
-        useAuthStore.getState().setAuth("", {
-          id: "pending", // Temporary ID
-          email: formData.email,
-          fullName: formData.fullName,
-          role: role,
-          status: "PENDING"
+      const targetEmail = encodeURIComponent(formData.email);
+      router.push(`/verify-otp?email=${targetEmail}&type=signup`);
+
+      if (response.data.accessToken) {
+        // localStorage.setItem("accessToken", response.data.accessToken);
+        // window.location.href = "/admindashboard";
+        setFormData({
+          fullName: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+          businessInfo: ""
         });
         
         router.push("/profile-setup");
