@@ -299,30 +299,7 @@ export const resetPasswordController = async (
 };
 
 
-export const pendingProfileController = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { email, profileData } = req.body;
 
-    if (!email || !profileData) {
-      const err: HttpError = new Error("Email and profile data required");
-      err.statusCode = 400;
-      throw err;
-    }
-
-    const result = await pendingProfileService(email, profileData);
-
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 
 

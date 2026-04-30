@@ -472,16 +472,5 @@ export const resetPasswordService = async (
 };
 
 
-export const pendingProfileService = async (email: string, profileData: Record<string, unknown>) => {
-  const pending = await pendingSignupRepository.findByEmail(email);
 
-  if (!pending) {
-    throw createHttpError("Signup request not found", 404);
-  }
-
-  pending.profileData = profileData;
-  await pending.save();
-
-  return { message: "Profile data saved successfully" };
-};
 
