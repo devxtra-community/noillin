@@ -108,7 +108,7 @@ export const stripeWebhook = async (req: Request, res: Response) => {
 // 🔥 STRIPE CONNECT ONBOARDING
 export const createStripeAccountLink = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user!.userId;
     const profile = await InfluencerProfile.findOne({ userId });
     if (!profile) return res.status(404).json({ message: "Profile not found" });
 

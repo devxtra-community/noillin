@@ -88,7 +88,7 @@ export const markAsReadController = async (
 export const respondToProposalController = async (req: Request, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const messageId = req.params.messageId;
+    const messageId = req.params.messageId as string;
     const { status } = req.body; // "ACCEPTED" | "REJECTED"
 
     if (!["ACCEPTED", "REJECTED"].includes(status)) {

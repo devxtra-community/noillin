@@ -6,6 +6,7 @@ export interface OrderDocument {
     influencerId: Types.ObjectId;
     gigId: Types.ObjectId;
     connectionId: Types.ObjectId;
+    dueDate?: Date;
 
     amount: number;
     currency: string;

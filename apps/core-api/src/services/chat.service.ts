@@ -40,16 +40,21 @@ export const sendMessage = async (
     ? request.influencerId.toString()
     : request.brandId.toString();
 
-  return addMessage({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const messageData: any = {
     gigRequestId: new mongoose.Types.ObjectId(gigRequestId),
     senderId,
     receiverId,
     content,
     status: "SENT",
-    // @ts-expect-error - repository needs update too
     messageType,
-    proposalData
-  });
+  };
+
+  if (proposalData) {
+    messageData.proposalData = proposalData;
+  }
+
+  return addMessage(messageData);
 }
 
 export const respondToProposal = async (messageId: string, userId: string, status: "ACCEPTED" | "REJECTED") => {

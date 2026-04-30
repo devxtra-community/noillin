@@ -67,18 +67,23 @@ export const createOrderService = async (data: CreateOrderInput) => {
   }
 
   // 🔥 STEP 5: Create order
-  const order = await OrderModel.create({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orderData: any = {
     gigId: new Types.ObjectId(gigId),
     buyerId: new Types.ObjectId(buyerId),
     influencerId: new Types.ObjectId(influencerId),
     amount: orderAmount,
     connectionId: new Types.ObjectId(connectionId),
-
     status: "PENDING",
     escrowStatus: "HOLD",
     workStatus: "NOT_STARTED",
-    dueDate: dueDate ? new Date(dueDate) : undefined,
-  });
+  };
+
+  if (dueDate) {
+    orderData.dueDate = new Date(dueDate);
+  }
+
+  const order = await OrderModel.create(orderData);
   await publishEvent(ORDER_CREATED_EVENT, {
     orderId: order._id.toString(),
     buyerId: order.buyerId.toString(),
