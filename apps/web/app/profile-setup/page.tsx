@@ -8,6 +8,7 @@ import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
+import { uploadToS3 } from "@/lib/s3-uploads";
 
 export default function ProfileSetupPage() {
     const router = useRouter();
@@ -45,6 +46,23 @@ export default function ProfileSetupPage() {
     useEffect(() => {
         if (!userType) return;
 
+        // If user is PENDING, we don't need to fetch from /profile/get_profile
+        // but we should initialize with whatever we have from signup
+        if (user?.status === "PENDING") {
+            if (userType === "INFLUENCER") {
+                setInfluencerData(prev => ({
+                    ...prev,
+                    fullName: user.fullName || "",
+                }));
+            } else if (userType === "BRAND") {
+                setBrandData(prev => ({
+                    ...prev,
+                    companyName: user.fullName || "",
+                }));
+            }
+            return;
+        }
+
         const fetchProfile = async () => {
             try {
                 const res = await api.get("/profile/get_profile");
@@ -52,7 +70,7 @@ export default function ProfileSetupPage() {
 
                 if (userType === "INFLUENCER") {
                     setInfluencerData({
-                        fullName: data.fullName || "",
+                        fullName: data.fullName || user?.fullName || "",
                         username: data.username || "",
                         niche: data.categories?.[0] || "",
                         gender: "",
@@ -71,7 +89,7 @@ export default function ProfileSetupPage() {
 
                 if (userType === "BRAND") {
                     setBrandData({
-                        companyName: data.companyName || "",
+                        companyName: data.companyName || user?.fullName || "",
                         industry: data.industry || "",
                         website: data.website || "",
                         companySize: data.companySize || "",
@@ -79,17 +97,29 @@ export default function ProfileSetupPage() {
                 }
             } catch (err) {
                 console.error(err);
+                // On error, still try to populate with store data
+                if (userType === "INFLUENCER") {
+                    setInfluencerData(prev => ({ ...prev, fullName: user?.fullName || "" }));
+                } else {
+                    setBrandData(prev => ({ ...prev, companyName: user?.fullName || "" }));
+                }
             }
         };
 
         fetchProfile();
-    }, [userType]);
+    }, [userType, user]);
 
     const handleCommonChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     ) => {
         const { name, value } = e.target;
         setCommonData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setCommonData((prev) => ({ ...prev, profilePicture: e.target.files![0] }));
+        }
     };
 
     const handleInfluencerChange = (
@@ -106,66 +136,54 @@ export default function ProfileSetupPage() {
         setBrandData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
 
         try {
             if (!userType) return;
-            type InfluencerPayload = {
-                bio?: string;
-                location?: string;
-                fullName?: string;
-                username?: string;
-                categories?: string[];
-                instagramUrl?: string;
-                youtubeUrl?: string;
-                tiktokUrl?: string;
-                languages?: string[];
-            };
-
-            type BrandPayload = {
-                bio?: string;
-                location?: string;
-                companyName?: string;
-                industry?: string;
-                website?: string;
-                companySize?: string;
-            };
-
-            let payload: InfluencerPayload | BrandPayload = {
-
-
+            
+            let profileImageUrl = "";
+            if (commonData.profilePicture) {
+                profileImageUrl = await uploadToS3(commonData.profilePicture, "profiles");
+            }
+            
+            const profileData = {
                 bio: commonData.bio,
                 location: commonData.location,
-            };
-
-            if (userType === "INFLUENCER") {
-                payload = {
-                    ...payload,
+                phoneNumber: commonData.phoneNumber,
+                profileImageUrl: profileImageUrl,
+                ...(userType === "INFLUENCER" ? {
                     fullName: influencerData.fullName,
                     username: influencerData.username,
-                    categories: influencerData.niche
-                        ? [influencerData.niche]
-                        : [],
-                    instagramUrl: influencerData.instagram,
-                    youtubeUrl: influencerData.youtube,
-                    tiktokUrl: influencerData.tiktok,
-                    languages: [],
-                };
-            }
-
-            if (userType === "BRAND") {
-                payload = {
-                    ...payload,
+                    niche: influencerData.niche,
+                    gender: influencerData.gender,
+                    dob: influencerData.dob,
+                    socialLinks: {
+                        instagram: influencerData.instagram,
+                        youtube: influencerData.youtube,
+                        tiktok: influencerData.tiktok,
+                    }
+                } : {
                     companyName: brandData.companyName,
                     industry: brandData.industry,
                     website: brandData.website,
                     companySize: brandData.companySize,
-                };
+                })
+            };
+
+            if (user?.status === "PENDING") {
+                await api.post("/auth/pending-profile", {
+                    email: user.email,
+                    profileData
+                });
+                setShowSuccessModal(true);
+                return;
             }
 
-            await api.patch("/profile/update_profile", payload);
+            await api.patch("/profile/update_profile", profileData);
 
             alert("Profile Updated Successfully");
             const dashboardPath = userType === "BRAND" ? "/brand-dashboard" : "/influencer-dashboard";
@@ -218,7 +236,7 @@ export default function ProfileSetupPage() {
                                                     <span className="mt-1 block text-xs font-medium text-gray-500">Upload Photo</span>
                                                 </div>
                                             )}
-                                            {/* <input type="file" disabled accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={} /> */}
+                                            <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={handleFileChange} />
                                         </div>
                                     </div>
 
@@ -459,6 +477,32 @@ export default function ProfileSetupPage() {
                     </div>
                 </div>
             </main>
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-300">
+                        <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-2">Profile Submitted!</h3>
+                        <p className="text-gray-500 mb-8">
+                            Your details are being reviewed by our team. We&apos;ll notify you once your account is verified.
+                        </p>
+                        <button
+                            onClick={() => {
+                                setShowSuccessModal(false);
+                                router.push("/");
+                            }}
+                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                        >
+                            Got it, thanks!
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Simple Footer */}
             <footer className="bg-white border-t border-gray-200 py-12">

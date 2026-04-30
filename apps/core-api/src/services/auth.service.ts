@@ -15,10 +15,11 @@ import { sendOtpEmail } from "../utils/sendotpEmail.js";
 
 
 interface SignupInput {
+  fullName: string;
   email: string;
   password: string;
   role: "INFLUENCER" | "BRAND";
-  documents: string;
+  documents?: string;
 }
 
 export const signupService = async (data: SignupInput) => {
@@ -45,10 +46,11 @@ export const signupService = async (data: SignupInput) => {
 
   //  Save pending signup with OTP
   await pendingSignupRepository.create({
+    fullName: data.fullName,
     email: data.email.toLowerCase(),
     passwordHash,
     role: data.role,
-    documents: data.documents,
+    documents: data.documents || "",
     status: "PENDING",
 
     emailOtpHash: hashedOtp,
@@ -467,5 +469,19 @@ export const resetPasswordService = async (
   await userRepository.clearResetSession(user._id.toString());
 
   logger.info(`Password reset successful for ${email}`);
+};
+
+
+export const pendingProfileService = async (email: string, profileData: Record<string, unknown>) => {
+  const pending = await pendingSignupRepository.findByEmail(email);
+
+  if (!pending) {
+    throw createHttpError("Signup request not found", 404);
+  }
+
+  pending.profileData = profileData;
+  await pending.save();
+
+  return { message: "Profile data saved successfully" };
 };
 

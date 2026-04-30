@@ -30,6 +30,9 @@ export default function BrandDashboardLayout({
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+    const displayName = user?.fullName || user?.contactPersonName || user?.email?.split("@")[0] || "User";
+    const profileImage = user?.profileImageUrl || user?.profileImage || null;
+
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown on outside click
@@ -144,11 +147,15 @@ export default function BrandDashboardLayout({
                                     className="flex items-center gap-3 group focus:outline-none"
                                 >
                                     <div className="text-right hidden sm:block">
-                                        <p className="text-sm font-bold text-gray-900">Brand Name</p>
+                                        <p className="text-sm font-bold text-gray-900">{displayName}</p>
                                         <p className="text-xs text-gray-500 font-medium">Brand User</p>
                                     </div>
-                                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all">
-                                        {user?.email?.charAt(0).toUpperCase() || "B"}
+                                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all overflow-hidden">
+                                        {profileImage ? (
+                                            <img src={profileImage} alt={displayName} className="w-full h-full object-cover" />
+                                        ) : (
+                                            displayName.charAt(0).toUpperCase()
+                                        )}
                                     </div>
                                 </button>
 

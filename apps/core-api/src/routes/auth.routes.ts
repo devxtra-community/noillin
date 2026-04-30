@@ -13,6 +13,7 @@ router.post("/resend-signup-otp", resendSignupOtpController);
 router.post("/forgot-password", forgotPasswordController);
 router.post("/verify-reset-otp", verifyResetOtpController);
 router.post("/reset-password", resetPasswordController);
+router.post("/pending-profile", pendingProfileController);
 
 
 export default router                   

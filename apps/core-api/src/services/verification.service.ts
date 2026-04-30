@@ -174,11 +174,17 @@ export const approveSignupService = async (email: string) => {
 if (user.role === "INFLUENCER") {
   const influencer = await profileRepository.createInfluencer({
     userId: user._id,
-    fullName: "",
-    username: user.email?.split("@")[0] || user.email,
-    categories: [],
+    fullName: pending.fullName,
+    username: pending.profileData?.username || user.email?.split("@")[0] || user.email,
+    bio: pending.profileData?.bio || "",
+    location: pending.profileData?.location || "",
+    profileImageUrl: pending.profileData?.profileImageUrl || "",
+    instagramUrl: pending.profileData?.socialLinks?.instagram || "",
+    youtubeUrl: pending.profileData?.socialLinks?.youtube || "",
+    tiktokUrl: pending.profileData?.socialLinks?.tiktok || "",
+    categories: pending.profileData?.niche ? [pending.profileData.niche] : [],
     languages: [],
-    isProfileComplete: false,
+    isProfileComplete: true, // Since they just did the setup
     isVerified: false,
   });
 
@@ -190,10 +196,10 @@ if (user.role === "INFLUENCER") {
         id: influencer._id.toString(),
         fullName: influencer.fullName,
         username: influencer.username,
-        instagram: "",
-        youtube: "",
+        instagram: influencer.instagramUrl,
+        youtube: influencer.youtubeUrl,
         category: influencer.categories,
-        location: "",
+        location: influencer.location,
         languages: influencer.languages,
         followersCount: 0,
         engagementRate: 0,
@@ -203,15 +209,20 @@ if (user.role === "INFLUENCER") {
   );
 }
 
- if (user.role === "BRAND") {
+  if (user.role === "BRAND") {
   const brand = await profileRepository.createBrand({
     userId: user._id,
-    companyName: "Pending Setup",
-    industry: "Not Specified",
-    contactPersonName: user.email?.split("@")[0] || "Pending",
+    companyName: pending.profileData?.companyName || pending.fullName,
+    industry: pending.profileData?.industry || "Not Specified",
+    website: pending.profileData?.website || "",
+    profileImageUrl: pending.profileData?.profileImageUrl || "",
+    contactPersonName: pending.fullName,
     contactEmail: user.email,
+    companySize: pending.profileData?.companySize || "",
+    description: pending.profileData?.bio || "",
+    headquarters: pending.profileData?.location || "",
     documents: [],
-    isProfileComplete: false,
+    isProfileComplete: true,
     isVerified: false,
   });
 

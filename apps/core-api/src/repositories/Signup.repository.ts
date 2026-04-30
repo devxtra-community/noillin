@@ -2,6 +2,7 @@ import { PendingSignup } from "../models/pendingSignup.models.js";
 import type { PendingSignupFilter } from "../types/pendingSignup.types.js";
 
 interface CreatePendingSignupInput {
+  fullName: string;
   email: string;
   passwordHash: string;
   documents: string;
@@ -9,6 +10,7 @@ interface CreatePendingSignupInput {
   adminLevel?: "SUPER" | "NORMAL";
 
   status: "PENDING" | "APPROVED" | "REJECTED";
+  profileData?: Record<string, unknown>;
 
   //  OTP fields (optional)
   emailOtpHash?: string | null;
