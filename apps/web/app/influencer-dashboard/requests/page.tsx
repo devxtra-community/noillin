@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Check, ChevronRight, Calendar, Globe, Loader2 } from "lucide-react";
+import { Search, ChevronRight, Calendar, Globe, Loader2 } from "lucide-react";
 
 import api from "@/lib/axios.client";
 
@@ -182,72 +182,85 @@ export default function RequestsPage() {
                 </div>
 
                 {/* Details Card (Right Column) */}
-                <div className="xl:w-[360px] shrink-0 h-full">
+                <div className="xl:w-[400px] shrink-0 h-full">
                     <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex flex-col h-full sticky top-0">
                         <div className="p-6 flex flex-col h-full">
                             <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-6">Request Details</h2>
 
                             {selectedRequest ? (
-                                <>
-                                    {/* Brand Profile */}
-                                    <div className="flex flex-col items-center text-center mb-8">
-                                        <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
-                                            {selectedRequest.brandId?.fullName?.charAt(0) || "B"}
+                                <div className="flex flex-col h-full min-h-0">
+                                    <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
+                                        {/* Brand Profile */}
+                                        <div className="flex flex-col items-center text-center mb-8">
+                                            <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
+                                                {selectedRequest.brandId?.fullName?.charAt(0) || "B"}
+                                            </div>
+                                            <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedRequest.brandId?.fullName || "Brand User"}</h3>
+                                            <p className="text-xs text-gray-500 font-medium mb-3">{selectedRequest.gigId?.title}</p>
+                                            <div className="flex items-center justify-center gap-2">
+                                                <span className="px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide rounded-full bg-emerald-50 text-emerald-600 flex items-center gap-1.5">
+                                                    <Globe className="w-2.5 h-2.5" />
+                                                    {selectedRequest.status}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedRequest.brandId?.fullName || "Brand User"}</h3>
-                                        <p className="text-xs text-gray-500 font-medium mb-3">{selectedRequest.gigId?.title}</p>
-                                        <div className="flex items-center justify-center gap-2">
-                                            <span className="px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide rounded-full bg-emerald-50 text-emerald-600 flex items-center gap-1.5">
-                                                <Globe className="w-2.5 h-2.5" />
-                                                {selectedRequest.status}
-                                            </span>
+
+                                        {/* Simple Details List */}
+                                        <div className="space-y-1.5 flex-grow">
+                                            <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                                        <Globe className="w-4 h-4" />
+                                                    </div>
+                                                    <span className="text-[13px] font-bold text-gray-400">Status</span>
+                                                </div>
+                                                <span className="text-[13px] font-bold text-gray-900">{selectedRequest.status}</span>
+                                            </div>
+
+                                            <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                                                        <Calendar className="w-4 h-4" />
+                                                    </div>
+                                                    <span className="text-[13px] font-bold text-gray-400">Received Date</span>
+                                                </div>
+                                                <span className="text-[13px] font-bold text-gray-900">{new Date(selectedRequest.createdAt).toLocaleDateString()}</span>
+                                            </div>
+
+                                            <div className="space-y-4 bg-slate-50/50 p-5 rounded-[20px] border border-slate-100/50 mt-6">
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <span className="font-bold text-gray-400 uppercase tracking-widest">Gig Amount</span>
+                                                    <span className="font-bold text-gray-900">₹{(selectedRequest.gigId?.pricing?.basePrice || 0).toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between text-xs">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="font-bold text-gray-400 uppercase tracking-widest">Platform Fee</span>
+                                                        <span className="px-1.5 py-0.5 bg-orange-50 text-orange-600 rounded text-[9px] font-black">10%</span>
+                                                    </div>
+                                                    <span className="font-bold text-rose-500">- ₹{((selectedRequest.gigId?.pricing?.basePrice || 0) * 0.1).toLocaleString()}</span>
+                                                </div>
+                                                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-[11px] font-black text-gray-900 uppercase tracking-widest">Est. Payout</span>
+                                                        <span className="text-[9px] font-bold text-emerald-500 uppercase tracking-tighter">Securely Held</span>
+                                                    </div>
+                                                    <span className="text-2xl font-black text-emerald-600">₹{((selectedRequest.gigId?.pricing?.basePrice || 0) * 0.9).toLocaleString()}</span>
+                                                </div>
+                                            </div>
                                         </div>
+
+                                        {/* Brand Note (If provided) */}
+                                        {selectedRequest.note && (
+                                            <div className="mt-4 bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-2">
+                                                <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Message from Brand</h4>
+                                                <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{selectedRequest.note}</p>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {/* Simple Details List */}
-                                    <div className="space-y-1.5 flex-grow">
-                                        <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
-                                                    <Globe className="w-4 h-4" />
-                                                </div>
-                                                <span className="text-[13px] font-bold text-gray-400">Status</span>
-                                            </div>
-                                            <span className="text-[13px] font-bold text-gray-900">{selectedRequest.status}</span>
-                                        </div>
-
-                                        <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
-                                                    <Calendar className="w-4 h-4" />
-                                                </div>
-                                                <span className="text-[13px] font-bold text-gray-400">Received Date</span>
-                                            </div>
-                                            <span className="text-[13px] font-bold text-gray-900">{new Date(selectedRequest.createdAt).toLocaleDateString()}</span>
-                                        </div>
-
-                                        <div className="flex items-center justify-between py-3">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0">
-                                                    <Check className="w-4 h-4" />
-                                                </div>
-                                                <span className="text-[13px] font-bold text-gray-400">Est. Payout</span>
-                                            </div>
-                                            <span className="text-[17px] font-black text-emerald-600">₹{((selectedRequest.gigId?.pricing?.basePrice || 0) * 0.9).toLocaleString()}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Brand Note (If provided) */}
-                                    {selectedRequest.note && (
-                                        <div className="mt-4 bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-2">
-                                            <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-2">Message from Brand</h4>
-                                            <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{selectedRequest.note}</p>
-                                        </div>
-                                    )}
-
-                                    {/* Actions */}
+                                    {/* Actions - Fixed at bottom */}
                                     {selectedRequest.status === "pending" && (
-                                        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-3">
+                                        <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col gap-3">
                                             <button
                                                 onClick={() => handleAccept(selectedRequest._id)}
                                                 className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-[16px] text-sm shadow-lg shadow-emerald-200/50 transition-all hover:-translate-y-0.5 active:scale-[0.98]"
@@ -264,19 +277,20 @@ export default function RequestsPage() {
                                     )}
 
                                     {selectedRequest.status === "accepted" && (
-                                        <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-3">
+                                        <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col gap-3">
                                             <button
                                                 onClick={() => router.push(`/influencer-dashboard/messages?gigRequestId=${selectedRequest._id}`)}
-
                                                 className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3.5 px-4 rounded-[16px] text-sm shadow-lg shadow-blue-200/50 transition-all hover:-translate-y-0.5 active:scale-[0.98]"
                                             >
                                                 Message Brand
                                             </button>
                                         </div>
                                     )}
-                                </>
+                                </div>
                             ) : (
-                                <div className="h-full flex items-center justify-center text-gray-400 italic text-sm">Select a request to see details</div>
+                                <div className="h-full flex items-center justify-center text-gray-400 italic text-sm">
+                                    Select a request to see details
+                                </div>
                             )}
                         </div>
                     </div>

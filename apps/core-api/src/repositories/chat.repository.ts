@@ -100,8 +100,8 @@ export const aggregateConversations = async (userId: string, role?: string) => {
       name: {
         $cond: [
           { $eq: ["$user.role", "INFLUENCER"] },
-          { $arrayElemAt: ["$influencerProfile.fullName", 0] },
-          { $arrayElemAt: ["$brandProfile.contactPersonName", 0] },
+          { $ifNull: [{ $arrayElemAt: ["$influencerProfile.fullName", 0] }, { $arrayElemAt: ["$influencerProfile.username", 0] }] },
+          { $ifNull: [{ $arrayElemAt: ["$brandProfile.companyName", 0] }, { $arrayElemAt: ["$brandProfile.contactPersonName", 0] }] },
         ],
       },
       profileImage: {

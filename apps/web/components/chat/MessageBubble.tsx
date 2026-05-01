@@ -1,5 +1,7 @@
 import React from "react";
 
+import { SecureMediaPreview } from "../shared/SecureMediaPreview";
+
 import { cn } from "@/lib/utils";
 
 export interface Message {
@@ -184,31 +186,11 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
               </div>
 
               {/* Secure Media Viewer */}
-              <div
-                className="relative rounded-2xl overflow-hidden bg-black aspect-video group cursor-default"
-                onContextMenu={(e) => e.preventDefault()}
-              >
-                {dData.mediaType === "VIDEO" ? (
-                  <video
-                    src={dData.url}
-                    className="w-full h-full object-contain"
-                    controls
-                    controlsList="nodownload"
-                    disablePictureInPicture
-                  />
-                ) : (
-                  <img
-                    src={dData.url}
-                    alt="Deliverable"
-                    className="w-full h-full object-contain select-none"
-                    draggable={false}
-                  />
-                )}
-                {/* Visual Protection Overlay */}
-                <div className="absolute inset-0 pointer-events-none border-[12px] border-white/5 mix-blend-overlay" />
-                <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-2 py-1 rounded text-[8px] font-black text-white/50 uppercase tracking-widest select-none">
-                  Protected Preview
-                </div>
+              <div className="mt-2">
+                <SecureMediaPreview
+                  url={dData.url}
+                  type={dData.mediaType === "VIDEO" ? "video" : "image"}
+                />
               </div>
 
               {dData.status === "REJECTED" && dData.rejectionNote && (

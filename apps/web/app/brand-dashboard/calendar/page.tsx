@@ -52,9 +52,15 @@ const getStatusStyles = (status: string) => {
 export default function BrandCalendarPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<number>(new Date().getDate());
     const router = useRouter();
+
+    const handleMonthChange = (offset: number) => {
+        const nextDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1);
+        setCurrentDate(nextDate);
+        setSelectedDate(1);
+    };
 
     useEffect(() => {
         const fetchCalendarData = async () => {
@@ -115,11 +121,17 @@ export default function BrandCalendarPage() {
                         <div className="flex items-center justify-between mb-12">
                             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Select Date</h1>
                             <div className="flex items-center gap-6">
-                                <button className="p-2 hover:bg-gray-50 rounded-full transition-all text-gray-400">
+                                <button
+                                    onClick={() => handleMonthChange(-1)}
+                                    className="p-2 hover:bg-gray-50 rounded-full transition-all text-gray-400"
+                                >
                                     <ChevronLeft className="w-5 h-5" />
                                 </button>
                                 <span className="text-lg font-bold text-gray-900">{currentMonthLabel}</span>
-                                <button className="p-2 hover:bg-gray-50 rounded-full transition-all text-gray-400">
+                                <button
+                                    onClick={() => handleMonthChange(1)}
+                                    className="p-2 hover:bg-gray-50 rounded-full transition-all text-gray-400"
+                                >
                                     <ChevronRight className="w-5 h-5" />
                                 </button>
                             </div>
