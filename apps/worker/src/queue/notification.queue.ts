@@ -1,10 +1,7 @@
 import { Queue } from "bullmq";
 
-import { redis } from "../cache/redis";
+import { redis } from "../cache/redis.js";
 
 export const notificationQueue = new Queue("notification-queue", {
-  connection: {
-    host: "127.0.0.1",
-    port: 6379,
-  },
+  connection: redis,
 });
