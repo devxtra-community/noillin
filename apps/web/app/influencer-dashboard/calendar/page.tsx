@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, ChevronRight as ChevronIcon, Globe, Calendar as CalendarIcon, Clock, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import api from "@/lib/axios.client";
 
@@ -21,13 +22,38 @@ interface Order {
     };
 }
 
+const getStatusLabel = (status: string) => {
+    switch (status) {
+        case "COMPLETED": return "Completed";
+        case "IN_ESCROW": return "Order Booked (Escrow)";
+        case "PENDING": return "Awaiting Payment";
+        case "DISPUTED": return "Disputed";
+        case "CANCELLED": return "Cancelled";
+        default: return status;
+    }
+};
 
+const getStatusStyles = (status: string) => {
+    switch (status) {
+        case "COMPLETED": return "text-emerald-500 font-bold";
+        case "IN_ESCROW": return "text-blue-500 font-bold";
+        case "PENDING": return "text-orange-500 font-bold";
+        default: return "text-gray-400 font-bold";
+    }
+};
 
 export default function CalendarPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentDate] = useState(new Date());
+    const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<number>(new Date().getDate());
+    const router = useRouter();
+
+    const handleMonthChange = (offset: number) => {
+        const nextDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + offset, 1);
+        setCurrentDate(nextDate);
+        setSelectedDate(1);
+    };
 
     useEffect(() => {
         const fetchCalendarData = async () => {
@@ -88,11 +114,17 @@ export default function CalendarPage() {
                     <div className="flex items-center justify-between mb-12">
                         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Select Date</h1>
                         <div className="flex items-center gap-6">
-                            <button className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-400">
+                            <button
+                                onClick={() => handleMonthChange(-1)}
+                                className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-400"
+                            >
                                 <ChevronLeft className="w-5 h-5" />
                             </button>
                             <span className="text-md font-bold text-gray-900">{currentMonthLabel}</span>
-                            <button className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-400">
+                            <button
+                                onClick={() => handleMonthChange(1)}
+                                className="p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-400"
+                            >
                                 <ChevronRight className="w-5 h-5" />
                             </button>
                         </div>
@@ -152,6 +184,7 @@ export default function CalendarPage() {
                         {gigsDueToday.map((gig) => (
                             <button
                                 key={gig._id}
+                                onClick={() => router.push(`/influencer-dashboard/bookings?orderId=${gig._id}`)}
                                 className="w-full bg-white border border-gray-100 rounded-[24px] p-5 flex items-center gap-5 hover:shadow-xl hover:shadow-gray-200/40 hover:-translate-y-1 transition-all group text-left"
                             >
                                 <div className="w-14 h-14 rounded-[20px] bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105">
@@ -161,7 +194,9 @@ export default function CalendarPage() {
                                     <div className="flex items-center justify-between mb-1">
                                         <h3 className="font-bold text-[16px] text-gray-900 truncate tracking-tight">{gig.gigId?.title}</h3>
                                     </div>
-                                    <p className="text-[12px] font-bold text-gray-400 truncate tracking-wide">{gig.status}</p>
+                                    <p className={`text-[12px] uppercase tracking-widest mt-1 ${getStatusStyles(gig.status)}`}>
+                                        {getStatusLabel(gig.status)}
+                                    </p>
                                     <div className="flex items-center gap-1.5 mt-2.5">
                                         <Clock className="w-3.5 h-3.5 text-emerald-500" />
                                         <span className="text-[12px] font-black text-emerald-600">₹{gig.influencerAmount.toLocaleString()}</span>

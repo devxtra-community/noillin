@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, ChevronRight,  } from "lucide-react";
+import { Search, ChevronRight, } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import api from "@/lib/axios.client";
@@ -32,8 +32,8 @@ export default function BrandRequestsPage() {
     }, []);
 
     const filteredRequests = connections.filter(c => {
-        const titleMatch = c.gigId?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.influencerId?.fullName?.toLowerCase().includes(searchQuery.toLowerCase());
+        const titleMatch = (c.gigId?.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (c.influencerId?.fullName || "").toLowerCase().includes(searchQuery.toLowerCase());
         let statusMatch = false;
         if (activeFilter === "Pending") statusMatch = c.status === "pending";
         else if (activeFilter === "Accepted") statusMatch = c.status === "accepted";

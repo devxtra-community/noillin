@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 import api from "@/lib/axios.client";
-import { useAuthStore } from "@/store/auth.store";
+
 
 function SignupForm() {
   const [role, setRole] = useState<"BRAND" | "INFLUENCER">("BRAND");
@@ -73,7 +73,7 @@ function SignupForm() {
           confirmPassword: "",
           businessInfo: ""
         });
-        
+
         router.push("/profile-setup");
       }
 

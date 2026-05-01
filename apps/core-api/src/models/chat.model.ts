@@ -9,11 +9,17 @@ export interface MessageDocument {
 
   content: string;
 
-  messageType?: "TEXT" | "PROPOSAL";
+  messageType?: "TEXT" | "PROPOSAL" | "SYSTEM" | "DELIVERABLE";
   proposalData?: {
     date: Date;
     time: string;
     status: "PENDING" | "ACCEPTED" | "REJECTED";
+  };
+  deliverableData?: {
+    url: string;
+    mediaType: "VIDEO" | "IMAGE";
+    status: "PENDING" | "ACCEPTED" | "REJECTED";
+    rejectionNote?: string;
   };
 
   status: "SENT" | "DELIVERED" | "READ";
@@ -52,7 +58,7 @@ const MessageSchema = new Schema<MessageDocument>(
 
     messageType: {
       type: String,
-      enum: ["TEXT", "PROPOSAL"],
+      enum: ["TEXT", "PROPOSAL", "SYSTEM", "DELIVERABLE"],
       default: "TEXT"
     },
 
@@ -63,6 +69,20 @@ const MessageSchema = new Schema<MessageDocument>(
         type: String,
         enum: ["PENDING", "ACCEPTED", "REJECTED"],
       }
+    },
+
+    deliverableData: {
+      url: String,
+      mediaType: {
+        type: String,
+        enum: ["VIDEO", "IMAGE"],
+      },
+      status: {
+        type: String,
+        enum: ["PENDING", "ACCEPTED", "REJECTED"],
+        default: "PENDING"
+      },
+      rejectionNote: String
     },
 
     status: {

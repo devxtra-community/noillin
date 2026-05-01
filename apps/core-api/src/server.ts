@@ -59,7 +59,7 @@ app.use(errorHandler);
 await setupMeili();
 
 // Ensure gig.created queue exists
-await getChannel().assertQueue(GIG_CREATED_EVENT,{durable: true});
+await getChannel().assertQueue(GIG_CREATED_EVENT, { durable: true });
 await getChannel().assertQueue("order.created", { durable: true });
 await getChannel().assertQueue(GIG_REQUEST_CREATED_EVENT, { durable: true });
 

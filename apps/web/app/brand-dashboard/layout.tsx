@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import {
     LayoutDashboard,
@@ -88,7 +89,7 @@ export default function BrandDashboardLayout({
                     <div className="flex items-center justify-between px-6 mb-10">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-gray-50 border border-gray-200">
-                                <img src="/favicon.ico" alt="Noillin" className="w-5 h-5 object-contain" />
+                                <Image src="/favicon.ico" alt="Noillin" width={20} height={20} className="object-contain" />
                             </div>
                             <span className="font-bold text-gray-900 text-lg tracking-tight">Noillin</span>
                         </div>
@@ -155,7 +156,7 @@ export default function BrandDashboardLayout({
                                     </div>
                                     <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all overflow-hidden">
                                         {profileImage ? (
-                                            <img src={profileImage} alt={displayName} className="w-full h-full object-cover" />
+                                            <Image src={profileImage} alt={displayName} width={40} height={40} className="w-full h-full object-cover" />
                                         ) : (
                                             displayName.charAt(0).toUpperCase()
                                         )}

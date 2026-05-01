@@ -13,7 +13,9 @@ export interface OrderDocument {
 
     status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED" | "DISPUTED";
     escrowStatus: "HOLD" | "RELEASED";
-    workStatus: "NOT_STARTED" | "SUBMITTED" | "APPROVED";
+    workStatus: "NOT_STARTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
+    deliverableUrl?: string;
+    rejectionNote?: string;
 
     stripePaymentIntentId?: string;
     platformFee?: number;

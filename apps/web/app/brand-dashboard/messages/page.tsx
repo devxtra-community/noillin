@@ -64,7 +64,7 @@ function MessagesContent() {
                     gigTitle: gr.gigId?.title || "Gig Collaboration",
                     user: {
                         _id: otherUser._id || otherUser.id,
-                        name: otherUser.fullName || otherUser.name || "Unknown",
+                        name: otherUser.fullName || otherUser.username || otherUser.name || "Unknown",
                         role: isBrand ? "INFLUENCER" : "BRAND",
                         profileImage: otherUser.profileImageUrl || otherUser.profileImage || null
                     }
@@ -92,8 +92,8 @@ function MessagesContent() {
     // Removed legacy fetchMessages and handleSend because ChatWindow handles it
 
     const filteredConvs = conversations.filter(c =>
-        c.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.gigTitle.toLowerCase().includes(searchQuery.toLowerCase())
+        (c.user?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.gigTitle || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const activeConv = fetchedConv;

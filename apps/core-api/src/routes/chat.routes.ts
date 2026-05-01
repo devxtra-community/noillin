@@ -1,6 +1,15 @@
 import { Router } from "express";
 
-import { getConversationsController, getChatMessagesController, markAsReadController, sendMessageController, respondToProposalController, getAgreedProposalsController } from "../controllers/chat.controller.js";
+import {
+  getConversationsController,
+  getChatMessagesController,
+  markAsReadController,
+  sendMessageController,
+  respondToProposalController,
+  getAgreedProposalsController,
+  submitDeliverableController,
+  respondToDeliverableController
+} from "../controllers/chat.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 
 const router: Router = Router();
@@ -24,6 +33,18 @@ router.patch(
   "/proposal-respond/:messageId",
   authenticate,
   respondToProposalController
+);
+
+router.post(
+  "/submit-deliverable",
+  authenticate,
+  submitDeliverableController
+);
+
+router.patch(
+  "/deliverable-respond/:messageId",
+  authenticate,
+  respondToDeliverableController
 );
 
 export default router;

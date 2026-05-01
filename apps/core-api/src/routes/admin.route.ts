@@ -17,10 +17,13 @@ import {
   getGigModerationStatsController,
   pauseGigController,
   ignoreGigController,
-  rejectGigController
+  rejectGigController,
+  getPlatformRevenueController
 } from "../controllers/admin.controller.js";
 
 const router: Router = Router();
+
+router.get("/revenue", authenticate, getPlatformRevenueController);
 
 router.get("/signup", getAllpendingSignupController);
 router.post("/signup/approve", authenticate, approveSignupController);

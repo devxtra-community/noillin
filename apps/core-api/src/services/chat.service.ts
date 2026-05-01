@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 import { MessageModel } from "../models/chat.model.js";
 import { GigRequestModel } from "../models/gig-request.model.js";
+import { OrderModel } from "../models/order.model.js";
 import {
   findMessagesByGigRequest,
   aggregateConversations,
@@ -40,21 +41,25 @@ export const sendMessage = async (
     ? request.influencerId.toString()
     : request.brandId.toString();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const messageData: any = {
+  const messageData = {
     gigRequestId: new mongoose.Types.ObjectId(gigRequestId),
     senderId,
     receiverId,
     content,
     status: "SENT",
     messageType,
+    proposalData
   };
 
-  if (proposalData) {
-    messageData.proposalData = proposalData;
-  }
-
-  return addMessage(messageData);
+  return addMessage(messageData as {
+    gigRequestId: mongoose.Types.ObjectId;
+    senderId: string;
+    receiverId: string;
+    content: string;
+    status: string;
+    messageType?: string;
+    proposalData?: Record<string, unknown>;
+  });
 }
 
 export const respondToProposal = async (messageId: string, userId: string, status: "ACCEPTED" | "REJECTED") => {
@@ -86,6 +91,102 @@ export const respondToProposal = async (messageId: string, userId: string, statu
       senderId: userId, // The one who accepted
       receiverId: message.senderId.toString(),
       content: `✅ Proposal Accepted: ${message.proposalData.date.toLocaleDateString()} at ${message.proposalData.time}`,
+      status: "SENT",
+      messageType: "TEXT"
+    });
+  }
+
+  return message;
+}
+
+export const submitDeliverable = async (
+  senderId: string,
+  gigRequestId: string,
+  deliverableData: { url: string; mediaType: "VIDEO" | "IMAGE" }
+) => {
+  const request = await GigRequestModel.findById(gigRequestId);
+  if (!request) throw new Error("Gig request not found");
+
+  // Only the influencer can submit deliverables
+  if (request.influencerId.toString() !== senderId) {
+    throw new Error("Only the influencer can submit deliverables");
+  }
+
+  // Find the associated order to ensure it's paid/in-escrow
+  const order = await OrderModel.findOne({ connectionId: gigRequestId, status: "IN_ESCROW" });
+  if (!order) throw new Error("No active escrow order found for this request");
+
+  const receiverId = request.brandId.toString();
+
+  const message = await addMessage({
+    gigRequestId: new mongoose.Types.ObjectId(gigRequestId),
+    senderId,
+    receiverId,
+    content: "Final deliverable submitted for review.",
+    status: "SENT",
+    messageType: "DELIVERABLE",
+    deliverableData: {
+      ...deliverableData,
+      status: "PENDING"
+    }
+  });
+
+  // Also update order workStatus
+  order.workStatus = "SUBMITTED";
+  order.deliverableUrl = deliverableData.url;
+  await order.save();
+
+  return message;
+};
+
+export const respondToDeliverable = async (
+  messageId: string,
+  userId: string,
+  status: "ACCEPTED" | "REJECTED",
+  rejectionNote?: string
+) => {
+  const message = await MessageModel.findById(messageId);
+  if (!message) throw new Error("Message not found");
+  if (message.messageType !== "DELIVERABLE") throw new Error("Message is not a deliverable");
+  if (message.receiverId.toString() !== userId) throw new Error("Only the receiver can respond");
+  if (!message.deliverableData || message.deliverableData.status !== "PENDING") throw new Error("Deliverable already processed or not found");
+
+  message.deliverableData.status = status;
+  if (status === "REJECTED") {
+    message.deliverableData.rejectionNote = rejectionNote || "Revision requested";
+  }
+  await message.save();
+
+  const order = await OrderModel.findOne({ connectionId: message.gigRequestId, status: "IN_ESCROW" });
+  if (!order) throw new Error("Order not found");
+
+  if (status === "ACCEPTED") {
+    // 🔥 RELEASE ESCROW
+    order.workStatus = "APPROVED";
+    order.status = "COMPLETED";
+    order.escrowStatus = "RELEASED";
+    order.payoutStatus = "AVAILABLE";
+    order.availableAt = new Date();
+    await order.save();
+
+    // Create system notification
+    await addMessage({
+      gigRequestId: message.gigRequestId,
+      senderId: userId,
+      receiverId: message.senderId.toString(),
+      content: "✅ Deliverable Approved! Escrow funds have been released to the influencer.",
+      status: "SENT",
+      messageType: "SYSTEM"
+    });
+  } else {
+    order.workStatus = "NOT_STARTED";
+    await order.save();
+
+    await addMessage({
+      gigRequestId: message.gigRequestId,
+      senderId: userId,
+      receiverId: message.senderId.toString(),
+      content: `❌ Deliverable Rejected. Reason: ${rejectionNote || "No note provided."}`,
       status: "SENT",
       messageType: "TEXT"
     });

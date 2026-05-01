@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import {
     LayoutDashboard,
@@ -31,8 +32,6 @@ export default function InfluencerDashboardLayout({
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const displayName = user?.fullName || user?.contactPersonName || user?.email?.split("@")[0] || "User";
-    const profileImage = user?.profileImageUrl || user?.profileImage || null;
 
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -88,7 +87,7 @@ export default function InfluencerDashboardLayout({
                     <div className="flex items-center justify-between px-6 mb-10">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-gray-50 border border-gray-200">
-                                <img src="/favicon.ico" alt="Noillin" className="w-5 h-5 object-contain" />
+                                <Image src="/favicon.ico" alt="Noillin" width={20} height={20} className="object-contain" />
                             </div>
                             <span className="font-bold text-gray-900 text-lg tracking-tight">Noillin</span>
                         </div>
@@ -99,38 +98,36 @@ export default function InfluencerDashboardLayout({
 
 
                     <nav className="flex flex-col gap-1 flex-1 px-4">
-    {navItems.map((item) => {
-        const isActive = pathname === item.href;
-        const Icon = item.icon;
+                        {navItems.map((item) => {
+                            const isActive = pathname === item.href;
+                            const Icon = item.icon;
 
-        return (
-            <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${
-                    isActive
-                        ? "bg-emerald-50 text-emerald-600 font-medium"
-                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-            >
-                <div className="flex items-center gap-3">
-                    <Icon className="w-5 h-5" />
-                    <span className="text-sm">{item.name}</span>
-                </div>
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors ${isActive
+                                        ? "bg-emerald-50 text-emerald-600 font-medium"
+                                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <Icon className="w-5 h-5" />
+                                        <span className="text-sm">{item.name}</span>
+                                    </div>
 
-                {item.badge && (
-                    <span
-                        className={`${
-                            item.badgeColor || "bg-emerald-100 text-emerald-600"
-                        } text-xs font-bold px-2 py-0.5 rounded-full`}
-                    >
-                        {item.badge}
-                    </span>
-                )}
-            </Link>
-        );
-    })}
-</nav>
+                                    {item.badge && (
+                                        <span
+                                            className={`${item.badgeColor || "bg-emerald-100 text-emerald-600"
+                                                } text-xs font-bold px-2 py-0.5 rounded-full`}
+                                        >
+                                            {item.badge}
+                                        </span>
+                                    )}
+                                </Link>
+                            );
+                        })}
+                    </nav>
                 </aside>
 
                 {/* Main Area */}
