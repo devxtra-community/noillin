@@ -4,6 +4,9 @@ import { ConnectionRepository } from "../repositories/connection.repository.js";
 import { AvailabilityService } from "../services/availability.service.js";
 import { MessageModel } from "../models/chat.model.js";
 import { GigModel } from "../models/gig.model.js";
+import { publishEvent } from "../queue/publisher.js";
+import { GIG_REQUEST_CREATED_EVENT } from "../queue/events.js";
+import { logger } from "../utils/logger.js";
 
 const repo = new ConnectionRepository();
 const availabilityService = new AvailabilityService();
@@ -36,6 +39,14 @@ export class ConnectionService {
     })) as unknown as { _id: string };
 
     await this.sendAutoBookingMessages(brandId, influencerId, connection._id.toString(), gigId, note);
+
+    publishEvent(GIG_REQUEST_CREATED_EVENT, {
+      id: connection._id,
+      brandId,
+      influencerId,
+      gigId,
+      note,
+    }).catch((err) => logger.error(`Failed to publish gig_request.created: ${err}`));
 
     return {
       connection,
@@ -98,7 +109,11 @@ export class ConnectionService {
     if (!updatedConnection) {
       throw new Error("Failed to update connection");
     }
-
+    await publishEvent("gig_request.accepted", {
+    id: connectionId,
+    brandId: connection.brandId,
+    influencerId: connection.influencerId,
+  });
     await MessageModel.create({
       gigRequestId: new mongoose.Types.ObjectId(connectionId),
       senderId: connection.influencerId,
@@ -110,20 +125,50 @@ export class ConnectionService {
     //  CONVERSATION ALREADY CREATED ON REQUEST
     return updatedConnection;
   }
-  //  Reject request
+
   async rejectRequest(connectionId: string) {
-    const connection = await repo.findById(connectionId);
+  const connection = await repo.findById(connectionId);
 
-    if (!connection) {
-      throw new Error("Connection not found");
-    }
-
-    if (connection.status !== "pending") {
-      throw new Error("Already processed");
-    }
-
-    return repo.updateStatus(connectionId, "rejected");
+  if (!connection) {
+    throw new Error("Connection not found");
   }
+
+  if (connection.status !== "pending") {
+    throw new Error("Already processed");
+  }
+
+  const updatedConnection = await repo.updateStatus(
+    connectionId,
+    "rejected"
+  );
+
+  if (!updatedConnection) {
+    throw new Error("Failed to update connection");
+  }
+
+  // ✅ Publish AFTER update
+  await publishEvent("gig_request.rejected", {
+    id: connectionId,
+    brandId: connection.brandId,
+    influencerId: connection.influencerId,
+  });
+
+  return updatedConnection;
+}
+  // //  Reject request
+  // async rejectRequest(connectionId: string) {
+  //   const connection = await repo.findById(connectionId);
+
+  //   if (!connection) {
+  //     throw new Error("Connection not found");
+  //   }
+
+  //   if (connection.status !== "pending") {
+  //     throw new Error("Already processed");
+  //   }
+
+  //   return repo.updateStatus(connectionId, "rejected");
+  // }
 
   //  Get connection by ID
   async getConnectionById(id: string) {

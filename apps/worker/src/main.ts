@@ -1,13 +1,28 @@
 import 'dotenv/config'; 
 import "./jobs/notification.worker";
+import mongoose from "mongoose";
+
 import { connectRabbit } from "./rabbit/connection";
 import { startGigConsumer } from "./consumers/gig.consumer";
 import { logger } from "./utils/logger";
 import { startBrandConsumer } from './consumers/brand.cosumer';
 import { startInfluencerConsumer } from './consumers/influencer.consumer';
 import { startOrderConsumer } from './consumers/order.consumer';
+import { startGigRequestConsumer } from './consumers/gig-request.consumer';
+
+
+async function connectDB() {
+  if (!process.env.MONGO_URI) {
+    logger.warn("MONGO_URI not defined, worker DB connection skipped");
+    return;
+  }
+  await mongoose.connect(process.env.MONGO_URI);
+  logger.info("Worker connected to MongoDB");
+}
+
 async function bootstrap() {
   try {
+    await connectDB();
     const channel = await connectRabbit();
 
 
@@ -15,7 +30,8 @@ async function bootstrap() {
       startGigConsumer(channel),
       startBrandConsumer(channel),
       startInfluencerConsumer(channel),
-      startOrderConsumer(channel)
+      startOrderConsumer(channel),
+      startGigRequestConsumer(channel)
     ])
 
     logger.info("Worker started successfully");
