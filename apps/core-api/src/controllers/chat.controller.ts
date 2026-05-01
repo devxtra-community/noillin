@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 
 import { getConversations, getMessages, sendMessage, respondToProposal } from "../services/chat.service.js";
 import { MessageModel } from "../models/chat.model.js";
+import { notificationQueue } from "../queue/notification.queue.js";
 
 //  Get messages for a gig request
 export const getChatMessagesController = async (
@@ -28,6 +29,28 @@ export const sendMessageController = async (req: Request, res: Response) => {
     const { gigRequestId, content, messageType, proposalData } = req.body;
 
     const message = await sendMessage(senderId, gigRequestId, content, messageType, proposalData);
+
+    const receiverId = message.receiverId.toString();
+    const conversationId = message.gigRequestId.toString();
+    const messageId = message._id.toString();
+
+    // Add to notificationQueue
+    await notificationQueue.add(
+      "NEW_MESSAGE",
+      {
+        userId: receiverId,
+        type: "NEW_MESSAGE",
+        title: "New Message",
+        message: "You have a new message",
+        metadata: {
+          conversationId,
+          messageId,
+        },
+      },
+      {
+        jobId: `notify:msg:${messageId}`,
+      }
+    );
 
     res.json({ success: true, message });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
