@@ -136,7 +136,7 @@ export default function NotificationBell() {
                   <Bell className="w-6 h-6 text-gray-300" />
                 </div>
                 <p className="text-sm text-gray-500 font-medium">No notifications yet</p>
-                <p className="text-xs text-gray-400 mt-1">We'll let you know when something happens.</p>
+                <p className="text-xs text-gray-400 mt-1">We&apos;ll let you know when something happens.</p>
               </div>
             ) : (
               <ul className="divide-y divide-gray-50">
