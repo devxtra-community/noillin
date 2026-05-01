@@ -39,8 +39,8 @@ export class NotificationService {
     return await PushSubscriptionModel.find({ userId });
   }
 
-  async removeSubscription(endpoint: string) {
-    return await PushSubscriptionModel.deleteOne({ endpoint });
+  async removeSubscription(endpoint: string) : Promise<void>{
+    await PushSubscriptionModel.deleteOne({ endpoint });
   }
 
   // Notification Methods
