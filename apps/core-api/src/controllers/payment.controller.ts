@@ -12,6 +12,7 @@ import { MessageModel } from "../models/chat.model.js";
 import { GigRequestModel } from "../models/gig-request.model.js";
 import { GigModel } from "../models/gig.model.js";
 import { createOrderService } from "../services/order.service.js";
+import type { CreateOrderInput } from "../services/order.service.js";
 
 
 export const createCheckout = async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -110,7 +111,7 @@ export const stripeWebhook = async (req: Request, res: Response) => {
 
     // 🔥 CREATE ORDER RECORD POST-PAYMENT
     if (!order) {
-      const orderData: Record<string, unknown> = {
+      const orderData: CreateOrderInput = {
         gigId: gigId as string,
         buyerId: buyerId as string,
         influencerId: influencerId as string,
