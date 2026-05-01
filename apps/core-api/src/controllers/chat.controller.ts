@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 
-import { getConversations, getMessages, sendMessage, respondToProposal } from "../services/chat.service.js";
+import { getConversations, getMessages, sendMessage, respondToProposal, submitDeliverable, respondToDeliverable } from "../services/chat.service.js";
 import { MessageModel } from "../models/chat.model.js";
 
 //  Get messages for a gig request
@@ -30,11 +30,11 @@ export const sendMessageController = async (req: Request, res: Response) => {
     const message = await sendMessage(senderId, gigRequestId, content, messageType, proposalData);
 
     res.json({ success: true, message });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
+     
+  } catch (err: unknown) {
     console.error("sendMessage error:", err);
-    if (err.message === "Chat is only available for accepted gig requests") {
-      return res.status(403).json({ message: err.message });
+    if ((err as Error).message === "Chat is only available for accepted gig requests") {
+      return res.status(403).json({ message: (err as Error).message });
     }
     res.status(500).json({ message: "Internal server error" });
   }
@@ -119,5 +119,42 @@ export const getAgreedProposalsController = async (req: Request, res: Response) 
   } catch (err) {
     console.error("getAgreedProposals error:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const submitDeliverableController = async (req: Request, res: Response) => {
+  try {
+    const senderId = req.user!.userId;
+    const { gigRequestId, deliverableData } = req.body;
+
+    if (!deliverableData || !deliverableData.url) {
+      return res.status(400).json({ message: "Deliverable URL is required" });
+    }
+
+    const message = await submitDeliverable(senderId, gigRequestId, deliverableData);
+
+    res.json({ success: true, message });
+  } catch (err: unknown) {
+    console.error("submitDeliverable error:", err);
+    res.status(400).json({ message: (err as Error).message });
+  }
+};
+
+export const respondToDeliverableController = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const messageId = req.params.messageId as string;
+    const { status, rejectionNote } = req.body;
+
+    if (!["ACCEPTED", "REJECTED"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const message = await respondToDeliverable(messageId, userId, status, rejectionNote);
+
+    res.json({ success: true, message });
+  } catch (err: unknown) {
+    console.error("respondToDeliverable error:", err);
+    res.status(400).json({ message: (err as Error).message });
   }
 };

@@ -67,11 +67,21 @@ export default function InfluencerDashboardPage() {
 
   const recentBookings = orders.slice(0, 5);
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "COMPLETED": return "Completed";
+      case "IN_ESCROW": return "Order Booked (Escrow)";
+      case "PENDING": return "Awaiting Payment";
+      case "CANCELLED": return "Cancelled";
+      default: return status;
+    }
+  };
+
   const getStatusStyles = (status: string) => {
     switch (status) {
       case "COMPLETED": return "text-emerald-600 bg-emerald-50";
       case "IN_ESCROW": return "text-blue-600 bg-blue-50";
-      case "PENDING": return "text-orange-600 bg-orange-50";
+      case "PENDING": return "text-orange-600 bg-orange-50 font-bold";
       case "CANCELLED": return "text-rose-600 bg-rose-50";
       default: return "text-gray-600 bg-gray-100";
     }
@@ -187,8 +197,8 @@ export default function InfluencerDashboardPage() {
                     </td>
                     <td className="py-4 px-4 text-sm font-bold text-gray-900 text-right">₹{(booking.influencerAmount || 0).toLocaleString()}</td>
                     <td className="py-4 px-4 text-center">
-                      <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full ${getStatusStyles(booking.status)}`}>
-                        {booking.status}
+                      <span className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-full shadow-sm ${getStatusStyles(booking.status)}`}>
+                        {getStatusLabel(booking.status)}
                       </span>
                     </td>
                   </tr>
@@ -252,7 +262,7 @@ export default function InfluencerDashboardPage() {
               {Array.from({ length: new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((day) => {
                 const dateString = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth(), day).toDateString();
                 const hasEvent = orders.some(o => o.dueDate && new Date(o.dueDate).toDateString() === dateString) ||
-                  proposals.some(p => new Date(p.proposalData.date).toDateString() === dateString);
+                  proposals.some(p => p.proposalData?.date && new Date(p.proposalData.date).toDateString() === dateString);
                 const isSelected = selectedDate === dateString;
 
                 return (
@@ -302,11 +312,11 @@ export default function InfluencerDashboardPage() {
                   {/* Unified Orders & Proposals */}
                   {[
                     ...orders.filter(o => o.dueDate && new Date(o.dueDate).toDateString() === selectedDate).map(o => ({ ...o, type: 'locked' })),
-                    ...proposals.filter(p => new Date(p.proposalData.date).toDateString() === selectedDate).map(p => ({ ...p, type: 'negotiated' }))
+                    ...proposals.filter(p => p.proposalData?.date && new Date(p.proposalData.date).toDateString() === selectedDate).map(p => ({ ...p, type: 'negotiated' }))
                   ].length > 0 ? (
                     [
                       ...orders.filter(o => o.dueDate && new Date(o.dueDate).toDateString() === selectedDate).map(o => ({ ...o, type: 'locked' })),
-                      ...proposals.filter(p => new Date(p.proposalData.date).toDateString() === selectedDate).map(p => ({ ...p, type: 'negotiated' }))
+                      ...proposals.filter(p => p.proposalData?.date && new Date(p.proposalData.date).toDateString() === selectedDate).map(p => ({ ...p, type: 'negotiated' }))
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     ].map((item: any) => (
                       <div key={`${item.type}-${item._id}`} className={`rounded-2xl p-5 border ${item.type === 'locked' ? 'bg-gray-50 border-gray-100' : 'bg-emerald-50/30 border-emerald-100/50'}`}>
@@ -316,7 +326,7 @@ export default function InfluencerDashboardPage() {
                           </div>
                           <div>
                             <p className="text-[14px] font-black text-gray-900 leading-none">{item.gigId?.title || "Agreed Date"}</p>
-                            <p className="text-[11px] font-bold text-gray-500 mt-1 uppercase tracking-wider">{item.type === 'locked' ? 'Final Deadline' : `Time: ${item.proposalData.time}`}</p>
+                            <p className="text-[11px] font-bold text-gray-500 mt-1 uppercase tracking-wider">{item.type === 'locked' ? 'Final Deadline' : `Time: ${item.proposalData?.time || 'TBD'}`}</p>
                           </div>
                         </div>
 

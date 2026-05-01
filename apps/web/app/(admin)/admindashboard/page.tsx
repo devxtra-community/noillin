@@ -20,7 +20,7 @@ import { FadeIn } from "@/components/animations/FadeIn";
 import { Button } from "@/components/ui/button";
 
 export default function DashboardPage() {
-    const { requests, userCount, gigCount, loading } = useAdminStats();
+    const { requests, userCount, gigCount, revenue, loading } = useAdminStats();
     const [isAtRest, setIsAtRest] = useState<boolean>(false)
     return (
         <>
@@ -76,9 +76,9 @@ export default function DashboardPage() {
                                 iconBg="bg-blue-50"
                             />
                             <MetricCard
-                                title="Today's Revenue"
-                                value="$12,450.00"
-                                change="8.4%"
+                                title="Platform Revenue"
+                                value={`₹${(revenue || 0).toLocaleString()}`}
+                                change="10.5%"
                                 isPositive={true}
                                 icon={DollarSign}
                                 iconColor="text-emerald-600"

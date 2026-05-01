@@ -451,7 +451,7 @@ function GigDetailsContent() {
                                         Close
                                     </button>
                                     <button
-                                        onClick={() => router.push("/brand-dashboard?tab=requests")}
+                                        onClick={() => router.push("/brand-dashboard/requests")}
                                         className="flex-1 py-3 text-sm font-bold bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl transition-all shadow-lg hover:shadow-emerald-500/30"
                                     >
                                         Go to Requests

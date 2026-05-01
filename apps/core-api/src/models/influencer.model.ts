@@ -22,6 +22,8 @@ export interface IInfluencerProfile extends Document {
   isVerified: boolean;
   profileImageUrl?: string;
   stripeAccountId?: string;
+  balance?: number;
+  totalEarnings?: number;
 }
 
 const InfluencerProfileSchema = new Schema<IInfluencerProfile>(
@@ -88,6 +90,14 @@ const InfluencerProfileSchema = new Schema<IInfluencerProfile>(
     stripeAccountId: {
       type: String,
       default: "",
+    },
+    balance: {
+      type: Number,
+      default: 0,
+    },
+    totalEarnings: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

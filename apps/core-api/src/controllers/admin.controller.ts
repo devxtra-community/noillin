@@ -14,7 +14,18 @@ import {
   ignoreGigService,
   rejectGigService
 } from "../services/admin.service.js";
+import { PlatformRevenueModel } from "../models/platform-revenue.model.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
+
+export const getPlatformRevenueController = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const platform = await PlatformRevenueModel.findOne();
+    const revenue = platform ? platform.totalRevenue : 0;
+    res.status(200).json({ success: true, data: revenue });
+  } catch (error) {
+    next(error);
+  }
+};
 export const getTotalGigsController = async (
   req: Request,
   res: Response,

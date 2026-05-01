@@ -9,6 +9,7 @@ import Image from "next/image";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
 
+import { cn } from "@/lib/utils";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
 
@@ -20,11 +21,17 @@ export interface Message {
   createdAt: string;
   gigRequestId: string;
   status: "SENT" | "DELIVERED" | "READ";
-  messageType?: "TEXT" | "PROPOSAL";
+  messageType?: "TEXT" | "PROPOSAL" | "SYSTEM" | "DELIVERABLE";
   proposalData?: {
     date: string;
     time: string;
     status: "PENDING" | "ACCEPTED" | "REJECTED";
+  };
+  deliverableData?: {
+    url: string;
+    mediaType: "VIDEO" | "IMAGE";
+    status: "PENDING" | "ACCEPTED" | "REJECTED";
+    rejectionNote?: string;
   };
 }
 
@@ -57,6 +64,12 @@ export function ChatWindow({
   const [isProposing, setIsProposing] = useState(false);
   const [proposalDate, setProposalDate] = useState("");
   const [proposalTime, setProposalTime] = useState("");
+
+  // Deliverable State
+  const [isSubmittingDeliverable, setIsSubmittingDeliverable] = useState(false);
+  const [deliverableUrl, setDeliverableUrl] = useState("");
+  const [deliverableMediaType, setDeliverableMediaType] = useState<"VIDEO" | "IMAGE">("VIDEO");
+  const [activeOrder, setActiveOrder] = useState<Record<string, unknown> | null>(null);
 
   // --- Custom Calendar Logic ---
   const [viewDate, setViewDate] = useState(new Date());
@@ -120,6 +133,11 @@ export function ChatWindow({
     if (gigRequestId && accessToken) {
       setTimeout(() => {
         fetchConnection();
+        // Fetch order details too
+        api.get(`/orders/history`).then(res => {
+          const order = res.data.find((o: { connectionId: string }) => o.connectionId === gigRequestId);
+          setActiveOrder(order);
+        }).catch(console.error);
       }, 0);
     }
   }, [gigRequestId, accessToken, fetchConnection]);
@@ -265,8 +283,47 @@ export function ChatWindow({
           message: updatedMessage
         });
       }
+      if (status === "ACCEPTED") fetchConnection();
     } catch (err) {
       console.error("Failed to respond to proposal:", err);
+    }
+  };
+
+  const handleSendDeliverable = async () => {
+    if (!deliverableUrl) return;
+    try {
+      const res = await api.post("/chat/submit-deliverable", {
+        gigRequestId,
+        deliverableData: { url: deliverableUrl, mediaType: deliverableMediaType }
+      });
+      const savedMessage = res.data.message;
+      if (socketRef.current) {
+        socketRef.current.emit("send_message", { message: savedMessage });
+      }
+      setMessages((prev) => [...prev, savedMessage]);
+      setIsSubmittingDeliverable(false);
+      setDeliverableUrl("");
+    } catch (err) {
+      console.error("Failed to send deliverable:", err);
+      alert("Failed to send deliverable. Please ensure you have an active order.");
+    }
+  };
+
+  const handleRespondToDeliverable = async (messageId: string, status: "ACCEPTED" | "REJECTED", rejectionNote?: string) => {
+    try {
+      const res = await api.patch(`/chat/deliverable-respond/${messageId}`, { status, rejectionNote });
+      const updatedMessage = res.data.message;
+
+      setMessages((prev) => prev.map(m => m._id === messageId ? updatedMessage : m));
+
+      if (socketRef.current) {
+        socketRef.current.emit("proposal_update", {
+          gigRequestId,
+          message: updatedMessage
+        });
+      }
+    } catch (err) {
+      console.error("Failed to respond to deliverable:", err);
     }
   };
 
@@ -384,22 +441,20 @@ export function ChatWindow({
                   const acceptedProposal = messages.find(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED");
                   if (!activeGigId) return alert("Gig ID not found");
                   try {
-                    const res = await api.post("/orders", {
-                      gigId: activeGigId,
-                      buyerId: user?.id,
-                      influencerId: receiverId,
-                      connectionId: gigRequestId,
+                    const res = await api.post("/payments/checkout", {
+                      gigRequestId,
                       dueDate: acceptedProposal?.proposalData?.date
                     });
-                    window.location.href = `/payment?orderId=${res.data.orderId}`;
+                    window.location.href = res.data.url;
                   } catch (err: unknown) {
                     const error = err as { response?: { data?: { message?: string } } };
-                    alert(error.response?.data?.message || "Failed to create order");
+                    alert(error.response?.data?.message || "Failed to initiate payment");
                   }
                 }}
                 onRespond={async (id, status) => {
                   await handleRespondToProposal(id, status);
                 }}
+                onRespondDeliverable={handleRespondToDeliverable}
                 onTryAgain={handleTryAnotherDay}
               />
             ))}
@@ -485,25 +540,26 @@ export function ChatWindow({
             </button>
           )}
 
+          {isInfluencer && activeOrder?.status === "IN_ESCROW" && (
+            <button onClick={() => setIsSubmittingDeliverable(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-bold text-[13px] px-5 py-2.5 rounded-xl border border-blue-100 hover:bg-blue-50 transition-all uppercase tracking-wider">
+              🎁 Submit Final Work
+            </button>
+          )}
+
           {isBrand && (
             <button
               onClick={async () => {
                 if (!connection?._id) return;
-                const gigData = urlGigId || connection.gigId;
-                const activeGigId = typeof gigData === 'object' && gigData !== null ? (gigData as { _id: string })._id : gigData;
                 const acceptedProposal = messages.find(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED");
                 try {
-                  const res = await api.post("/orders", {
-                    gigId: activeGigId,
-                    buyerId: user?.id,
-                    influencerId: receiverId,
-                    connectionId: gigRequestId,
+                  const res = await api.post("/payments/checkout", {
+                    gigRequestId,
                     dueDate: acceptedProposal?.proposalData?.date
                   });
-                  window.location.href = `/payment?orderId=${res.data.orderId}`;
+                  window.location.href = res.data.url;
                 } catch (err: unknown) {
                   const error = err as { response?: { data?: { message?: string } } };
-                  alert(error.response?.data?.message || "Failed to create order");
+                  alert(error.response?.data?.message || "Failed to initiate payment");
                 }
               }}
               disabled={!messages.some(m => m.messageType === "PROPOSAL" && m.proposalData?.status === "ACCEPTED")}
@@ -517,6 +573,61 @@ export function ChatWindow({
           )}
         </div>
       </div>
+      {/* Deliverable Submission Modal */}
+      {isSubmittingDeliverable && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSubmittingDeliverable(false)} />
+          <div className="bg-white rounded-[40px] w-full max-w-[440px] shadow-2xl relative z-10 overflow-hidden p-8 animate-in fade-in zoom-in-95 duration-300">
+            <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2">Submit Deliverable</h3>
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-8">Secure your payment by sending the work</p>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Media URL</label>
+                <input
+                  type="text"
+                  placeholder="Direct link to video or image..."
+                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  value={deliverableUrl}
+                  onChange={(e) => setDeliverableUrl(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Content Type</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setDeliverableMediaType("VIDEO")}
+                    className={cn("py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all",
+                      deliverableMediaType === "VIDEO" ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20" : "bg-white text-gray-500 border-gray-100 hover:border-blue-200"
+                    )}
+                  >
+                    Video
+                  </button>
+                  <button
+                    onClick={() => setDeliverableMediaType("IMAGE")}
+                    className={cn("py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all",
+                      deliverableMediaType === "IMAGE" ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20" : "bg-white text-gray-500 border-gray-100 hover:border-blue-200"
+                    )}
+                  >
+                    Image
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <button
+                  onClick={handleSendDeliverable}
+                  disabled={!deliverableUrl}
+                  className="w-full py-5 bg-blue-600 text-white rounded-[24px] font-black text-[16px] shadow-xl shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-50 transition-all uppercase tracking-[0.2em]"
+                >
+                  Send to Brand
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

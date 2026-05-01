@@ -5,9 +5,9 @@ import type { OrderDocument } from "../types/order.types.js";
 
 const orderSchema = new mongoose.Schema(
   {
-    buyerId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    influencerId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    gigId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    buyerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    influencerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    gigId: { type: mongoose.Schema.Types.ObjectId, ref: "Gig", required: true },
 
     // 🔥 ADD THIS
     connectionId: {
@@ -34,9 +34,11 @@ const orderSchema = new mongoose.Schema(
 
     workStatus: {
       type: String,
-      enum: ["NOT_STARTED", "SUBMITTED", "APPROVED"],
+      enum: ["NOT_STARTED", "SUBMITTED", "APPROVED", "REJECTED"],
       default: "NOT_STARTED",
     },
+    deliverableUrl: String,
+    rejectionNote: String,
 
     stripePaymentIntentId: String,
     platformFee: Number, // 10% fee

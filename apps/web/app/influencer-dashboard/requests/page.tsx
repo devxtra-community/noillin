@@ -40,8 +40,8 @@ export default function RequestsPage() {
     }, []);
 
     const filteredRequests = orders.filter(o => {
-        const titleMatch = o.gigId?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            o.brandId?.fullName?.toLowerCase().includes(searchQuery.toLowerCase());
+        const titleMatch = (o.gigId?.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (o.brandId?.fullName || "").toLowerCase().includes(searchQuery.toLowerCase());
 
         let statusMatch = false;
         if (activeFilter === "Pending") statusMatch = o.status === "pending";

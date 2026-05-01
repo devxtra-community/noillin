@@ -90,8 +90,8 @@ function MessagesContent() {
     // Removed legacy fetchMessages and handleSend because ChatWindow handles it
 
     const filteredConvs = conversations.filter(c =>
-        c.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.gigTitle.toLowerCase().includes(searchQuery.toLowerCase())
+        (c.user?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.gigTitle || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const activeConv = fetchedConv;

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Search, Loader2, MessageSquare } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
@@ -22,15 +22,7 @@ interface Conversation {
     };
 }
 
-interface Message {
-    _id: string;
-    gigRequestId: string;
-    senderId: string;
-    receiverId: string;
-    content: string;
-    status: "SENT" | "DELIVERED" | "READ";
-    createdAt: string;
-}
+
 
 function MessagesContent() {
     const searchParams = useSearchParams();
@@ -100,8 +92,8 @@ function MessagesContent() {
     // Removed legacy fetchMessages and handleSend because ChatWindow handles it
 
     const filteredConvs = conversations.filter(c =>
-        c.user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.gigTitle.toLowerCase().includes(searchQuery.toLowerCase())
+        (c.user?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.gigTitle || "").toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     const activeConv = fetchedConv;

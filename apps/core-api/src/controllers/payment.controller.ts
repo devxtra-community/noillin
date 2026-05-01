@@ -5,37 +5,62 @@ import type { AuthRequest } from "../middlewares/auth.middleware.js";
 import { InfluencerProfile } from "../models/influencer.model.js";
 import { stripe } from "../lib/stripe.js";
 import { OrderModel } from "../models/order.model.js";
-import { createBooking } from "../services/booking.service.js";
 import { createCheckoutSession } from "../services/payment.service.js";
 import { publishEvent } from "../queue/publisher.js";
+import { PlatformRevenueModel } from "../models/platform-revenue.model.js";
+import { MessageModel } from "../models/chat.model.js";
+import { GigRequestModel } from "../models/gig-request.model.js";
+import { GigModel } from "../models/gig.model.js";
+import { createOrderService } from "../services/order.service.js";
 
 
-export const createCheckout = async (req: Request, res: Response, next: NextFunction) => {
+export const createCheckout = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const { orderId } = req.body;
+    const { gigRequestId } = req.body;
     let { amount } = req.body;
 
-    if (!orderId) {
-      return res.status(400).json({ message: "Order ID is required." });
+    if (!gigRequestId) {
+      return res.status(400).json({ message: "Gig Request ID is required." });
     }
 
-    const order = await OrderModel.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ message: `Order not found with ID: ${orderId}` });
+    const gigRequest = await GigRequestModel.findById(gigRequestId).populate("gigId");
+    if (!gigRequest) {
+      return res.status(404).json({ message: `Gig Request not found with ID: ${gigRequestId}` });
     }
 
+    if (gigRequest.status !== "accepted") {
+      return res.status(400).json({ message: "Gig Request must be accepted before payment." });
+    }
+
+    const gig = await GigModel.findById(gigRequest.gigId);
+    if (!gig) {
+      return res.status(404).json({ message: "Gig information not found." });
+    }
+
+    // Amount can be overridden by frontend (negotiated price), otherwise use base price
     if (!amount) {
-      amount = order.amount;
+      amount = gig.pricing.basePrice;
     }
 
-    const influencerProfile = await InfluencerProfile.findOne({ userId: order.influencerId });
-    if (!influencerProfile?.stripeAccountId) {
+    const influencerProfile = await InfluencerProfile.findOne({ userId: gigRequest.influencerId });
+    if (!influencerProfile?.stripeAccountId && process.env.STRIPE_MOCK_PAYOUT !== "true") {
       return res.status(400).json({
         message: "Influencer has not set up a Stripe account for payouts. Please ask them to connect Stripe in their Earning's dashboard."
       });
     }
 
-    const session = await createCheckoutSession(amount, orderId, influencerProfile.stripeAccountId);
+    // Metadata for post-payment order creation
+    const metadata = {
+      gigRequestId: gigRequest._id.toString(),
+      gigId: gig._id.toString(),
+      buyerId: gigRequest.brandId.toString(),
+      influencerId: gigRequest.influencerId.toString(),
+      amount: amount.toString(),
+      // Optional: due date from latest accepted proposal
+      dueDate: req.body.dueDate || "",
+    };
+
+    const session = await createCheckoutSession(amount, influencerProfile?.stripeAccountId || "mock_account", metadata);
 
     res.json({ url: session.url });
   } catch (err: unknown) {
@@ -65,19 +90,49 @@ export const stripeWebhook = async (req: Request, res: Response) => {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
-    const orderId = session.metadata?.orderId;
 
-    const order = await OrderModel.findById(orderId);
-    if (!order) return res.json({ status: "order not found" });
+    // Extract metadata
+    const { gigRequestId, gigId, buyerId, influencerId, amount: amountStr, dueDate } = session.metadata || {};
 
-    // ✅ IDEMPOTENCY
-    if (order.status === "IN_ESCROW") {
+    if (!gigRequestId || !gigId || !buyerId || !influencerId) {
+      console.error("Missing metadata in Stripe session:", session.id);
+      return res.json({ status: "metadata missing" });
+    }
+
+    // ✅ IDEMPOTENCY: Check if order already exists for this gigRequest
+    let order = await OrderModel.findOne({ connectionId: gigRequestId });
+
+    if (order && order.status === "IN_ESCROW") {
       return res.json({ status: "already processed" });
     }
 
+    const amount = parseFloat(amountStr || "0");
+
+    // 🔥 CREATE ORDER RECORD POST-PAYMENT
+    if (!order) {
+      const orderData: Record<string, unknown> = {
+        gigId: gigId as string,
+        buyerId: buyerId as string,
+        influencerId: influencerId as string,
+        connectionId: gigRequestId as string,
+        amount,
+      };
+      if (dueDate) {
+        orderData.dueDate = dueDate as string;
+      }
+      const result = await createOrderService(orderData);
+      order = await OrderModel.findById(result.orderId);
+    }
+
+    if (!order) {
+      console.error("Failed to create order in webhook for session:", session.id);
+      return res.status(500).json({ message: "Order creation failed" });
+    }
+
+    const orderId = order._id;
+
     // 🔥 ESCROW STARTS HERE (10% Fee)
     const PLATFORM_FEE_PERCENTAGE = 0.10;
-    const amount = order.amount;
     const platformFee = amount * PLATFORM_FEE_PERCENTAGE;
     const influencerAmount = amount - platformFee;
 
@@ -89,7 +144,23 @@ export const stripeWebhook = async (req: Request, res: Response) => {
 
     await order.save();
 
-    console.log(`✅ Order ${orderId} is now IN_ESCROW. Fee: ${platformFee}, Influencer: ${influencerAmount}`);
+    // 🔥 VIRTUAL BALANCE UPDATES
+    const profile = await InfluencerProfile.findOne({ userId: order.influencerId });
+    if (profile) {
+      profile.balance = (profile.balance || 0) + influencerAmount;
+      profile.totalEarnings = (profile.totalEarnings || 0) + influencerAmount;
+      await profile.save();
+    }
+
+    let platform = await PlatformRevenueModel.findOne();
+    if (!platform) {
+      platform = new PlatformRevenueModel();
+    }
+    platform.totalRevenue = (platform.totalRevenue || 0) + platformFee;
+    platform.availableBalance = (platform.availableBalance || 0) + platformFee;
+    await platform.save();
+
+    console.log(`✅ Order ${orderId} IN_ESCROW. Fee added: ${platformFee}, Influencer cut: ${influencerAmount}`);
 
     // 🔥 REAL-TIME NOTIFICATION
     await publishEvent("payment.confirmed", {
@@ -98,8 +169,15 @@ export const stripeWebhook = async (req: Request, res: Response) => {
       amount: order.amount,
     });
 
-    // ✅ CREATE BOOKING
-    await createBooking(order);
+    // 🔥 AUTOMATED SYSTEM CHAT MESSAGE
+    await MessageModel.create({
+      gigRequestId: order.connectionId,
+      senderId: order.buyerId,
+      receiverId: order.influencerId,
+      content: `₹${order.amount.toLocaleString()} has been safely secured in platform Escrow!`,
+      messageType: "SYSTEM",
+      status: "SENT",
+    });
   }
 
   res.json({ received: true });

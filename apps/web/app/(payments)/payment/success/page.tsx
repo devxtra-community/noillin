@@ -2,15 +2,17 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Check, ShieldCheck, Printer, History } from "lucide-react";
 
+import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
 
 interface Order {
   _id: string;
   amount: number;
   stripePaymentIntentId?: string;
+  connectionId?: string;
   [key: string]: unknown; // Allow other fields with unknown type to satisfy lint
 }
 
@@ -19,15 +21,20 @@ function PaymentSuccessContent() {
   const orderId = searchParams.get("orderId");
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [countdown, setCountdown] = useState(5);
+
+  const router = useRouter();
+  const { user } = useAuthStore();
+  const chatDashboardPath = user?.role?.toLowerCase() === 'influencer' ? 'influencer-dashboard' : 'brand-dashboard';
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        if (orderId) {
-          const res = await api.get(`/orders/details/${orderId}`);
-          setOrder(res.data);
-        } else if (searchParams.get("session_id")) {
+        if (searchParams.get("session_id")) {
           const res = await api.get(`/orders/by-session/${searchParams.get("session_id")}`);
+          setOrder(res.data);
+        } else if (orderId) {
+          const res = await api.get(`/orders/details/${orderId}`);
           setOrder(res.data);
         }
       } catch (err) {
@@ -39,6 +46,21 @@ function PaymentSuccessContent() {
     fetchOrder();
   }, [orderId, searchParams]);
 
+  useEffect(() => {
+    if (!order?.connectionId) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev <= 1 ? 0 : prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [order?.connectionId]);
+
+  useEffect(() => {
+    if (countdown === 0 && order?.connectionId) {
+      router.push(`/${chatDashboardPath}/messages?gigRequestId=${order.connectionId}`);
+    }
+  }, [countdown, order?.connectionId, router, chatDashboardPath]);
 
   if (loading) {
     return (
@@ -50,15 +72,15 @@ function PaymentSuccessContent() {
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] flex items-center justify-center p-4 sm:p-6 font-sans">
-      
+
       {/* 🧾 The Receipt Modal */}
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden animate-in zoom-in-95 duration-500">
-        
+
         <div className="p-8 sm:p-12 text-center">
           {/* ✅ Success Icon */}
           <div className="w-20 h-20 bg-[#F1F9F5] rounded-full flex items-center justify-center mx-auto mb-6">
             <div className="w-14 h-14 bg-[#4CAF50] rounded-full flex items-center justify-center shadow-lg shadow-green-200">
-                <Check className="text-white w-8 h-8 stroke-[3]" />
+              <Check className="text-white w-8 h-8 stroke-[3]" />
             </div>
           </div>
 
@@ -78,7 +100,7 @@ function PaymentSuccessContent() {
               <span className="text-gray-500 font-medium tracking-tight">Stripe Reference</span>
               <span className="text-gray-800 font-mono font-bold text-[12px] truncate max-w-[150px]">{order?.stripePaymentIntentId || "Direct Payment"}</span>
             </div>
-            
+
             <div className="mt-8 pt-6 border-t-2 border-dashed border-gray-100">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">Amount Paid</span>
@@ -100,16 +122,16 @@ function PaymentSuccessContent() {
                 History
               </Link>
             </div>
-            <Link href="/" className="w-full bg-white hover:bg-gray-50 text-gray-500 py-3 px-6 rounded-xl font-bold uppercase text-[11px] tracking-widest transition-all text-center">
-              Back to Home
+            <Link href={`/${chatDashboardPath}/messages?gigRequestId=${order?.connectionId}`} className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-600 py-3.5 px-6 rounded-xl font-black uppercase text-[12px] tracking-widest transition-all text-center flex items-center justify-center gap-2 border border-emerald-100 shadow-sm animate-pulse">
+              Go Back to Chat ({countdown}s)
             </Link>
           </div>
         </div>
 
         {/* 🛡️ Trust Footer */}
         <div className="bg-gray-50 py-5 border-t border-gray-100 flex items-center justify-center gap-3">
-            <ShieldCheck className="w-5 h-5 text-emerald-600" />
-            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Verified Secure Escrow Transaction</span>
+          <ShieldCheck className="w-5 h-5 text-emerald-600" />
+          <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Verified Secure Escrow Transaction</span>
         </div>
       </div>
 

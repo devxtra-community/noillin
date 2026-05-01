@@ -7,13 +7,13 @@ import { GigModel } from "../models/gig.model.js";
 import { GigRequestModel } from "../models/gig-request.model.js";
 
 // ✅ Define input type
-interface CreateOrderInput {
+export interface CreateOrderInput {
   gigId: string;
   buyerId: string;
   influencerId: string;
   amount?: number;
   connectionId: string;
-  dueDate?: string;
+  dueDate?: string | undefined;
 }
 
 // 🟢 CREATE ORDER

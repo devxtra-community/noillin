@@ -31,8 +31,28 @@ interface Order {
   amount: number;
   status: string;
   createdAt: string;
-  dueDate?: string; // 🔥 Added this
+  influencerId?: { fullName: string };
 }
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case "COMPLETED": return "Completed";
+    case "IN_ESCROW": return "Securely Booked";
+    case "PENDING": return "Payment Pending";
+    case "CANCELLED": return "Cancelled";
+    default: return status;
+  }
+};
+
+const getStatusStyles = (status: string) => {
+  switch (status) {
+    case "COMPLETED": return "text-emerald-600 bg-emerald-50";
+    case "IN_ESCROW": return "text-blue-600 bg-blue-50";
+    case "PENDING": return "text-orange-600 bg-orange-50 font-bold";
+    case "CANCELLED": return "text-rose-600 bg-rose-50";
+    default: return "text-gray-600 bg-gray-100";
+  }
+};
 
 export default function BrandDashboardPage() {
   const [requests, setRequests] = useState<Request[]>([]);
@@ -144,7 +164,7 @@ export default function BrandDashboardPage() {
               <tbody className="divide-y divide-gray-50">
                 {[
                   ...requests.map(r => ({ ...r, type: 'request' })),
-                  ...orders.filter(o => o.status === 'PENDING').map(o => ({ ...o, type: 'order' }))
+                  ...orders.filter(o => o.status === 'PENDING' || o.status === 'IN_ESCROW').map(o => ({ ...o, type: 'order' }))
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 ].sort((a, b) => new Date((b as any).createdAt || 0).getTime() - new Date((a as any).createdAt || 0).getTime()).slice(0, 8).map((item: any) => (
                   <tr key={`${item.type}-${item._id}`} className="group hover:bg-gray-50 transition-colors">
@@ -152,7 +172,9 @@ export default function BrandDashboardPage() {
                       {item.type === 'order' ? (
                         <div className="flex flex-col">
                           <span>{item.gigId?.title || "Collaboration"}</span>
-                          <span className="text-[10px] text-emerald-600 uppercase">Payment Pending</span>
+                          <span className={`text-[10px] uppercase font-black ${item.status === 'IN_ESCROW' ? 'text-blue-500' : 'text-emerald-600'}`}>
+                            {getStatusLabel(item.status)}
+                          </span>
                         </div>
                       ) : (
                         item.gigId?.title || "Collaboration"
@@ -160,7 +182,7 @@ export default function BrandDashboardPage() {
                     </td>
                     <td className="py-5 text-sm font-bold text-gray-900 text-right">₹{item.amount}</td>
                     <td className="py-5 text-center">
-                      {item.type === 'order' ? (
+                      {item.type === 'order' && item.status === 'PENDING' ? (
                         <Link
                           href={`/payment?orderId=${item._id}`}
                           className="px-4 py-1.5 text-[10px] font-black rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-100 hover:bg-emerald-600 transition-all"
@@ -168,8 +190,8 @@ export default function BrandDashboardPage() {
                           Pay Now
                         </Link>
                       ) : (
-                        <span className={`px-3 py-1 text-[11px] font-bold rounded-full ${item.status === 'accepted' ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'}`}>
-                          {item.status}
+                        <span className={`px-3 py-1 text-[11px] font-black uppercase tracking-widest rounded-full ${getStatusStyles(item.status)}`}>
+                          {item.type === 'order' ? getStatusLabel(item.status) : item.status}
                         </span>
                       )}
                     </td>
@@ -233,8 +255,7 @@ export default function BrandDashboardPage() {
               {/* Dynamic Calendar Days */}
               {Array.from({ length: new Date(currentViewDate.getFullYear(), currentViewDate.getMonth() + 1, 0).getDate() }, (_, i) => i + 1).map((day) => {
                 const dateString = new Date(currentViewDate.getFullYear(), currentViewDate.getMonth(), day).toDateString();
-                const hasEvent = orders.some(o => o.dueDate && new Date(o.dueDate).toDateString() === dateString) ||
-                  proposals.some(p => new Date(p.proposalData.date).toDateString() === dateString);
+                const hasProposal = proposals.some(p => new Date(p.proposalData.date).toDateString() === dateString);
                 const isSelected = selectedDate === dateString;
 
                 return (
@@ -249,7 +270,7 @@ export default function BrandDashboardPage() {
                       }`}
                   >
                     {day}
-                    {hasEvent && !isSelected && (
+                    {hasProposal && !isSelected && (
                       <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full absolute bottom-1.5 left-1/2 -translate-x-1/2 shrink-0"></div>
                     )}
                   </div>
@@ -281,29 +302,17 @@ export default function BrandDashboardPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {[
-                    ...orders.filter(o => o.dueDate && new Date(o.dueDate).toDateString() === selectedDate).map(o => ({ ...o, type: 'locked' })),
-                    ...proposals.filter(p => new Date(p.proposalData.date).toDateString() === selectedDate).map(p => ({ ...p, type: 'negotiated' }))
-                  ].length > 0 ? (
-                    [
-                      ...orders.filter(o => o.dueDate && new Date(o.dueDate).toDateString() === selectedDate).map(o => ({ ...o, type: 'locked' })),
-                      ...proposals.filter(p => new Date(p.proposalData.date).toDateString() === selectedDate).map(p => ({ ...p, type: 'negotiated' }))
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    ].map((item: any) => (
-                      <div key={`${item.type}-${item._id}`} className={`rounded-2xl p-5 border ${item.type === 'locked' ? 'bg-gray-50 border-gray-100' : 'bg-emerald-50/30 border-emerald-100/50'}`}>
+                  {proposals.filter(p => new Date(p.proposalData.date).toDateString() === selectedDate).length > 0 ? (
+                    proposals.filter(p => new Date(p.proposalData.date).toDateString() === selectedDate).map(p => (
+                      <div key={p._id} className="bg-gray-50/50 rounded-2xl p-5 border border-gray-100">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm ${item.type === 'locked' ? 'bg-white text-gray-400' : 'bg-emerald-100 text-emerald-600'}`}>
-                            {item.type === 'locked' ? <Clock className="w-5 h-5" /> : "📅"}
-                          </div>
+                          <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-lg shadow-sm">📅</div>
                           <div>
-                            <p className="text-[14px] font-black text-gray-900 leading-none">{item.gigId?.title || "Agreed Date"}</p>
-                            <p className="text-[11px] font-bold text-gray-500 mt-1 uppercase tracking-wider">{item.type === 'locked' ? 'Final Deadline' : `Time: ${item.proposalData.time}`}</p>
+                            <p className="text-[13px] font-black text-gray-900 leading-none">Agreed Date</p>
+                            <p className="text-[11px] font-bold text-emerald-600 mt-1">{p.proposalData.time}</p>
                           </div>
                         </div>
-
-                        {item.type === 'negotiated' && (
-                          <p className="text-[12px] font-bold text-gray-500 leading-relaxed bg-white/50 p-3 rounded-xl border border-emerald-50 italic">&ldquo;{item.content}&rdquo;</p>
-                        )}
+                        <p className="text-[12px] font-bold text-gray-500 leading-relaxed bg-white p-3 rounded-xl border border-gray-100 shadow-sm">&ldquo;{p.content}&rdquo;</p>
 
                         <Link
                           href="/brand-dashboard/messages"
