@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -19,6 +18,7 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import RoleGuard from "@/components/rbac/RoleGuard";
 import api from "@/lib/axios.client";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function InfluencerDashboardLayout({
     children,
@@ -131,36 +131,40 @@ export default function InfluencerDashboardLayout({
                             <Menu className="w-6 h-6" />
                         </button>
 
-                        <div className="relative ml-auto" ref={dropdownRef}>
-                            <button
-                                onClick={() => setShowLogoutModal(!showLogoutModal)}
-                                className="flex items-center gap-3 group focus:outline-none"
-                            >
-                                <div className="text-right hidden sm:block">
-                                    <p className="text-sm font-bold text-gray-900">{user?.role === "INFLUENCER" ? "Influencer User" : "Brand User"}</p>
-                                    <p className="text-xs text-gray-500 font-medium">Active Member</p>
-                                </div>
-                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all">
-                                    {user?.email?.charAt(0).toUpperCase() || "I"}
-                                </div>
-                            </button>
+                        <div className="flex items-center gap-6 ml-auto">
+                            <NotificationBell />
 
-                            {/* Logout Dropdown Modal */}
-                            {showLogoutModal && (
-                                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 origin-top-right">
-                                    <div className="px-4 py-3 border-b border-gray-50 mb-1">
-                                        <p className="text-sm text-gray-900 font-bold truncate">{user?.email}</p>
-                                        <p className="text-xs text-gray-500 mt-0.5">{user?.role === "INFLUENCER" ? "Influencer" : "Brand"} Dashboard</p>
+                            <div className="relative" ref={dropdownRef}>
+                                <button
+                                    onClick={() => setShowLogoutModal(!showLogoutModal)}
+                                    className="flex items-center gap-3 group focus:outline-none"
+                                >
+                                    <div className="text-right hidden sm:block">
+                                        <p className="text-sm font-bold text-gray-900">{user?.role === "INFLUENCER" ? "Influencer User" : "Brand User"}</p>
+                                        <p className="text-xs text-gray-500 font-medium">Active Member</p>
                                     </div>
-                                    <button
-                                        onClick={handleLogout}
-                                        className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors font-medium"
-                                    >
-                                        <LogOut className="w-4 h-4" />
-                                        Sign Out
-                                    </button>
-                                </div>
-                            )}
+                                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all">
+                                        {user?.email?.charAt(0).toUpperCase() || "I"}
+                                    </div>
+                                </button>
+
+                                {/* Logout Dropdown Modal */}
+                                {showLogoutModal && (
+                                    <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 origin-top-right">
+                                        <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                                            <p className="text-sm text-gray-900 font-bold truncate">{user?.email}</p>
+                                            <p className="text-xs text-gray-500 mt-0.5">{user?.role === "INFLUENCER" ? "Influencer" : "Brand"} Dashboard</p>
+                                        </div>
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors font-medium"
+                                        >
+                                            <LogOut className="w-4 h-4" />
+                                            Sign Out
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </header>
 

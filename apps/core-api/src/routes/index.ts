@@ -18,6 +18,7 @@ import chatRoutes from "./chat.routes.js"
 import brandRoutes from "./brand.route.js";
 import reportRoutes from "./report.route.js";
 import connectionRoutes from "./gig-request.route.js";
+import notificationRoutes from "./notification.routes.js";
 
 
 const router: Router = Router()
@@ -38,6 +39,7 @@ router.use("/chat", chatRoutes);
 router.use("/brands", brandRoutes);
 router.use("/reports", reportRoutes);
 router.use("/connections", connectionRoutes);
+router.use("/notifications", notificationRoutes);
 
 
 export default router

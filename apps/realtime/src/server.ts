@@ -1,3 +1,5 @@
+import http from "http";
+
 import dotenv from "dotenv"
 
 dotenv.config()
@@ -39,6 +41,23 @@ io.on("connection", (socket) => {
     logger.info("Socket disconnected:", socket.id);
   });
 });
+
+app.post('/internal/emit', (req, res) => {
+  const secret = req.headers['x-internal-secret'];
+  if (!secret || secret !== process.env.INTERNAL_SECRET) {
+    return res.status(403).json({ error: 'Forbidden: Invalid internal secret' });
+  }
+
+  const { event, room, payload } = req.body;
+  if (!event || !room || !payload) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  io.to(room).emit(event, payload);
+  logger.info(`Emitted internal event  to room `);
+  res.status(200).json({ success: true });
+});
+
 app.use(notFound)
 app.use(errorHandler)
 const PORT = Number(process.env.PORT) || 6001;
