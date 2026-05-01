@@ -16,6 +16,7 @@ import { connectDB } from "./db/connect.js";
 import { cleanupExpiredSignups } from "./services/verification.service.js";
 import { setupMeili } from "./search/setup.js";
 import { GIG_CREATED_EVENT } from "./controllers/gig.controller.js";
+import { GIG_REQUEST_CREATED_EVENT } from "./queue/events.js";
 import { getChannel } from "./queue/rabbit.js";
 
 const app = express()
@@ -60,7 +61,7 @@ await setupMeili();
 // Ensure gig.created queue exists
 await getChannel().assertQueue(GIG_CREATED_EVENT,{durable: true});
 await getChannel().assertQueue("order.created", { durable: true });
-await getChannel().assertQueue(GIG_CREATED_EVENT, { durable: true });
+await getChannel().assertQueue(GIG_REQUEST_CREATED_EVENT, { durable: true });
 
 
 app.listen(PORT, "127.0.0.1", () => {
