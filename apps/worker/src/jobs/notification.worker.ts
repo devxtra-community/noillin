@@ -83,19 +83,35 @@ export const notificationWorker = new Worker(
         };
 
         for (const sub of subscriptions) {
-          console.log("Sending push to:", sub.endpoint);
-          const success = await webPushService.sendNotification(
-            { endpoint: sub.endpoint, keys: sub.keys },
-            pushPayload
-          );
-          if (success) {
-            pushSuccessCount++;
-          } else {
-            console.log("Push failed, removing subscription:", sub.endpoint);
-            // Remove dead subscription
-            await PushSubscriptionModel.deleteOne({ _id: sub._id });
-          }
-        }
+  if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+    console.warn("Skipping invalid subscription:", sub.endpoint);
+
+    // Optional: clean invalid entries
+    await PushSubscriptionModel.deleteOne({ _id: sub._id });
+
+    continue;
+  }
+
+  console.log("Sending push to:", sub.endpoint);
+
+  const success = await webPushService.sendNotification(
+    {
+      endpoint: sub.endpoint,
+      keys: {
+        p256dh: sub.keys.p256dh,
+        auth: sub.keys.auth,
+      },
+    },
+    pushPayload
+  );
+
+  if (success) {
+    pushSuccessCount++;
+  } else {
+    console.log("Push failed, removing subscription:", sub.endpoint);
+    await PushSubscriptionModel.deleteOne({ _id: sub._id });
+  }
+}
       } else {
         logger.info(`Web push skipped (feature flag disabled)`);
       }
@@ -147,10 +163,21 @@ export const notificationWorker = new Worker(
     };
 
     for (const sub of subscriptions) {
-      await webPushService.sendNotification(
-        { endpoint: sub.endpoint, keys: sub.keys },
-        pushPayload
-      );
+      if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+  logger.warn("Skipping invalid push subscription", { endpoint: sub.endpoint });
+  continue;
+}
+
+await webPushService.sendNotification(
+  {
+    endpoint: sub.endpoint,
+    keys: {
+      p256dh: sub.keys.p256dh,
+      auth: sub.keys.auth,
+    },
+  },
+  pushPayload
+);
     }
   }
 }
@@ -184,10 +211,21 @@ else if (job.name === "gig-request-rejected") {
     };
 
     for (const sub of subscriptions) {
-      await webPushService.sendNotification(
-        { endpoint: sub.endpoint, keys: sub.keys },
-        pushPayload
-      );
+      if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+  logger.warn("Skipping invalid push subscription", { endpoint: sub.endpoint });
+  continue;
+}
+
+await webPushService.sendNotification(
+  {
+    endpoint: sub.endpoint,
+    keys: {
+      p256dh: sub.keys.p256dh,
+      auth: sub.keys.auth,
+    },
+  },
+  pushPayload
+);
     }
   }
 }
@@ -218,11 +256,23 @@ else if (job.name === "gig-request-rejected") {
         };
 
         for (const sub of subscriptions) {
-          console.log("Sending push to:", sub.endpoint);
-          await webPushService.sendNotification(
-            { endpoint: sub.endpoint, keys: sub.keys },
-            pushPayload
-          );
+  if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+    console.warn("Skipping invalid subscription:", sub.endpoint);
+    continue;
+  }
+
+  console.log("Sending push to:", sub.endpoint);
+
+  const success = await webPushService.sendNotification(
+    {
+      endpoint: sub.endpoint,
+      keys: {
+        p256dh: sub.keys.p256dh,
+        auth: sub.keys.auth,
+      },
+    },
+    pushPayload
+  );
         }
       }
     }
