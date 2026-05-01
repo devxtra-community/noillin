@@ -1,7 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, DollarSign, Calendar, Clock, X, ChevronRight, Loader2, ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  Plus,
+  DollarSign,
+  Calendar,
+  Clock,
+  X,
+  ChevronRight,
+  ChevronLeft,
+  User,
+  Loader2
+} from "lucide-react";
 
 import api from "@/lib/axios.client";
 
@@ -56,6 +67,7 @@ export default function InfluencerDashboardPage() {
     };
     fetchDashboardData();
   }, []);
+  const router = useRouter()
 
   const stats = {
     earnings: orders
@@ -96,7 +108,6 @@ export default function InfluencerDashboardPage() {
       </div>
     );
   }
-
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1400px] mx-auto w-full font-sans">
       {/* Header Area */}
@@ -105,7 +116,8 @@ export default function InfluencerDashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Platform Overview</h1>
           <p className="text-sm text-gray-500 mt-1">Welcome back, here&apos;s what&apos;s happening today.</p>
         </div>
-        <button className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors w-full sm:w-auto shrink-0">
+        <button onClick={() => router.push("/gig/create")}
+className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors w-full sm:w-auto shrink-0">
           <Plus className="w-4 h-4" />
           Create new gig
         </button>

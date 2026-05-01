@@ -1,4 +1,10 @@
 import { GigRequestRepository } from "../repositories/gig-request.repository.js";
+import { publishEvent } from "../queue/publisher.js";
+import { 
+    GIG_REQUEST_CREATED_EVENT,
+    GIG_REQUEST_ACCEPTED_EVENT,
+    GIG_REQUEST_REJECTED_EVENT 
+} from "../queue/events.js";
 
 const repo = new GigRequestRepository();
 
@@ -27,6 +33,14 @@ export class GigRequestService {
             influencerId,
             gigId,
             ...(note ? { note } : {}),
+        }) as unknown as { _id: string };
+
+        await publishEvent(GIG_REQUEST_CREATED_EVENT, {
+            id: gigRequest._id,
+            brandId,
+            influencerId,
+            gigId,
+            note,
         });
 
         return { gigRequest };
@@ -44,9 +58,17 @@ export class GigRequestService {
         }
 
         const updated = await repo.updateStatus(gigRequestId, "accepted");
+        
         if (!updated) {
             throw new Error("Failed to update gig request");
         }
+
+        await publishEvent(GIG_REQUEST_ACCEPTED_EVENT, {
+            id: request._id || gigRequestId,
+            brandId: request.brandId,
+            influencerId: request.influencerId,
+            gigId: request.gigId,
+        });
 
         return updated;
     }
@@ -62,7 +84,20 @@ export class GigRequestService {
             throw new Error("Already processed");
         }
 
-        return repo.updateStatus(gigRequestId, "rejected");
+        const updated = await repo.updateStatus(gigRequestId, "rejected");
+
+        if (!updated) {
+            throw new Error("Failed to update gig request");
+        }
+
+        await publishEvent(GIG_REQUEST_REJECTED_EVENT, {
+            id: request._id || gigRequestId,
+            brandId: request.brandId,
+            influencerId: request.influencerId,
+            gigId: request.gigId,
+        });
+
+        return updated;
     }
 
     // Get a single request by ID

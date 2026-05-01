@@ -18,6 +18,7 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import RoleGuard from "@/components/rbac/RoleGuard";
 import api from "@/lib/axios.client";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function BrandDashboardLayout({
     children,
@@ -140,6 +141,8 @@ export default function BrandDashboardLayout({
                             >
                                 Explore gigs
                             </Link>
+
+                            <NotificationBell />
 
                             <div className="relative" ref={dropdownRef}>
                                 <button
