@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Clock, MoreHorizontal, Calendar as CalendarIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Calendar as CalendarIcon } from "lucide-react";
 
 const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 const calendarDays = [

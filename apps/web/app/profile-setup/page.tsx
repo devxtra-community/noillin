@@ -47,17 +47,11 @@ export default function ProfileSetupPage() {
         if (!userType) return;
 
         // If user is PENDING, we don't need to fetch from /profile/get_profile
-        // but we should initialize with whatever we have from signup
         if (user?.status === "PENDING") {
             if (userType === "INFLUENCER") {
                 setInfluencerData(prev => ({
                     ...prev,
-                    fullName: user.fullName || "",
-                }));
-            } else if (userType === "BRAND") {
-                setBrandData(prev => ({
-                    ...prev,
-                    companyName: user.fullName || "",
+                    fullName: user.fullName || ""
                 }));
             }
             return;
@@ -84,25 +78,26 @@ export default function ProfileSetupPage() {
                         ...prev,
                         bio: data.bio || "",
                         location: data.location || "",
+                        phoneNumber: data.phoneNumber || "",
                     }));
                 }
 
                 if (userType === "BRAND") {
                     setBrandData({
-                        companyName: data.companyName || user?.fullName || "",
+                        companyName: data.companyName || "",
                         industry: data.industry || "",
                         website: data.website || "",
                         companySize: data.companySize || "",
                     });
+                    
+                    setCommonData((prev) => ({
+                        ...prev,
+                        bio: data.description || "",
+                        location: data.headquarters || "",
+                    }));
                 }
             } catch (err) {
                 console.error(err);
-                // On error, still try to populate with store data
-                if (userType === "INFLUENCER") {
-                    setInfluencerData(prev => ({ ...prev, fullName: user?.fullName || "" }));
-                } else {
-                    setBrandData(prev => ({ ...prev, companyName: user?.fullName || "" }));
-                }
             }
         };
 
@@ -147,14 +142,19 @@ export default function ProfileSetupPage() {
             
             let profileImageUrl = "";
             if (commonData.profilePicture) {
-                profileImageUrl = await uploadToS3(commonData.profilePicture, "profiles");
+                try {
+                    profileImageUrl = await uploadToS3(commonData.profilePicture, "profiles");
+                } catch (uploadErr) {
+                    console.error("Image upload failed:", uploadErr);
+                    // Continue without image if upload fails
+                }
             }
             
             const profileData = {
                 bio: commonData.bio,
                 location: commonData.location,
                 phoneNumber: commonData.phoneNumber,
-                profileImageUrl: profileImageUrl,
+                profileImageUrl: profileImageUrl || undefined,
                 ...(userType === "INFLUENCER" ? {
                     fullName: influencerData.fullName,
                     username: influencerData.username,
@@ -190,14 +190,14 @@ export default function ProfileSetupPage() {
             router.push(dashboardPath);
         } catch (err) {
             console.error(err);
-            alert("Failed to update profile");
+            alert("Failed to update profile. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
     if (!user) {
-        return <div className="p-6">Loading profile...</div>;
+        return <div className="p-6 text-center pt-20">Loading your session...</div>;
     }
 
 
@@ -208,7 +208,12 @@ export default function ProfileSetupPage() {
             <main className="pt-24 pb-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-3xl mx-auto">
                     {/* Header */}
-
+                    <div className="text-center mb-10">
+                        <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">Complete Your Profile</h1>
+                        <p className="mt-3 text-lg text-gray-500">
+                            Tell us a bit more about yourself to get started with Noillin.
+                        </p>
+                    </div>
 
                     {/* Main Card */}
                     <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
