@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, DollarSign, Clock, Calendar, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Plus, DollarSign, Clock, Calendar, ChevronRight } from "lucide-react";
 
 const transactions = [
     {

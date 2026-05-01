@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Search, Loader2, MessageSquare } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 import api from "@/lib/axios.client";
 import { ChatWindow } from "@/components/chat/ChatWindow";
+import { useAuthStore } from "@/store/auth.store";
 
 interface Conversation {
     gigRequestId: string;
@@ -21,15 +22,7 @@ interface Conversation {
     };
 }
 
-interface Message {
-    _id: string;
-    gigRequestId: string;
-    senderId: string;
-    receiverId: string;
-    content: string;
-    status: "SENT" | "DELIVERED" | "READ";
-    createdAt: string;
-}
+
 
 function MessagesContent() {
     const searchParams = useSearchParams();
@@ -39,14 +32,9 @@ function MessagesContent() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [selectedConvId, setSelectedConvId] = useState<string | null>(initialGigRequestId);
     const [loadingConvs, setLoadingConvs] = useState(true);
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
     const [fetchedConv, setFetchedConv] = useState<Conversation | null>(null);
-
-    // Get current user ID from /me or decode JWT (reuse the stored user if available)
-    useEffect(() => {
-        const stored = localStorage.getItem("userId") || sessionStorage.getItem("userId");
-        if (stored) setCurrentUserId(stored);
-    }, []);
+    const { user } = useAuthStore();
+    const currentUserId = user?.id;
 
     // Fallback for historical gig requests with no existing messages
     useEffect(() => {
@@ -60,18 +48,23 @@ function MessagesContent() {
         api.get(`/connections/details/${selectedConvId}`).then(res => {
             const gr = res.data?.connection || res.data?.gigRequest;
             if (gr) {
-                const isBrand = currentUserId === gr.brandId._id;
-                const otherUser = isBrand ? gr.influencerId : gr.brandId;
+                const brand = gr.brandId;
+                const influencer = gr.influencerId;
+
+                const isBrand = currentUserId === (brand?._id || brand?.id);
+                const otherUser = isBrand ? influencer : brand;
+
+                if (!otherUser) return;
 
                 setFetchedConv({
                     gigRequestId: gr._id,
                     lastMessage: "No messages yet",
                     lastMessageTime: gr.updatedAt || gr.createdAt,
                     unreadCount: 0,
-                    gigTitle: gr.gigId?.title || "Gig",
+                    gigTitle: gr.gigId?.title || "Gig Collaboration",
                     user: {
-                        _id: otherUser._id,
-                        name: otherUser.name || otherUser.fullName || otherUser.contactPersonName || "Unknown",
+                        _id: otherUser._id || otherUser.id,
+                        name: otherUser.fullName || otherUser.name || "Unknown",
                         role: isBrand ? "INFLUENCER" : "BRAND",
                         profileImage: otherUser.profileImageUrl || otherUser.profileImage || null
                     }

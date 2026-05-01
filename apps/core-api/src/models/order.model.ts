@@ -15,6 +15,7 @@ const orderSchema = new mongoose.Schema(
       ref: "Connection",
       required: true,
     },
+    dueDate: Date, // 🔥 AGREED DELIVERY DATE
 
     amount: { type: Number, required: true },
     currency: { type: String, default: "INR" },

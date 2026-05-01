@@ -31,6 +31,9 @@ export default function InfluencerDashboardLayout({
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+    const displayName = user?.fullName || user?.contactPersonName || user?.email?.split("@")[0] || "User";
+    const profileImage = user?.profileImageUrl || user?.profileImage || null;
+
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     // Close dropdown on outside click
@@ -145,6 +148,30 @@ export default function InfluencerDashboardLayout({
                                     </div>
                                     <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all">
                                         {user?.email?.charAt(0).toUpperCase() || "I"}
+                        <div className="relative ml-auto" ref={dropdownRef}>
+                            <button
+                                onClick={() => setShowLogoutModal(!showLogoutModal)}
+                                className="flex items-center gap-3 group focus:outline-none"
+                            >
+                                <div className="text-right hidden sm:block">
+                                    <p className="text-sm font-bold text-gray-900">{displayName}</p>
+                                    <p className="text-xs text-gray-500 font-medium">Active Member</p>
+                                </div>
+                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all overflow-hidden">
+                                    {profileImage ? (
+                                        <img src={profileImage} alt={displayName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        displayName.charAt(0).toUpperCase()
+                                    )}
+                                </div>
+                            </button>
+
+                            {/* Logout Dropdown Modal */}
+                            {showLogoutModal && (
+                                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 origin-top-right">
+                                    <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                                        <p className="text-sm text-gray-900 font-bold truncate">{user?.email}</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">{user?.role === "INFLUENCER" ? "Influencer" : "Brand"} Dashboard</p>
                                     </div>
                                 </button>
 

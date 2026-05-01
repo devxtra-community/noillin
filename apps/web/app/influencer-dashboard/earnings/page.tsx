@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Wallet, DollarSign, ArrowUpRight, History,  ChevronRight, CheckCircle2, Clock, ShieldAlert, Loader2 } from "lucide-react";
+import { Search, Wallet, DollarSign, ArrowUpRight, History, ChevronRight, CheckCircle2, Clock, ShieldAlert, Loader2 } from "lucide-react";
 
 import api from "@/lib/axios.client";
 
@@ -27,18 +27,40 @@ export default function EarningsPage() {
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
     const [activeFilter, setActiveFilter] = useState("30 days");
 
+    const [hasStripeAccount, setHasStripeAccount] = useState(true);
+    const [connectingStripe, setConnectingStripe] = useState(false);
+
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await api.get("/orders/history");
-            setOrders(response.data);
-            if (response.data.length > 0) {
-                setSelectedOrderId(response.data[0]._id);
+            const [ordersRes, profileRes] = await Promise.all([
+                api.get("/orders/history"),
+                api.get("/profile/get_profile")
+            ]);
+            setOrders(ordersRes.data);
+            setHasStripeAccount(!!profileRes.data.data.stripeAccountId);
+            if (ordersRes.data.length > 0) {
+                setSelectedOrderId(ordersRes.data[0]._id);
             }
         } catch (error) {
-            console.error("Failed to fetch orders:", error);
+            console.error("Failed to fetch dashboard data:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleConnectStripe = async () => {
+        try {
+            setConnectingStripe(true);
+            const res = await api.post("/payments/connect");
+            if (res.data.url) {
+                window.location.href = res.data.url;
+            }
+        } catch (error) {
+            console.error("Stripe Connect failed:", error);
+            alert("Failed to start Stripe onboarding. Please try again.");
+        } finally {
+            setConnectingStripe(false);
         }
     };
 
@@ -57,7 +79,7 @@ export default function EarningsPage() {
             await api.post("/payouts/withdraw");
             alert("Withdrawal successful! Funds are on the way.");
             fetchOrders(); // Refresh data
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("Withdrawal failed:", error);
             alert(error.response?.data?.message || "Withdrawal failed. Please try again.");
@@ -140,6 +162,25 @@ export default function EarningsPage() {
                     ))}
                 </div>
             </div>
+
+            {/* 🔥 Stripe Verification Banner */}
+            {!hasStripeAccount && (
+                <div className="mb-8 bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-emerald-100 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="relative z-10">
+                        <h2 className="text-2xl font-black tracking-tight mb-2">Complete Your Payout Setup</h2>
+                        <p className="text-emerald-50 text-sm font-semibold max-w-md">Connect your Stripe account to start receiving payments for your collaborations securely. It only takes a few minutes.</p>
+                    </div>
+                    <button
+                        onClick={handleConnectStripe}
+                        disabled={connectingStripe}
+                        className="relative z-10 bg-white text-emerald-600 px-8 py-3.5 rounded-2xl font-black text-sm hover:bg-emerald-50 transition-all flex items-center gap-2 shadow-lg disabled:opacity-50"
+                    >
+                        {connectingStripe ? <Loader2 className="w-5 h-5 animate-spin" /> : "Connect Stripe Now"}
+                        {!connectingStripe && <ChevronRight className="w-5 h-5" />}
+                    </button>
+                </div>
+            )}
 
             {/* Stats Row */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">

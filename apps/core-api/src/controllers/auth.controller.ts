@@ -9,7 +9,7 @@ import {
   verifyOtpService,
   resetPasswordService,
   verifySignupOtpService,
-
+  resendSignupOtpService,
 } from "../services/auth.service.js";
 import type { HttpError } from "../modules/auth/http-error.js";
 // import { log } from "winston";
@@ -23,15 +23,16 @@ export const signupController = async (
 ) => {
   try {
 
-    const { email, password, role, documents: businessInfo } = req.body;
+    const { fullName, email, password, role, documents: businessInfo } = req.body;
 
-    if (!email || !password || !role) {
+    if (!fullName || !email || !password || !role) {
       const err: HttpError = new Error("Missing required fields");
       err.statusCode = 400;
       throw err;
     }
 
     const result = await signupService({
+      fullName,
       email,
       password,
       role,
@@ -189,6 +190,32 @@ export const verifySignupOtpController = async (
   }
 };
 
+// ================= RESEND SIGNUP OTP =================
+export const resendSignupOtpController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      const err: HttpError = new Error("Email is required");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    await resendSignupOtpService(email);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP resent successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 // ================= FORGOT PASSWORD =================
 export const forgotPasswordController = async (
@@ -270,6 +297,9 @@ export const resetPasswordController = async (
     next(error);
   }
 };
+
+
+
 
 
 

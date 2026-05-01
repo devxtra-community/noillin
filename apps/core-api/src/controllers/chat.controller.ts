@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 
-import { getConversations, getMessages, sendMessage } from "../services/chat.service.js";
+import { getConversations, getMessages, sendMessage, respondToProposal } from "../services/chat.service.js";
 import { MessageModel } from "../models/chat.model.js";
 
 //  Get messages for a gig request
@@ -25,9 +25,9 @@ export const getChatMessagesController = async (
 export const sendMessageController = async (req: Request, res: Response) => {
   try {
     const senderId = req.user!.userId;
-    const { gigRequestId, content } = req.body;
+    const { gigRequestId, content, messageType, proposalData } = req.body;
 
-    const message = await sendMessage(senderId, gigRequestId, content);
+    const message = await sendMessage(senderId, gigRequestId, content, messageType, proposalData);
 
     res.json({ success: true, message });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,6 +81,43 @@ export const markAsReadController = async (
     res.json({ success: true });
   } catch (err) {
     console.error("markAsRead error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const respondToProposalController = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const messageId = req.params.messageId as string;
+    const { status } = req.body; // "ACCEPTED" | "REJECTED"
+
+    if (!["ACCEPTED", "REJECTED"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
+    }
+
+    const message = await respondToProposal(messageId, userId, status);
+
+    res.json({ success: true, message });
+  } catch (err: unknown) {
+    console.error("respondToProposal error:", err);
+    res.status(400).json({ message: (err as Error).message });
+  }
+};
+
+export const getAgreedProposalsController = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+
+    // Find messages where type=PROPOSAL, status=ACCEPTED and user is sender or receiver
+    const proposals = await MessageModel.find({
+      messageType: "PROPOSAL",
+      "proposalData.status": "ACCEPTED",
+      $or: [{ senderId: userId }, { receiverId: userId }]
+    }).populate("gigRequestId");
+
+    res.json({ proposals });
+  } catch (err) {
+    console.error("getAgreedProposals error:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };

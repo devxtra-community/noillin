@@ -20,6 +20,8 @@ export const addMessage = async (data: {
   receiverId: string;
   content: string;
   status: string;
+  messageType?: string;
+  proposalData?: Record<string, unknown>;
 }) => {
   return MessageModel.create(data);
 };
