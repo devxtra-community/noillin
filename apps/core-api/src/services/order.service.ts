@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 
 import { publishEvent } from "../queue/publisher.js";
 import { ORDER_CREATED_EVENT } from "../queue/events.js";
@@ -13,11 +13,18 @@ interface CreateOrderInput {
   influencerId: string;
   amount?: number;
   connectionId: string;
+  dueDate?: string;
 }
 
 // 🟢 CREATE ORDER
 export const createOrderService = async (data: CreateOrderInput) => {
-  const { gigId, buyerId, influencerId, amount, connectionId } = data;
+  const { gigId, buyerId, influencerId, amount, connectionId, dueDate } = data;
+
+  // 🔥 ID VALIDATION
+  if (!Types.ObjectId.isValid(gigId)) throw new Error(`Invalid Gig ID: ${gigId}`);
+  if (!Types.ObjectId.isValid(buyerId)) throw new Error(`Invalid Buyer ID: ${buyerId}`);
+  if (!Types.ObjectId.isValid(influencerId)) throw new Error(`Invalid Influencer ID: ${influencerId}`);
+  if (!Types.ObjectId.isValid(connectionId)) throw new Error(`Invalid Connection ID: ${connectionId}`);
 
   // 🔥 STEP 1: Validate gig request exists
   const connection = await GigRequestModel.findById(new Types.ObjectId(connectionId));
@@ -60,24 +67,30 @@ export const createOrderService = async (data: CreateOrderInput) => {
   }
 
   // 🔥 STEP 5: Create order
-  const order = await OrderModel.create({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orderData: any = {
     gigId: new Types.ObjectId(gigId),
     buyerId: new Types.ObjectId(buyerId),
     influencerId: new Types.ObjectId(influencerId),
     amount: orderAmount,
     connectionId: new Types.ObjectId(connectionId),
-
     status: "PENDING",
     escrowStatus: "HOLD",
     workStatus: "NOT_STARTED",
+  };
+
+  if (dueDate) {
+    orderData.dueDate = new Date(dueDate);
+  }
+
+  const order = await OrderModel.create(orderData);
+  await publishEvent(ORDER_CREATED_EVENT, {
+    orderId: order._id.toString(),
+    buyerId: order.buyerId.toString(),
+    influencerId: order.influencerId.toString(),
+    amount: order.amount,
   });
-await publishEvent(ORDER_CREATED_EVENT, {
-  orderId: order._id.toString(),
-  buyerId: order.buyerId.toString(),
-  influencerId: order.influencerId.toString(),
-  amount: order.amount,
-});
-console.log("🚀 order.created event published");
+  console.log("🚀 order.created event published");
   await publishEvent("order.created", {
     orderId: order._id.toString(),
     buyerId: order.buyerId,
