@@ -22,6 +22,8 @@ interface Conversation {
     };
 }
 
+
+
 function MessagesContent() {
     const searchParams = useSearchParams();
     const initialGigRequestId = searchParams.get("gigRequestId");
