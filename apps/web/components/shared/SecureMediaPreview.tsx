@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { EyeOff, ShieldCheck, Lock, Maximize2 } from "lucide-react";
+import NextImage from "next/image";
 
 import { SecureMediaModal } from "./SecureMediaModal";
 
@@ -82,11 +83,13 @@ export function SecureMediaPreview({ url, type = "image" }: SecureMediaPreviewPr
 
                 <div className={`w-full h-full transition-all duration-700 ${!isVisible ? 'scale-105 blur-lg opacity-20' : 'opacity-100'}`}>
                     {type === "image" ? (
-                        <img
+                        <NextImage
                             src={url}
                             alt="Secure Deliverable"
-                            className="w-full h-full object-contain pointer-events-none"
-                            onDragStart={(e) => e.preventDefault()}
+                            fill
+                            className="object-contain pointer-events-none"
+                            onDragStart={(e: React.DragEvent) => e.preventDefault()}
+                            unoptimized
                         />
                     ) : (
                         <video

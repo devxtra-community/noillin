@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, ShieldCheck, Lock, Maximize2, EyeOff } from "lucide-react";
+import { X, ShieldCheck, Lock, EyeOff } from "lucide-react";
+import NextImage from "next/image";
 
 interface SecureMediaModalProps {
     isOpen: boolean;
@@ -105,11 +106,13 @@ export function SecureMediaModal({ isOpen, onClose, url, type }: SecureMediaModa
                     <div className="absolute inset-0 z-[108] select-none cursor-default" onContextMenu={(e) => e.preventDefault()} />
 
                     {type === "image" ? (
-                        <img
+                        <NextImage
                             src={url}
                             alt="Secure Preview"
-                            className="max-w-full max-h-[85vh] object-contain select-none"
-                            onDragStart={(e) => e.preventDefault()}
+                            fill
+                            className="object-contain select-none"
+                            onDragStart={(e: React.DragEvent) => e.preventDefault()}
+                            unoptimized
                         />
                     ) : (
                         <video

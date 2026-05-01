@@ -196,7 +196,7 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
               {dData.status === "REJECTED" && dData.rejectionNote && (
                 <div className="mt-4 p-3 bg-rose-50 rounded-xl border border-rose-100">
                   <p className="text-[10px] font-black text-rose-500 uppercase tracking-tight mb-1">Feedback</p>
-                  <p className="text-xs text-rose-700 font-medium italic">"{dData.rejectionNote}"</p>
+                  <p className="text-xs text-rose-700 font-medium italic">&ldquo;{dData.rejectionNote}&rdquo;</p>
                 </div>
               )}
             </div>

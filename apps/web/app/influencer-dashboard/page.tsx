@@ -10,7 +10,6 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
-  User,
   Loader2
 } from "lucide-react";
 
