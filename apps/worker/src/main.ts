@@ -1,5 +1,6 @@
 import 'dotenv/config'; 
 import "./jobs/notification.worker";
+import "./workers/chat.worker";
 import mongoose from "mongoose";
 
 import { connectRabbit } from "./rabbit/connection";
@@ -9,6 +10,7 @@ import { startBrandConsumer } from './consumers/brand.cosumer';
 import { startInfluencerConsumer } from './consumers/influencer.consumer';
 import { startOrderConsumer } from './consumers/order.consumer';
 import { startGigRequestConsumer } from './consumers/gig-request.consumer';
+import { consumeChatMessages } from './consumers/chat.consumer';
 
 
 async function connectDB() {
@@ -31,7 +33,8 @@ async function bootstrap() {
       startBrandConsumer(channel),
       startInfluencerConsumer(channel),
       startOrderConsumer(channel),
-      startGigRequestConsumer(channel)
+      startGigRequestConsumer(channel),
+      consumeChatMessages(channel)
     ])
 
     logger.info("Worker started successfully");
@@ -42,6 +45,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-
-
-

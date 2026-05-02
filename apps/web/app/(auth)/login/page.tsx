@@ -8,8 +8,7 @@ import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
-
-
+import AuthNavbar from "@/components/AuthNavbar";
 
 function LoginForm() {
   const router = useRouter();
@@ -71,16 +70,10 @@ function LoginForm() {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 relative">
-      <Link
-        href="/"
-        className="absolute top-8 left-8 flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors group"
-      >
-        <div className="p-2 rounded-full bg-white shadow-sm group-hover:shadow transition-all">
-          <ArrowLeft className="w-5 h-5" />
-        </div>
-        <span className="font-medium text-sm">Back</span>
-      </Link>
+    <div className="min-h-screen bg-[#F9FAFB] font-sans">
+      <AuthNavbar />
+      
+      <main className="pt-24 pb-20 px-4 flex items-center justify-center min-h-screen">
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -215,6 +208,7 @@ function LoginForm() {
           Secure login · Data protected
         </p>
       </motion.div>
+      </main>
     </div>
   );
 }

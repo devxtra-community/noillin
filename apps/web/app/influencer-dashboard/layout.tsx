@@ -31,7 +31,21 @@ export default function InfluencerDashboardLayout({
     const { user, clearAuth } = useAuthStore();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [profile, setProfile] = useState<{ fullName?: string; profileImageUrl?: string; companyName?: string } | null>(null);
+    const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
+    // Fetch real profile data for name & photo
+    useEffect(() => {
+        setIsLoadingProfile(true);
+        api.get("/profile/get_profile")
+            .then((res) => setProfile(res.data.data))
+            .catch(() => {}) // silently fail — fallback to auth store values
+            .finally(() => setIsLoadingProfile(false));
+    }, []);
+
+    const rawDisplayName = profile?.fullName || user?.fullName || user?.email?.split("@")[0] || "User";
+    const displayName = rawDisplayName.trim() || "User";
+    const profileImage = (profile?.profileImageUrl || user?.profileImageUrl || user?.profileImage || "").trim() || null;
 
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -141,8 +155,43 @@ export default function InfluencerDashboardLayout({
                             <Menu className="w-6 h-6" />
                         </button>
 
-                        <div className="flex items-center gap-6 ml-auto">
-                            <NotificationBell />
+                        <div className="relative ml-auto" ref={dropdownRef}>
+                            <button
+                                onClick={() => setShowLogoutModal(!showLogoutModal)}
+                                className="flex items-center gap-3 group focus:outline-none"
+                            >
+                                <div className="text-right hidden sm:block min-w-[80px]">
+                                    {isLoadingProfile ? (
+                                        <div className="space-y-1">
+                                            <div className="h-4 w-24 bg-gray-100 animate-pulse rounded"></div>
+                                            <div className="h-3 w-16 bg-gray-50 animate-pulse rounded ml-auto"></div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <p className="text-sm font-bold text-gray-900">{displayName}</p>
+                                            <p className="text-xs text-gray-500 font-medium">Active Member</p>
+                                        </>
+                                    )}
+                                </div>
+                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all overflow-hidden relative">
+                                    {isLoadingProfile ? (
+                                        <div className="absolute inset-0 bg-gray-100 animate-pulse"></div>
+                                    ) : profileImage ? (
+                                        <img 
+                                            src={profileImage} 
+                                            alt={displayName} 
+                                            className="w-full h-full object-cover"
+                                            referrerPolicy="no-referrer"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                (e.target as HTMLImageElement).parentElement!.classList.add('bg-emerald-100');
+                                            }}
+                                        />
+                                    ) : (
+                                        displayName.charAt(0).toUpperCase()
+                                    )}
+                                </div>
+                            </button>
 
                             <div className="relative" ref={dropdownRef}>
                                 <button

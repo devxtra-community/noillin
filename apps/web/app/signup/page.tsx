@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 import api from "@/lib/axios.client";
-
+import { useAuthStore } from "@/store/auth.store";
+import SetupNavbar from "@/components/SetupNavbar";
 
 function SignupForm() {
   const [role, setRole] = useState<"BRAND" | "INFLUENCER">("BRAND");
@@ -20,7 +21,6 @@ function SignupForm() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,28 +58,22 @@ function SignupForm() {
         role: role,
       };
 
-      const response = await api.post("/auth/signup", payload);
+      await api.post("/auth/signup", payload);
+
+      // Store a pending user in auth store so profile-setup knows the role & name
+      useAuthStore.getState().setAuth("", {
+        id: "pending",
+        email: formData.email,
+        fullName: formData.fullName,
+        role: role,
+        status: "PENDING",
+      });
 
       const targetEmail = encodeURIComponent(formData.email);
       router.push(`/verify-otp?email=${targetEmail}&type=signup`);
-
-      if (response.data.accessToken) {
-        // localStorage.setItem("accessToken", response.data.accessToken);
-        // window.location.href = "/admindashboard";
-        setFormData({
-          fullName: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-          businessInfo: ""
-        });
-
-        router.push("/profile-setup");
-      }
-
-      setSuccess(true);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Signup failed. Please try again.";
+      const errorObj = err as { response?: { data?: { message?: string } } };
+      const errorMessage = errorObj.response?.data?.message || (err instanceof Error ? err.message : "Signup failed. Please try again.");
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -87,16 +81,10 @@ function SignupForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 relative">
-      <Link
-        href="/"
-        className="absolute top-8 left-8 flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors group"
-      >
-        <div className="p-2 rounded-full bg-white shadow-sm group-hover:shadow transition-all">
-          <ArrowLeft className="w-5 h-5" />
-        </div>
-        <span className="font-medium text-sm">Back</span>
-      </Link>
+    <div className="min-h-screen bg-[#F9FAFB] font-sans">
+      <SetupNavbar step={1} />
+      
+      <main className="pt-24 pb-20 px-4 flex items-center justify-center min-h-screen">
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -106,32 +94,11 @@ function SignupForm() {
       >
 
         <div className="text-center mb-3">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
-            {success ? "Registration Successful" : "Welcome Back"}
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {success
-              ? "Your account has been created successfully."
-              : "Join as a Brand or Influencer"}
-          </p>
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Welcome Back</h1>
+          <p className="text-sm text-gray-500 mt-1">Join as a Brand or Influencer</p>
         </div>
 
-        {success ? (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-center">
-            <div className="text-green-600 font-medium mb-2">
-              Application Submitted
-            </div>
-            <p className="text-sm text-gray-600">
-              Please wait for admin approval. We will notify you via email once your account is verified.
-            </p>
-            <button
-              onClick={() => setSuccess(false)}
-              className="mt-4 text-sm text-green-700 hover:text-green-800 font-medium underline"
-            >
-              Back to Sign Up
-            </button>
-          </div>
-        ) : (
+        {(
           <>
             <div className="flex bg-gray-100 rounded-xl p-1 mb-8 relative">
               <motion.div
@@ -279,6 +246,7 @@ function SignupForm() {
           </>
         )}
       </motion.div>
+      </main>
     </div>
   );
 }

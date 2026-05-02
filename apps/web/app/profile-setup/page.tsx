@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 
-import Navbar from "@/components/Navbar";
+import SetupNavbar from "@/components/SetupNavbar";
+import SetupFooter from "@/components/SetupFooter";
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
 import { uploadToS3 } from "@/lib/s3-uploads";
@@ -196,14 +197,29 @@ export default function ProfileSetupPage() {
         }
     };
 
-    if (!user) {
-        return <div className="p-6 text-center pt-20">Loading your session...</div>;
+    const isInitialized = useAuthStore((state) => state.isInitialized);
+
+    useEffect(() => {
+        if (isInitialized && !user) {
+            router.push("/login");
+        }
+    }, [isInitialized, user, router]);
+
+    if (!isInitialized || !user) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600 font-medium">Loading your session...</p>
+                </div>
+            </div>
+        );
     }
 
 
     return (
         <div className="min-h-screen bg-[#F9FAFB] font-sans selection:bg-green-100 selection:text-green-900">
-            <Navbar />
+            <SetupNavbar step={3} />
 
             <main className="pt-24 pb-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-3xl mx-auto">
@@ -509,18 +525,7 @@ export default function ProfileSetupPage() {
                 </div>
             )}
 
-            {/* Simple Footer */}
-            <footer className="bg-white border-t border-gray-200 py-12">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center bg-white">
-                    <div className="flex items-center gap-2 mb-4 md:mb-0">
-                        <div className="w-6 h-6 bg-gray-200 rounded-md"></div>
-                        <span className="text-lg font-bold text-gray-900">Noillin</span>
-                    </div>
-                    <div className="text-gray-500 text-sm">
-                        © 2026 Noillin Inc. All rights reserved.
-                    </div>
-                </div>
-            </footer>
+            <SetupFooter />
         </div>
     );
 }

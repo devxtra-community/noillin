@@ -229,50 +229,52 @@ await webPushService.sendNotification(
     }
   }
 }
-    else if (job.name === "new-message") {
-      const { receiverId, conversationId } = job.data;
-      
+    else if (job.name === "new-message" || job.name === "NEW_MESSAGE") {
+      const userId = job.data.userId || job.data.receiverId;
+      const conversationId = job.data.metadata?.conversationId || job.data.conversationId;
+      const title = job.data.title || "New Message";
+      const messageText = job.data.message || "New message received";
+      const metadata = job.data.metadata || { conversationId };
+
       const notification = await NotificationModel.create({
-        userId: receiverId,
+        userId,
         type: "NEW_MESSAGE",
-        title: "New Message",
-        message: "New message received",
-        metadata: {
-          conversationId: conversationId
-        }
+        title,
+        message: messageText,
+        metadata
       });
       logger.info(`Saved in-app notification for message in ${conversationId}`);
-      await emitRealtimeNotification(receiverId, notification);
+      await emitRealtimeNotification(userId, notification);
 
       // Web Push for messages
       if (process.env.ENABLE_WEB_PUSH === "true") {
-        const subscriptions = await PushSubscriptionModel.find({ userId: receiverId });
+        const subscriptions = await PushSubscriptionModel.find({ userId });
         console.log(`Found ${subscriptions.length} subscriptions for message notification`);
         
         const pushPayload = {
-          title: "New Message",
-          body: "You have received a new message",
+          title,
+          body: messageText,
           url: `/messages/${conversationId}`
         };
 
         for (const sub of subscriptions) {
-  if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
-    console.warn("Skipping invalid subscription:", sub.endpoint);
-    continue;
-  }
+          if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+            console.warn("Skipping invalid subscription:", sub.endpoint);
+            continue;
+          }
 
-  console.log("Sending push to:", sub.endpoint);
+          console.log("Sending push to:", sub.endpoint);
 
-  const success = await webPushService.sendNotification(
-    {
-      endpoint: sub.endpoint,
-      keys: {
-        p256dh: sub.keys.p256dh,
-        auth: sub.keys.auth,
-      },
-    },
-    pushPayload
-  );
+          await webPushService.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: {
+                p256dh: sub.keys.p256dh,
+                auth: sub.keys.auth,
+              },
+            },
+            pushPayload
+          );
         }
       }
     }

@@ -57,6 +57,15 @@ class PendingSignupRepository {
     return PendingSignup.findOneAndDelete({ email });
   }
 
+  // ================= UPDATE PROFILE DATA =================
+  updateProfileData(email: string, profileData: Record<string, unknown>) {
+    return PendingSignup.findOneAndUpdate(
+      { email },
+      { $set: { profileData } },
+      { new: true }
+    );
+  }
+
   // ================= DELETE MANY (FOR CLEANUP) =================
   deleteMany(filter: Record<string, unknown>): Promise<unknown> {
     return PendingSignup.deleteMany(filter);
