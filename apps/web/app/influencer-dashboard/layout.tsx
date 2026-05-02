@@ -19,7 +19,7 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import RoleGuard from "@/components/rbac/RoleGuard";
 import api from "@/lib/axios.client";
-import NotificationBell from "@/components/NotificationBell";
+
 
 export default function InfluencerDashboardLayout({
     children,
@@ -39,7 +39,7 @@ export default function InfluencerDashboardLayout({
         setIsLoadingProfile(true);
         api.get("/profile/get_profile")
             .then((res) => setProfile(res.data.data))
-            .catch(() => {}) // silently fail — fallback to auth store values
+            .catch(() => { }) // silently fail — fallback to auth store values
             .finally(() => setIsLoadingProfile(false));
     }, []);
 
@@ -177,9 +177,9 @@ export default function InfluencerDashboardLayout({
                                     {isLoadingProfile ? (
                                         <div className="absolute inset-0 bg-gray-100 animate-pulse"></div>
                                     ) : profileImage ? (
-                                        <img 
-                                            src={profileImage} 
-                                            alt={displayName} 
+                                        <img
+                                            src={profileImage}
+                                            alt={displayName}
                                             className="w-full h-full object-cover"
                                             referrerPolicy="no-referrer"
                                             onError={(e) => {
