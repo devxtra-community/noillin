@@ -5,6 +5,7 @@ import { ORDER_CREATED_EVENT } from "../queue/events.js";
 import { OrderModel } from "../models/order.model.js";
 import { GigModel } from "../models/gig.model.js";
 import { GigRequestModel } from "../models/gig-request.model.js";
+import { notificationQueue } from "../queue/notification.queue.js";
 
 // ✅ Define input type
 export interface CreateOrderInput {
@@ -90,14 +91,23 @@ export const createOrderService = async (data: CreateOrderInput) => {
     influencerId: order.influencerId.toString(),
     amount: order.amount,
   });
-  console.log("🚀 order.created event published");
-  await publishEvent("order.created", {
-    orderId: order._id.toString(),
-    buyerId: order.buyerId,
-    influencerId: order.influencerId,
-    amount: order.amount,
+
+  console.log("Adding ORDER_CREATED notification job", { userId: order.influencerId.toString(), orderId: order._id.toString() });
+
+  const job = await notificationQueue.add("new-notification", {
+    userId: order.influencerId.toString(),
+    type: "ORDER_CREATED",
+    title: "New Order",
+    message: "You have received a new order",
+    metadata: {
+      orderId: order._id.toString(),
+      senderId: order.buyerId.toString()
+    }
   });
-  console.log("🚀 order.created event published");
+
+  console.log("Notification job added", job.id);
+
+  console.log("🚀 order.created event published and notification queued");
   return {
     orderId: order._id,
     amount: order.amount,

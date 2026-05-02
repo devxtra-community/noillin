@@ -10,7 +10,7 @@ const notificationSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["gig_request", "system", "GIG_REQUEST", "NEW_MESSAGE"], // Extensible for later
+      enum: ["gig_request", "system", "GIG_REQUEST", "NEW_MESSAGE", "ORDER_CREATED", "USER_PENDING_APPROVAL", "USER_APPROVED"], // Extensible for later
       default: "system",
     },
     title: {

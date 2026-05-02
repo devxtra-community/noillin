@@ -11,6 +11,7 @@ import { startInfluencerConsumer } from './consumers/influencer.consumer';
 import { startOrderConsumer } from './consumers/order.consumer';
 import { startGigRequestConsumer } from './consumers/gig-request.consumer';
 import { consumeChatMessages } from './consumers/chat.consumer';
+import { startUserConsumer } from './consumers/user.consumer';
 
 
 async function connectDB() {
@@ -34,7 +35,8 @@ async function bootstrap() {
       startInfluencerConsumer(channel),
       startOrderConsumer(channel),
       startGigRequestConsumer(channel),
-      consumeChatMessages(channel)
+      consumeChatMessages(channel),
+      startUserConsumer(channel)
     ])
 
     logger.info("Worker started successfully");

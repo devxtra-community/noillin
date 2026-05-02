@@ -9,6 +9,7 @@ import { userRepository } from "../repositories/user.repository.js"
 import { pendingSignupRepository } from "../repositories/Signup.repository.js";
 import { logger } from "../utils/logger.js";
 import { sendOtpEmail } from "../utils/sendotpEmail.js";
+import { getChannel } from "../queue/rabbit.js";
 
 
 
@@ -362,6 +363,16 @@ export const verifySignupOtpService = async (
   pending.emailOtpExpiresAt = null;
 
   await pending.save();
+
+  try {
+    getChannel().sendToQueue(
+      "user.created",
+      Buffer.from(JSON.stringify({ userId: pending._id.toString(), email: pending.email, fullName: pending.fullName, role: pending.role })),
+      { persistent: true }
+    );
+  } catch (err) {
+    logger.error("Failed to publish user.created event", err);
+  }
 };
 
 
