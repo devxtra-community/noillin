@@ -19,9 +19,12 @@ export default function RoleGuard({
     redirectTo,
 }: RoleGuardProps) {
     const router = useRouter();
-    const { user, accessToken } = useAuthStore();
+    const { user, accessToken, isInitialized } = useAuthStore();
 
     useEffect(() => {
+        // Wait for hydration to finish
+        if (!isInitialized) return;
+
         // If not authenticated, redirect to login
         if (!accessToken) {
             const loginPath = allowedRoles.includes("ADMIN") ? "/adminAuth/login" : "/login";
@@ -42,9 +45,9 @@ export default function RoleGuard({
             router.push("/admindashboard");
             return;
         }
-    }, [accessToken, user, allowedRoles, adminLevel, router, redirectTo]);
+    }, [accessToken, user, allowedRoles, adminLevel, router, redirectTo, isInitialized]);
 
-    if (!accessToken || !user || !allowedRoles.includes(user.role)) {
+    if (!isInitialized || !accessToken || !user || !allowedRoles.includes(user.role)) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="animate-pulse flex flex-col items-center gap-4">
