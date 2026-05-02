@@ -9,7 +9,6 @@ import Image from "next/image";
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
 
-import { cn } from "@/lib/utils";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
 import { uploadToS3 } from "@/lib/s3-uploads";

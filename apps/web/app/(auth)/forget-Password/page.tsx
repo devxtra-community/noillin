@@ -38,7 +38,7 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen bg-[#F9FAFB] font-sans">
       <SetupNavbar step={1} mode="reset" />
-      
+
       <main className="pt-24 pb-20 px-4 flex items-center justify-center min-h-screen">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -51,7 +51,7 @@ export default function ForgotPassword() {
               Forgot Password?
             </h2>
             <p className="text-sm text-gray-500">
-              No worries, we'll send you reset instructions via email.
+              No worries, we&apos;ll send you reset instructions via email.
             </p>
           </div>
 
@@ -61,7 +61,7 @@ export default function ForgotPassword() {
                 {error}
               </div>
             )}
-            
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Email Address
