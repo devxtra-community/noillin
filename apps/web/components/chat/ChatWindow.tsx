@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { io, Socket } from "socket.io-client";
-import { MoreVertical, Info, Check, X, MessageSquare, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { MoreVertical, Info, Check, X, MessageSquare, Calendar, ChevronLeft, ChevronRight, UploadCloud, FileText, Trash2, Loader2 } from "lucide-react";
 import Image from "next/image";
 
 import { MessageBubble } from "./MessageBubble";
@@ -12,6 +12,7 @@ import { ChatInput } from "./ChatInput";
 import { cn } from "@/lib/utils";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
+import { uploadToS3 } from "@/lib/s3-uploads";
 
 export interface Message {
   _id: string;
@@ -67,8 +68,8 @@ export function ChatWindow({
 
   // Deliverable State
   const [isSubmittingDeliverable, setIsSubmittingDeliverable] = useState(false);
-  const [deliverableUrl, setDeliverableUrl] = useState("");
-  const [deliverableMediaType, setDeliverableMediaType] = useState<"VIDEO" | "IMAGE">("VIDEO");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [activeOrder, setActiveOrder] = useState<Record<string, unknown> | null>(null);
 
   // --- Custom Calendar Logic ---
@@ -290,22 +291,19 @@ export function ChatWindow({
   };
 
   const handleSendDeliverable = async () => {
-    if (!deliverableUrl) return;
+    if (!selectedFile || !activeOrder?._id) return;
     try {
-      const res = await api.post("/chat/submit-deliverable", {
-        gigRequestId,
-        deliverableData: { url: deliverableUrl, mediaType: deliverableMediaType }
-      });
-      const savedMessage = res.data.message;
-      if (socketRef.current) {
-        socketRef.current.emit("send_message", { message: savedMessage });
-      }
-      setMessages((prev) => [...prev, savedMessage]);
+      setUploading(true);
+      const url = await uploadToS3(selectedFile, "deliverables");
+      await api.patch(`/orders/submit/${activeOrder._id}`, { deliverableUrl: url });
+      setActiveOrder((prev) => prev ? { ...prev, workStatus: "SUBMITTED", deliverableUrl: url } : prev);
       setIsSubmittingDeliverable(false);
-      setDeliverableUrl("");
+      setSelectedFile(null);
     } catch (err) {
-      console.error("Failed to send deliverable:", err);
-      alert("Failed to send deliverable. Please ensure you have an active order.");
+      console.error("Failed to upload deliverable:", err);
+      alert("Failed to upload file. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -576,54 +574,64 @@ export function ChatWindow({
       {/* Deliverable Submission Modal */}
       {isSubmittingDeliverable && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsSubmittingDeliverable(false)} />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => { setIsSubmittingDeliverable(false); setSelectedFile(null); }} />
           <div className="bg-white rounded-[40px] w-full max-w-[440px] shadow-2xl relative z-10 overflow-hidden p-8 animate-in fade-in zoom-in-95 duration-300">
-            <h3 className="text-2xl font-black text-gray-900 tracking-tight mb-2">Submit Deliverable</h3>
-            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-8">Secure your payment by sending the work</p>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-2xl font-black text-gray-900 tracking-tight">Submit Final Work</h3>
+              <button onClick={() => { setIsSubmittingDeliverable(false); setSelectedFile(null); }} className="p-2.5 hover:bg-gray-100 rounded-full transition-colors">
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-8">Upload your deliverable from your device</p>
 
-            <div className="space-y-6">
-              <div>
-                <label className="block text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Media URL</label>
-                <input
-                  type="text"
-                  placeholder="Direct link to video or image..."
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                  value={deliverableUrl}
-                  onChange={(e) => setDeliverableUrl(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-black text-gray-400 uppercase tracking-[0.2em] mb-3">Content Type</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setDeliverableMediaType("VIDEO")}
-                    className={cn("py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all",
-                      deliverableMediaType === "VIDEO" ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20" : "bg-white text-gray-500 border-gray-100 hover:border-blue-200"
-                    )}
-                  >
-                    Video
-                  </button>
-                  <button
-                    onClick={() => setDeliverableMediaType("IMAGE")}
-                    className={cn("py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest border transition-all",
-                      deliverableMediaType === "IMAGE" ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/20" : "bg-white text-gray-500 border-gray-100 hover:border-blue-200"
-                    )}
-                  >
-                    Image
-                  </button>
+            <div className="flex flex-col gap-4">
+              {/* Drag-and-drop upload zone */}
+              <div className="relative">
+                <div className={`border-2 border-dashed rounded-[24px] p-8 transition-all flex flex-col items-center justify-center gap-3 ${selectedFile ? "border-emerald-500 bg-emerald-50" : "border-gray-200 hover:border-emerald-400 hover:bg-gray-50/50"}`}>
+                  {selectedFile ? (
+                    <>
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center text-white mb-1 shadow-lg shadow-emerald-200">
+                        <FileText className="w-6 h-6" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-bold text-gray-900 truncate max-w-[240px] mb-1">{selectedFile.name}</p>
+                        <p className="text-[10px] font-bold text-emerald-600 uppercase">Ready to submit ({Math.round(selectedFile.size / 1024)} KB)</p>
+                      </div>
+                      <button
+                        onClick={() => setSelectedFile(null)}
+                        className="absolute top-4 right-4 p-1.5 hover:bg-gray-200 rounded-full transition-all text-gray-400"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 mb-1">
+                        <UploadCloud className="w-6 h-6" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm font-bold text-gray-900 mb-1">Upload Deliverable</p>
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Supports common media types</p>
+                      </div>
+                      <input
+                        type="file"
+                        onChange={(e) => e.target.files?.[0] && setSelectedFile(e.target.files[0])}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                    </>
+                  )}
                 </div>
               </div>
 
-              <div className="pt-4">
-                <button
-                  onClick={handleSendDeliverable}
-                  disabled={!deliverableUrl}
-                  className="w-full py-5 bg-blue-600 text-white rounded-[24px] font-black text-[16px] shadow-xl shadow-blue-500/20 hover:bg-blue-700 disabled:opacity-50 transition-all uppercase tracking-[0.2em]"
-                >
-                  Send to Brand
-                </button>
-              </div>
+              <button
+                disabled={uploading || !selectedFile}
+                onClick={handleSendDeliverable}
+                className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white font-bold py-5 px-4 rounded-[20px] text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-200/50"
+              >
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
+                {uploading ? "Uploading..." : "Submit Output for Approval"}
+              </button>
+              <p className="text-[10px] text-gray-400 font-bold text-center uppercase tracking-widest px-4 leading-relaxed">Once submitted, the brand will review and release funds to your account.</p>
             </div>
           </div>
         </div>
