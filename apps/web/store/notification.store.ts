@@ -6,7 +6,7 @@ export interface Notification {
   _id: string;
   message: string;
   read: boolean;
-  type: "GIG_REQUEST" | "GIG_ACCEPTED" | "GIG_REJECTED" | "NEW_MESSAGE";
+  type: "GIG_REQUEST" | "GIG_ACCEPTED" | "GIG_REJECTED" | "NEW_MESSAGE" | "ORDER_CREATED";
   metadata?: {
     connectionId?: string;
     gigRequestId?: string;

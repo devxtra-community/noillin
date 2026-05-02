@@ -242,6 +242,16 @@ if (user.role === "INFLUENCER") {
 
   await pendingSignupRepository.updateStatus(email, "APPROVED");
 
+  try {
+    getChannel().sendToQueue(
+      "user.approved",
+      Buffer.from(JSON.stringify({ userId: user._id.toString(), email: user.email, fullName: pending.fullName, role: user.role })),
+      { persistent: true }
+    );
+  } catch (err) {
+    // ignore
+  }
+
   return { message: "Signup approved successfully" };
 };
 
