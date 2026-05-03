@@ -71,32 +71,80 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
             )
         )}
       >
-        {isSystem ? (
-          <div className="flex flex-col w-full text-left">
-            <div className="p-5 bg-gradient-to-br from-emerald-50/50 to-emerald-100/30">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[11px] font-black uppercase tracking-widest text-emerald-600/80">Escrow Success</span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold border text-emerald-600 bg-white border-emerald-200 shadow-sm">
-                  VERIFIED
-                </span>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-emerald-500">
-                    <span className="text-lg">🔒</span>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">System Message</p>
-                    <p className="text-sm font-bold text-gray-900 leading-snug">{message.content}</p>
+        {isSystem ? (() => {
+          let title = "System Update";
+          let subtitle = "Status Update";
+          let icon = "🔔";
+          let colorClass = "gray";
+
+          const txt = message.content.toLowerCase();
+          if (txt.includes("escrow") || txt.includes("secured")) {
+            title = "Escrow Success";
+            icon = "🔒";
+            colorClass = "emerald";
+            subtitle = "Project deliverables can officially begin";
+          } else if (txt.includes("released") || txt.includes("paid")) {
+            title = "Funds Released";
+            icon = "💸";
+            colorClass = "blue";
+            subtitle = "Payment transferred successfully";
+          } else if (txt.includes("submitted") || txt.includes("review")) {
+            title = "Work Submitted";
+            icon = "📤";
+            colorClass = "purple";
+            subtitle = "Waiting for brand review";
+          } else if (txt.includes("approved")) {
+            title = "Work Approved";
+            icon = "✅";
+            colorClass = "emerald";
+            subtitle = "Funds are now available";
+          } else if (txt.includes("rejected") || txt.includes("revision") || txt.includes("changes")) {
+            title = "Revision Requested";
+            icon = "🔄";
+            colorClass = "rose";
+            subtitle = "Action required from influencer";
+          }
+
+          const gradients: Record<string, string> = {
+            emerald: "from-emerald-50/50 to-emerald-100/30",
+            blue: "from-blue-50/50 to-blue-100/30",
+            purple: "from-purple-50/50 to-purple-100/30",
+            rose: "from-rose-50/50 to-rose-100/30",
+            gray: "from-gray-50/50 to-gray-100/30"
+          };
+          const textTitles: Record<string, string> = { emerald: "text-emerald-600/80", blue: "text-blue-600/80", purple: "text-purple-600/80", rose: "text-rose-600/80", gray: "text-gray-600/80" };
+          const textBadges: Record<string, string> = { emerald: "text-emerald-600 border-emerald-200", blue: "text-blue-600 border-blue-200", purple: "text-purple-600 border-purple-200", rose: "text-rose-600 border-rose-200", gray: "text-gray-600 border-gray-200" };
+          const bgIcons: Record<string, string> = { emerald: "text-emerald-500", blue: "text-blue-500", purple: "text-purple-500", rose: "text-rose-500", gray: "text-gray-500" };
+          const bgFooters: Record<string, string> = { emerald: "bg-emerald-50/50 border-emerald-100", blue: "bg-blue-50/50 border-blue-100", purple: "bg-purple-50/50 border-purple-100", rose: "bg-rose-50/50 border-rose-100", gray: "bg-gray-50/50 border-gray-100" };
+          const textFooters: Record<string, string> = { emerald: "text-emerald-600/60", blue: "text-blue-600/60", purple: "text-purple-600/60", rose: "text-rose-600/60", gray: "text-gray-600/60" };
+
+          return (
+            <div className="flex flex-col w-full text-left">
+              <div className={`p-5 bg-gradient-to-br ${gradients[colorClass]}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <span className={`text-[11px] font-black uppercase tracking-widest ${textTitles[colorClass]}`}>{title}</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-white shadow-sm ${textBadges[colorClass]}`}>
+                    SYSTEM
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center ${bgIcons[colorClass]}`}>
+                      <span className="text-lg">{icon}</span>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">System Notification</p>
+                      <p className="text-sm font-bold text-gray-900 leading-snug">{message.content}</p>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div className={`p-4 border-t ${bgFooters[colorClass]}`}>
+                <p className={`text-[10px] text-center font-black uppercase tracking-widest ${textFooters[colorClass]}`}>{subtitle}</p>
+              </div>
             </div>
-            <div className="p-4 bg-emerald-50/50 border-t border-emerald-100">
-              <p className="text-[10px] text-center font-black text-emerald-600/60 uppercase tracking-widest">Project deliverables can officially begin</p>
-            </div>
-          </div>
-        ) : isProposal && pData ? (
+          );
+        })() : isProposal && pData ? (
           <div className="flex flex-col">
             <div className="p-5 bg-gradient-to-br from-gray-50 to-gray-100/50">
               <div className="flex items-center justify-between mb-4">

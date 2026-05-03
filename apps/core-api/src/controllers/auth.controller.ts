@@ -69,7 +69,8 @@ export const loginController = async (
     const data = await loginService(email, password);
 
     // Set refresh token as HttpOnly cookie
-    res.cookie("refreshToken", data.refreshToken, {
+    const cookieName = `refreshToken_${data.user.role}`;
+    res.cookie(cookieName, data.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -99,7 +100,12 @@ export const refreshTokenController = async (
   next: NextFunction
 ) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const { role } = req.body;
+    let refreshToken = role ? req.cookies[`refreshToken_${role}`] : null;
+
+    if (!refreshToken) {
+      refreshToken = req.cookies.refreshToken_BRAND || req.cookies.refreshToken_INFLUENCER || req.cookies.refreshToken;
+    }
 
     if (!refreshToken) {
       const err: HttpError = new Error("Refresh token missing");
@@ -110,7 +116,8 @@ export const refreshTokenController = async (
     const result = await refreshTokenService(refreshToken);
 
     // Set new refresh token as HttpOnly cookie
-    res.cookie("refreshToken", result.refreshToken, {
+    const cookieName = `refreshToken_${result.user.role}`;
+    res.cookie(cookieName, result.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
@@ -149,12 +156,17 @@ export const logoutController = async (
 
     const result = await logoutService(userId);
 
-    // Clear refresh token cookie
-    res.clearCookie("refreshToken", {
+    // Clear refresh token cookies
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-    });
+      sameSite: "strict" as const,
+    };
+    if (req.user?.role) {
+      res.clearCookie(`refreshToken_${req.user.role}`, cookieOptions);
+    }
+    // Also clear generic for backward compatibility
+    res.clearCookie("refreshToken", cookieOptions);
 
     res.status(200).json({
       success: true,

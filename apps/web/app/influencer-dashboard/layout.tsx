@@ -85,7 +85,7 @@ export default function InfluencerDashboardLayout({
     ];
 
     return (
-        <RoleGuard allowedRoles={["INFLUENCER", "BRAND"]}>
+        <RoleGuard allowedRoles={["INFLUENCER"]}>
             <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
 
                 {/* Mobile Sidebar Overlay */}
@@ -193,42 +193,24 @@ export default function InfluencerDashboardLayout({
                                 </div>
                             </button>
 
-                            <div className="relative" ref={dropdownRef}>
-                                <button
-                                    onClick={() => setShowLogoutModal(!showLogoutModal)}
-                                    className="flex items-center gap-3 group focus:outline-none"
-                                >
-                                    <div className="text-right hidden sm:block">
-                                        <p className="text-sm font-bold text-gray-900">
-                                            {user?.role === "INFLUENCER" ? "Influencer User" : "Brand User"}
+                            {showLogoutModal && (
+                                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50">
+                                    <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                                        <p className="text-sm text-gray-900 font-bold truncate">{user?.email}</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">
+                                            {user?.role === "INFLUENCER" ? "Influencer" : "Brand"} Dashboard
                                         </p>
-                                        <p className="text-xs text-gray-500 font-medium">Active Member</p>
                                     </div>
 
-                                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all">
-                                        {user?.email?.charAt(0).toUpperCase() || "I"}
-                                    </div>
-                                </button>
-
-                                {showLogoutModal && (
-                                    <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50">
-                                        <div className="px-4 py-3 border-b border-gray-50 mb-1">
-                                            <p className="text-sm text-gray-900 font-bold truncate">{user?.email}</p>
-                                            <p className="text-xs text-gray-500 mt-0.5">
-                                                {user?.role === "INFLUENCER" ? "Influencer" : "Brand"} Dashboard
-                                            </p>
-                                        </div>
-
-                                        <button
-                                            onClick={handleLogout}
-                                            className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium"
-                                        >
-                                            <LogOut className="w-4 h-4" />
-                                            Sign Out
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        Sign Out
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </header>
 
