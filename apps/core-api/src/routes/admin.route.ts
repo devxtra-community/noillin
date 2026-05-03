@@ -18,12 +18,14 @@ import {
   pauseGigController,
   ignoreGigController,
   rejectGigController,
-  getPlatformRevenueController
+  getPlatformRevenueController,
+  getBookingsAuditController
 } from "../controllers/admin.controller.js";
 
 const router: Router = Router();
 
 router.get("/revenue", authenticate, getPlatformRevenueController);
+router.get("/bookings", authenticate, getBookingsAuditController);
 
 router.get("/signup", getAllpendingSignupController);
 router.post("/signup/approve", authenticate, approveSignupController);

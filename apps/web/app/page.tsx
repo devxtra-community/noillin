@@ -130,7 +130,7 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
 
               <div className="flex items-center gap-5 mt-auto relative z-10 pt-6 border-t border-slate-50">
                 <div className="w-14 h-14 rounded-full overflow-hidden relative border-4 border-white shadow-lg">
-                  <Image fill src={`https://i.pravatar.cc/150?img=${t.img}`} alt={t.name} className="object-cover" />
+                  <Image fill src={`https://i.pravatar.cc/150?img=${t.img}`} alt={t.name || "Testimonial Avatar"} className="object-cover" />
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 text-base">{t.name}</h4>

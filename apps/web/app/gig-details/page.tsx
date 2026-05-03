@@ -8,11 +8,13 @@ import { motion } from "framer-motion";
 import {
     Star, CheckCircle2, ChevronRight, Heart,
     MessageSquare, Check,
-    Share, ShieldCheck,
+    ShieldCheck,
     BarChart, Users, Instagram, Info,
-    AlertCircle, Loader2, Zap, Clock, X
+    AlertCircle, Loader2, Zap, Clock, X, Flag
 } from "lucide-react";
 
+
+import { ReportingModal } from "@/components/shared/ReportingModal";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
@@ -61,6 +63,7 @@ function GigDetailsContent() {
     const [isRequestSuccess, setIsRequestSuccess] = useState(false);
     const [alreadyRequested, setAlreadyRequested] = useState(false);
     const [noteText, setNoteText] = useState("");
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     useEffect(() => {
         if (!id) return;
@@ -229,7 +232,7 @@ function GigDetailsContent() {
                         {/* Header */}
                         <div>
                             <div className="flex items-center gap-4 mb-5">
-                                <Image src={avatar} alt={influencer.fullName} width={64} height={64} className="rounded-full object-cover border border-gray-100 shadow-sm" />
+                                <Image src={avatar} alt={influencer.fullName || "Influencer"} width={64} height={64} className="rounded-full object-cover border border-gray-100 shadow-sm" />
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h1 className="text-xl font-bold text-gray-900">{influencer.fullName}</h1>
@@ -260,13 +263,26 @@ function GigDetailsContent() {
                                     <Zap className="w-4 h-4 text-emerald-500 mr-2" />
                                     Fast Delivery Available
                                 </span>
-                                <span className="flex items-center text-gray-700 bg-white px-3 py-1.5 rounded-full border border-gray-200 cursor-pointer hover:border-gray-300">
+                                {/* <span className="flex items-center text-gray-700 bg-white px-3 py-1.5 rounded-full border border-gray-200 cursor-pointer hover:border-gray-300">
                                     <Heart className="w-4 h-4 text-gray-400 mr-2" />
                                     Save
                                 </span>
                                 <span className="flex items-center text-gray-700 bg-white px-3 py-1.5 rounded-full border border-gray-200 cursor-pointer hover:border-gray-300">
                                     <Share className="w-4 h-4 text-gray-400 mr-2" />
                                     Share
+                                </span> */}
+                                <span
+                                    onClick={() => {
+                                        if (!user) {
+                                            router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+                                            return;
+                                        }
+                                        setIsReportModalOpen(true);
+                                    }}
+                                    className="flex items-center text-rose-600 bg-rose-50/50 px-3 py-1.5 rounded-full border border-rose-100 cursor-pointer hover:bg-rose-100"
+                                >
+                                    <Flag className="w-4 h-4 mr-2" />
+                                    Report
                                 </span>
                             </div>
                         </div>
@@ -497,6 +513,12 @@ function GigDetailsContent() {
                 </div>
             )}
 
+            <ReportingModal
+                isOpen={isReportModalOpen}
+                onClose={() => setIsReportModalOpen(false)}
+                entityId={gig._id}
+                entityType="GIG"
+            />
         </div>
     );
 }

@@ -5,6 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { MoreVertical, Info, Check, X, MessageSquare, Calendar, ChevronLeft, ChevronRight, UploadCloud, FileText, Trash2, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { ShieldAlert } from "lucide-react";
+
+import { ReportingModal } from "../shared/ReportingModal";
 
 import { MessageBubble } from "./MessageBubble";
 import { ChatInput } from "./ChatInput";
@@ -70,6 +73,10 @@ export function ChatWindow({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [activeOrder, setActiveOrder] = useState<Record<string, unknown> | null>(null);
+
+  // Reporting State
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isOptionsOpen, setIsOptionsOpen] = useState(false);
 
   // --- Custom Calendar Logic ---
   const [viewDate, setViewDate] = useState(new Date());
@@ -398,9 +405,28 @@ export function ChatWindow({
             <p className="text-[13px] text-[#20B271] font-medium mt-0.5">Online</p>
           </div>
         </div>
-        <button className="p-2.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100/80 rounded-full transition-all">
-          <MoreVertical className="w-5 h-5" />
-        </button>
+        <div className="relative">
+          <button onClick={() => setIsOptionsOpen(!isOptionsOpen)} className="p-2.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100/80 rounded-full transition-all">
+            <MoreVertical className="w-5 h-5" />
+          </button>
+
+          {isOptionsOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50">
+              <div className="py-2">
+                <button
+                  onClick={() => {
+                    setIsOptionsOpen(false);
+                    setIsReportModalOpen(true);
+                  }}
+                  className="w-full px-4 py-3 text-left text-[11px] font-black text-rose-500 hover:bg-rose-50 flex items-center gap-2 uppercase tracking-widest transition-colors"
+                >
+                  <ShieldAlert size={14} />
+                  Report Issue
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Connection Banners */}
@@ -655,6 +681,13 @@ export function ChatWindow({
           </div>
         </div>
       )}
+      {/* Reporting Modal */}
+      <ReportingModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        entityId={activeOrder?._id as string || gigRequestId}
+        entityType={activeOrder?._id ? "ORDER" : "USER"}
+      />
     </div>
   );
 }

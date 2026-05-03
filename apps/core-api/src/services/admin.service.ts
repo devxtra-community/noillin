@@ -3,6 +3,15 @@ import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 import { GigModel } from "../models/gig.model.js";
 import { OrderModel } from "../models/order.model.js";
+import { ReportModel } from "../models/report.model.js";
+
+interface IPopulatedUser {
+    _id: mongoose.Types.ObjectId;
+    displayName: string;
+    email: string;
+    profileImage?: string;
+}
+
 export const getRecentActivityService = async (limit: number = 10) => {
     const fetchLimit = Math.ceil(limit / 2) + 2; // Fetch slightly more to ensure we get enough after sorting
 
@@ -72,7 +81,7 @@ export const getGigModerationStatsService = async () => {
     };
 };
 //=================PAUSE GIG=================
-import { ReportModel } from "../models/report.model.js";
+
 
 export const pauseGigService = async (
     gigId: string,
@@ -168,4 +177,44 @@ export const rejectGigService = async (
     }
 
     return gig;
+};
+
+export const getBookingsAuditService = async () => {
+    const orders = await OrderModel.find()
+        .populate("buyerId", "displayName email profileImage")
+        .populate("influencerId", "displayName email profileImage")
+        .sort({ createdAt: -1 });
+
+    // const totalOrders = orders.length; (removed as per ESLint unused warning)
+
+    const completedBookings = orders.filter(o => o.status === "COMPLETED").length;
+    const pendingPayments = orders.filter(o => o.status === "PENDING").length;
+    const activeEscrows = orders.filter(o => o.status === "IN_ESCROW").length;
+    const totalVolume = orders
+        .filter(o => o.status === "COMPLETED" || o.status === "IN_ESCROW")
+        .reduce((sum, o) => sum + (o.amount || 0), 0);
+
+    return {
+        metrics: {
+            completedBookings,
+            pendingPayments,
+            activeEscrows,
+            totalVolume
+        },
+        bookings: orders.map(o => ({
+            id: `#BK-${o._id.toString().slice(-5).toUpperCase()}`,
+            _id: o._id,
+            brand: (o.buyerId as unknown as IPopulatedUser)?.displayName || "Unknown Brand",
+            brandEmail: (o.buyerId as unknown as IPopulatedUser)?.email,
+            brandLogo: (o.buyerId as unknown as IPopulatedUser)?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent((o.buyerId as unknown as IPopulatedUser)?.displayName || "B")}`,
+            influencer: (o.influencerId as unknown as IPopulatedUser)?.displayName || "Unknown Influencer",
+            influencerEmail: (o.influencerId as unknown as IPopulatedUser)?.email,
+            influencerAvatar: (o.influencerId as unknown as IPopulatedUser)?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent((o.influencerId as unknown as IPopulatedUser)?.displayName || "I")}`,
+
+            amount: `${o.currency === "INR" ? "₹" : "$"}${o.amount.toLocaleString()}`,
+            paymentStatus: o.status,
+            bookingStatus: o.workStatus.replace(/_/g, " "),
+            createdAt: o.createdAt
+        }))
+    };
 };
