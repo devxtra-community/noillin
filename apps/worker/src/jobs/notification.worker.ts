@@ -1,28 +1,39 @@
 import { Worker } from "bullmq";
+import amqp from "amqplib";
 
 import { logger } from "../utils/logger.js";
 import { webPushService } from "../services/web-push.service.js";
 import { NotificationModel } from "../../../core-api/src/models/notification.model.js";
 import { PushSubscriptionModel } from "../../../core-api/src/models/push-subscription.model.js";
 import { User } from "../../../core-api/src/models/user.model.js";
+import { sendTransactionalEmail } from "../../../core-api/src/utils/sendotpEmail.js";
+
+
+let rabbitChannel: amqp.Channel;
+
+async function getRabbitChannel() {
+  if (!rabbitChannel) {
+    const conn = await amqp.connect(process.env.RABBIT_URL || "amqp://localhost:5672");
+    rabbitChannel = await conn.createChannel();
+    await rabbitChannel.assertQueue("notification.events", { durable: true });
+  }
+  return rabbitChannel;
+}
 
 async function emitRealtimeNotification(userId: string, payload: unknown) {
   try {
-    const url = process.env.REALTIME_URL || "http://localhost:6001";
-    await fetch(`${url}/internal/emit`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-internal-secret": process.env.INTERNAL_SECRET || ""
-      },
-      body: JSON.stringify({
-        event: "notification:new",
-        room: `user:${userId}`,
-        payload
-      })
-    });
+    const channel = await getRabbitChannel();
+    console.log("Emitting realtime notification to:", userId);
+    
+    channel.sendToQueue("notification.events", Buffer.from(JSON.stringify({
+      event: "notification:new",
+      room: `user:${userId}`,
+      payload
+    })));
+    
+    console.log("Realtime event published to RabbitMQ");
   } catch (err) {
-    logger.error("Failed to emit realtime notification", err);
+    console.error("Notification worker error:", err);
   }
 }
 
@@ -31,17 +42,37 @@ console.log("🚀 Notification Worker started");
 export const notificationWorker = new Worker(
   "notification-queue",
   async (job) => {
+    console.log("Worker received job:", job.name, job.data);
     console.log("🔥 JOB RECEIVED:", job.name);
     console.log("📦 JOB DATA:", job.data);
 
-    if (job.name === "order-created") {
-      console.log("🔔 Processing notification...");
+    if (job.name === "new-notification") {
+      console.log("Processing notification job", job.data.type);
+    }
 
-      await new Promise((res) => setTimeout(res, 500));
+    if (job.name === "new-notification" && job.data.type === "ORDER_CREATED") {
+      console.log("Handling ORDER_CREATED notification");
+      console.log("🔔 Processing order notification...");
+      const { userId, type, title, message, metadata } = job.data;
 
-      logger.info(
-        `Notification processed for order ${job.data.orderId}`
-      );
+      const notification = await NotificationModel.create({
+        userId,
+        type,
+        title,
+        message,
+        metadata
+      });
+
+      const user = await User.findById(userId);
+      if (user && user.email) {
+        console.log("Sending email to:", user.email);
+        await sendTransactionalEmail(user.email, title, message);
+        console.log("Email sent successfully");
+      }
+
+      await emitRealtimeNotification(userId, notification);
+
+      logger.info(`Notification processed for order ${metadata.orderId}`);
     } else if (job.name === "gig-request-created") {
       const { id, brandId, influencerId, note } = job.data;
       
@@ -292,5 +323,6 @@ notificationWorker.on("completed", (job) => {
 });
 
 notificationWorker.on("failed", (job, err) => {
+  console.error("Notification worker error:", err);
   console.error(`❌ Job failed: ${job?.id}`, err);
 });
