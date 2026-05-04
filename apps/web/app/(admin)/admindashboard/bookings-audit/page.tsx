@@ -15,19 +15,53 @@ import MetricCardSkeleton from "@/components/admindashboard/MetricCardSkeleton";
 import TableSkeleton from "@/components/admindashboard/TableSkeleton";
 import InvestigationSkeleton from "@/components/admindashboard/InvestigationSkeleton";
 import BookingsTabs from "@/components/admindashboard/BookingsTabs";
-import BookingsTable from "@/components/admindashboard/BookingsTable";
+import BookingsTable, { Booking } from "@/components/admindashboard/BookingsTable";
 import { FadeIn } from "@/components/animations/FadeIn";
 import InvestigationView from "@/components/admindashboard/InvestigationView";
 import { AdminGuard } from "@/components/rbac/Guards";
+import api from "@/lib/axios.client";
+
+interface Metrics {
+    completedBookings: number;
+    pendingPayments: number;
+    activeEscrows: number;
+    totalVolume: number;
+}
 
 export default function BookingsAuditPage() {
     const [isAtRest, setIsAtRest] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [auditData, setAuditData] = useState<{ metrics: Metrics; bookings: Booking[] } | null>(null);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+
 
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 1500);
-        return () => clearTimeout(timer);
+        const fetchAuditData = async () => {
+            try {
+                const response = await api.get("/admin/bookings");
+                if (response.data.success) {
+                    setAuditData(response.data.data);
+                    // Automatically select the first booking if available
+                    if (response.data.data.bookings.length > 0) {
+                        setSelectedBooking(response.data.data.bookings[0]);
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to fetch bookings audit data:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchAuditData();
     }, []);
+
+    const metrics = auditData?.metrics || {
+        completedBookings: 0,
+        pendingPayments: 0,
+        activeEscrows: 0,
+        totalVolume: 0
+    };
 
     return (
         <AdminGuard>
@@ -60,7 +94,7 @@ export default function BookingsAuditPage() {
                                 <>
                                     <MetricCard
                                         title="Completed Bookings"
-                                        value="1,284"
+                                        value={metrics.completedBookings.toLocaleString()}
                                         change="8.2%"
                                         isPositive={true}
                                         icon={CheckCircle}
@@ -69,7 +103,7 @@ export default function BookingsAuditPage() {
                                     />
                                     <MetricCard
                                         title="Pending Payments"
-                                        value="42"
+                                        value={metrics.pendingPayments.toLocaleString()}
                                         status="Review Needed"
                                         icon={Clock}
                                         iconColor="text-orange-600"
@@ -77,15 +111,15 @@ export default function BookingsAuditPage() {
                                     />
                                     <MetricCard
                                         title="Active Escrows"
-                                        value="156"
+                                        value={metrics.activeEscrows.toLocaleString()}
                                         status="Stable"
                                         icon={RefreshCw}
                                         iconColor="text-blue-600"
                                         iconBg="bg-blue-50"
                                     />
                                     <MetricCard
-                                        title="Total Volume (MTD)"
-                                        value="$248,500.00"
+                                        title="Total Volume (Life)"
+                                        value={`₹${metrics.totalVolume.toLocaleString()}`}
                                         change="14.1%"
                                         isPositive={true}
                                         icon={DollarSign}
@@ -120,7 +154,7 @@ export default function BookingsAuditPage() {
                         {isLoading ? (
                             <TableSkeleton startLoading={isAtRest} />
                         ) : (
-                            <BookingsTable />
+                            <BookingsTable bookings={auditData?.bookings || []} onSelect={setSelectedBooking} />
                         )}
                     </FadeIn>
                 </div>
@@ -131,7 +165,7 @@ export default function BookingsAuditPage() {
                         {isLoading ? (
                             <InvestigationSkeleton startLoading={isAtRest} />
                         ) : (
-                            <InvestigationView />
+                            <InvestigationView booking={selectedBooking} />
                         )}
                     </FadeIn>
                 </div>
@@ -139,3 +173,4 @@ export default function BookingsAuditPage() {
         </AdminGuard>
     );
 }
+

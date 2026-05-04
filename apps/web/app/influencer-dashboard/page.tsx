@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
-  Plus,
   DollarSign,
   Calendar,
   Clock,
@@ -66,7 +64,6 @@ export default function InfluencerDashboardPage() {
     };
     fetchDashboardData();
   }, []);
-  const router = useRouter()
 
   const stats = {
     earnings: orders
@@ -115,11 +112,6 @@ export default function InfluencerDashboardPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Platform Overview</h1>
           <p className="text-sm text-gray-500 mt-1">Welcome back, here&apos;s what&apos;s happening today.</p>
         </div>
-        <button onClick={() => router.push("/gig/create")}
-className="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors w-full sm:w-auto shrink-0">
-          <Plus className="w-4 h-4" />
-          Create new gig
-        </button>
       </div>
 
       {/* Metrics Cards */}

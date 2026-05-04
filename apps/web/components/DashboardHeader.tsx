@@ -8,21 +8,22 @@ import { LogOut, Menu } from "lucide-react";
 
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
+import Logo from "@/components/shared/Logo";
 
 interface DashboardHeaderProps {
     showSidebarToggle?: boolean;
     onSidebarToggle?: () => void;
-    backPath?: string;
-    backLabel?: string;
+    isFixed?: boolean;
+    hideLogo?: boolean;
+    children?: React.ReactNode;
 }
-
-import { BackButton } from "@/components/ui/BackButton";
 
 export default function DashboardHeader({
     showSidebarToggle = false,
     onSidebarToggle,
-    backPath,
-    backLabel
+    isFixed = true,
+    hideLogo = false,
+    children
 }: DashboardHeaderProps) {
     const router = useRouter();
     const { user, clearAuth } = useAuthStore();
@@ -70,105 +71,107 @@ export default function DashboardHeader({
         }
     };
 
-    const dashboardPath = user?.role === "INFLUENCER" ? "/influencer-dashboard" : "/brand-dashboard";
+
 
     return (
-        <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-100 h-20 flex items-center justify-between px-4 sm:px-8 z-50">
-            <div className="flex items-center gap-4">
-                {showSidebarToggle && (
-                    <button
-                        className="lg:hidden text-gray-500 hover:text-gray-900 p-2"
-                        onClick={onSidebarToggle}
-                    >
-                        <Menu className="w-6 h-6" />
-                    </button>
-                )}
-                <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-                    <div className="w-8 h-8 bg-[#10B981] rounded-lg flex items-center justify-center transform group-hover:rotate-12 transition-transform shadow-sm">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-white">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                        </svg>
-                    </div>
-                    <span className="text-xl font-bold text-gray-900 tracking-tight hidden sm:block">
-                        Noillin
-                    </span>
-                </Link>
-                {backPath && (
-                    <>
-                        <div className="h-6 w-[1px] bg-gray-200 mx-2 hidden sm:block"></div>
-                        <BackButton href={backPath} label={backLabel} className="hidden sm:flex" />
-                    </>
-                )}
-            </div>
+        <header className={`${isFixed ? "fixed top-0 left-0 right-0" : "relative"} bg-white border-b border-gray-100 h-20 z-50 flex justify-center`}>
+            <div className="w-full max-w-[1400px] flex items-center justify-between px-4 sm:px-8">
+                <div className="flex items-center gap-4">
+                    {showSidebarToggle && (
+                        <button
+                            className="lg:hidden text-gray-500 hover:text-gray-900 p-2"
+                            onClick={onSidebarToggle}
+                        >
+                            <Menu className="w-6 h-6" />
+                        </button>
+                    )}
+                    {!hideLogo && (
+                        <Logo hideTextOnMobile={true} />
+                    )}
 
-            <div className="flex items-center gap-4 sm:gap-6 ml-auto">
-                <div className="relative" ref={dropdownRef}>
-                    <button
-                        onClick={() => setShowLogoutModal(!showLogoutModal)}
-                        className="flex items-center gap-3 group focus:outline-none"
-                    >
-                        <div className="text-right hidden sm:block min-w-[80px]">
-                            {isLoadingProfile ? (
-                                <div className="space-y-1">
-                                    <div className="h-4 w-24 bg-gray-100 animate-pulse rounded"></div>
-                                    <div className="h-3 w-16 bg-gray-50 animate-pulse rounded ml-auto"></div>
-                                </div>
-                            ) : (
-                                <>
-                                    <p className="text-sm font-bold text-gray-900 truncate max-w-[120px]">{displayName}</p>
-                                    <p className="text-xs text-gray-500 font-medium">
-                                        {user?.role === "INFLUENCER" ? "Active Member" : "Brand User"}
-                                    </p>
-                                </>
-                            )}
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all overflow-hidden relative">
-                            {isLoadingProfile ? (
-                                <div className="absolute inset-0 bg-gray-100 animate-pulse"></div>
-                            ) : profileImage ? (
-                                <Image
-                                    src={profileImage}
-                                    alt={displayName}
-                                    width={40}
-                                    height={40}
-                                    className="w-full h-full object-cover"
-                                    unoptimized
-                                    referrerPolicy="no-referrer"
-                                    onError={(e) => {
-                                        (e.target as HTMLImageElement).style.display = 'none';
-                                        const parent = (e.target as HTMLImageElement).parentElement;
-                                        if (parent) {
-                                            parent.innerText = displayName.charAt(0).toUpperCase();
-                                        }
-                                    }}
-                                />
-                            ) : (
-                                displayName.charAt(0).toUpperCase()
-                            )}
-                        </div>
-                    </button>
+                </div>
 
-                    {showLogoutModal && (
-                        <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 origin-top-right">
-                            <div className="px-4 py-3 border-b border-gray-50 mb-1">
-                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Signed in as</p>
-                                <p className="text-sm text-gray-900 font-bold truncate">{user?.email}</p>
-                            </div>
-
+                <div className="flex items-center gap-4 sm:gap-6 ml-auto">
+                    {children}
+                    {!user ? (
+                        <div className="flex items-center gap-3">
                             <Link
-                                href={dashboardPath}
-                                className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 font-medium"
+                                href="/login"
+                                className="text-gray-600 hover:text-gray-900 px-4 py-2 text-sm font-semibold transition-colors"
                             >
-                                Dashboard
+                                Log In
                             </Link>
-
-                            <button
-                                onClick={handleLogout}
-                                className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium"
+                            <Link
+                                href="/signup"
+                                className="bg-[#10B981] hover:bg-[#059669] text-white px-6 py-2.5 rounded-full text-sm font-semibold shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5"
                             >
-                                <LogOut className="w-4 h-4" />
-                                Sign Out
+                                Get Started
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="relative" ref={dropdownRef}>
+                            <button
+                                onClick={() => setShowLogoutModal(!showLogoutModal)}
+                                className="flex items-center gap-3 group focus:outline-none"
+                            >
+                                <div className="text-right hidden sm:block min-w-[80px]">
+                                    {isLoadingProfile ? (
+                                        <div className="space-y-1">
+                                            <div className="h-4 w-24 bg-gray-100 animate-pulse rounded"></div>
+                                            <div className="h-3 w-16 bg-gray-50 animate-pulse rounded ml-auto"></div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <p className="text-sm font-bold text-gray-900 truncate max-w-[120px]">{displayName}</p>
+                                            <p className="text-xs text-gray-500 font-medium">
+                                                {user?.role === "INFLUENCER" ? "Active Member" : "Brand User"}
+                                            </p>
+                                        </>
+                                    )}
+                                </div>
+                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all overflow-hidden relative">
+                                    {isLoadingProfile ? (
+                                        <div className="absolute inset-0 bg-gray-100 animate-pulse"></div>
+                                    ) : profileImage ? (
+                                        <Image
+                                            src={profileImage}
+                                            alt={displayName}
+                                            width={40}
+                                            height={40}
+                                            className="w-full h-full object-cover"
+                                            unoptimized
+                                            referrerPolicy="no-referrer"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                const parent = (e.target as HTMLImageElement).parentElement;
+                                                if (parent) {
+                                                    parent.innerText = displayName.charAt(0).toUpperCase();
+                                                }
+                                            }}
+                                        />
+                                    ) : (
+                                        displayName.charAt(0).toUpperCase()
+                                    )}
+                                </div>
                             </button>
+
+                            {showLogoutModal && (
+                                <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 origin-top-right">
+                                    <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                                        <p className="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Signed in as</p>
+                                        <p className="text-sm text-gray-900 font-bold truncate">{user?.email}</p>
+                                    </div>
+
+
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        Sign Out
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>

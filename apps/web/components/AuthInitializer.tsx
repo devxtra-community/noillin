@@ -16,12 +16,13 @@ export default function AuthInitializer() {
   useEffect(() => {
     const restoreSession = async () => {
       try {
-        const response = await api.post("/auth/refresh");
+        const currentRole = useAuthStore.getState().user?.role;
+        const response = await api.post("/auth/refresh", { role: currentRole });
 
         const { accessToken, user } = response.data.data;
 
         setAuth(accessToken, user);
-        
+
         // Trigger web push subscription quietly in the background
         import("@/lib/web-push").then(({ subscribeUser }) => {
           subscribeUser();

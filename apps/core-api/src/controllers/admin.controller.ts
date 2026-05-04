@@ -12,7 +12,8 @@ import {
   getGigModerationStatsService,
   pauseGigService,
   ignoreGigService,
-  rejectGigService
+  rejectGigService,
+  getBookingsAuditService
 } from "../services/admin.service.js";
 import { PlatformRevenueModel } from "../models/platform-revenue.model.js";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
@@ -201,6 +202,19 @@ export const rejectGigController = async (
       data: result
     });
 
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getBookingsAuditController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const data = await getBookingsAuditService();
+    res.status(200).json({ success: true, data });
   } catch (error) {
     next(error);
   }

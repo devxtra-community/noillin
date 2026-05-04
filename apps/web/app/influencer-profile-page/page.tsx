@@ -117,7 +117,7 @@ function ProfileContent() {
         <div className="bg-white rounded-3xl p-6 md:p-10 border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden">
           <div className="relative shrink-0">
             <div className="w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden border-2 border-slate-100 shadow-sm relative">
-              <Image fill src={avatar} alt={name} className="object-cover" />
+              <Image fill src={avatar} alt={name || "Influencer Avatar"} className="object-cover" />
             </div>
             {profile.isVerified && (
               <div className="absolute bottom-1 right-1 bg-emerald-500 text-white p-1 rounded-full border-4 border-white">
@@ -335,7 +335,7 @@ function ProfileContent() {
                 </div>
               </div>
             ))}
-            
+
             {(!gigs || gigs.length === 0) && (
               <p className="text-sm font-medium text-slate-500 col-span-3">No active gigs available for this creator.</p>
             )}

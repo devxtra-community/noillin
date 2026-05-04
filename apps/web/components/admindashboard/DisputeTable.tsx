@@ -5,46 +5,46 @@ import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
-const reports = [
-    {
-        id: "#REP-88291",
-        type: "Payment",
-        typeColor: "bg-red-50 text-red-600",
-        typeIcon: CreditCard,
-        users: [
-            { name: "User 1", avatar: "https://i.pravatar.cc/150?u=1" },
-            { name: "User 2", avatar: "https://i.pravatar.cc/150?u=2" },
-        ],
-        status: "Under Review",
-        statusColor: "text-orange-500",
-    },
-    {
-        id: "#REP-88284",
-        type: "Behavior",
-        typeColor: "bg-orange-50 text-orange-600",
-        typeIcon: User,
-        users: [
-            { name: "User 3", avatar: "https://i.pravatar.cc/150?u=3" },
-            { name: "User 4", avatar: "https://i.pravatar.cc/150?u=4" },
-        ],
-        status: "Pending",
-        statusColor: "text-blue-400",
-    },
-    {
-        id: "#REP-88195",
-        type: "Content",
-        typeColor: "bg-blue-50 text-blue-600",
-        typeIcon: FileText,
-        users: [
-            { name: "User 5", avatar: "https://i.pravatar.cc/150?u=5" },
-            { name: "User 6", avatar: "https://i.pravatar.cc/150?u=6" },
-        ],
-        status: "Resolved",
-        statusColor: "text-emerald-500",
-    },
-];
+interface InvolvedUser {
+    name: string;
+    avatar?: string;
+}
 
-export default function DisputeTable() {
+export interface Report {
+    _id: string;
+    reportId: string;
+    type: string;
+    status: string;
+    entityType: string;
+    usersInvolved?: InvolvedUser[];
+}
+
+interface DisputeTableProps {
+    reports: Report[];
+    selectedReportId: string | null;
+    onSelect: (id: string) => void;
+}
+
+
+export default function DisputeTable({ reports, selectedReportId, onSelect }: DisputeTableProps) {
+    const getTypeStyles = (type: string) => {
+        switch (type) {
+            case "PAYMENT": return { color: "bg-red-50 text-red-600", icon: CreditCard };
+            case "BEHAVIOR": return { color: "bg-orange-50 text-orange-600", icon: User };
+            case "CONTENT": return { color: "bg-blue-50 text-blue-600", icon: FileText };
+            default: return { color: "bg-gray-50 text-gray-600", icon: FileText };
+        }
+    };
+
+    const getStatusStyles = (status: string) => {
+        switch (status) {
+            case "PENDING": return { color: "text-blue-400", bg: "bg-blue-400" };
+            case "UNDER_REVIEW": return { color: "text-orange-500", bg: "bg-orange-500" };
+            case "RESOLVED": return { color: "text-emerald-500", bg: "bg-emerald-500" };
+            default: return { color: "text-gray-400", bg: "bg-gray-400" };
+        }
+    };
+
     return (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
@@ -53,59 +53,75 @@ export default function DisputeTable() {
                         <tr className="bg-gray-50/50 border-b border-gray-100">
                             <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Report ID</th>
                             <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Type</th>
-                            <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Users Involved</th>
+                            <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Entities / Users</th>
                             <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
                             <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
-                        {reports.map((report) => (
-                            <tr key={report.id} className="hover:bg-gray-50/30 transition-colors group cursor-pointer">
-                                <td className="px-6 py-5 whitespace-nowrap text-sm font-bold text-gray-400">
-                                    {report.id}
-                                </td>
-                                <td className="px-6 py-5 whitespace-nowrap">
-                                    <div className={cn("inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-[10px] font-bold", report.typeColor)}>
-                                        <report.typeIcon size={12} />
-                                        {report.type}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-5 whitespace-nowrap">
-                                    <div className="flex items-center -space-x-2">
-                                        {report.users.map((user, idx) => (
-                                            <div key={idx} className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-gray-100 shadow-sm">
-                                                <Image unoptimized width={50} height={50} src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </td>
-                                <td className="px-6 py-5 whitespace-nowrap">
-                                    <div className="flex items-center gap-2">
-                                        <div className={cn("w-1.5 h-1.5 rounded-full", report.statusColor.replace('text-', 'bg-'))} />
-                                        <span className={cn("text-xs font-bold", report.statusColor)}>{report.status}</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-5 whitespace-nowrap text-right">
-                                    <button className="p-2 text-gray-300 hover:text-gray-900 transition-all opacity-40 group-hover:opacity-100">
-                                        <Eye size={18} />
-                                    </button>
+                        {reports.map((report) => {
+                            const typeStyles = getTypeStyles(report.type);
+                            const statusStyles = getStatusStyles(report.status);
+                            const isSelected = selectedReportId === report._id;
+
+                            return (
+                                <tr
+                                    key={report._id}
+                                    onClick={() => onSelect(report._id)}
+                                    className={cn(
+                                        "hover:bg-gray-50/30 transition-colors group cursor-pointer",
+                                        isSelected && "bg-emerald-50/30 border-l-2 border-l-emerald-500"
+                                    )}
+                                >
+                                    <td className="px-6 py-5 whitespace-nowrap text-sm font-bold text-gray-400">
+                                        {report.reportId}
+                                    </td>
+                                    <td className="px-6 py-5 whitespace-nowrap">
+                                        <div className={cn("inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase", typeStyles.color)}>
+                                            <typeStyles.icon size={12} />
+                                            {report.type}
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5 whitespace-nowrap">
+                                        <div className="flex items-center -space-x-2">
+                                            {report.usersInvolved?.map((user: InvolvedUser, idx: number) => (
+
+                                                <div key={idx} className="w-8 h-8 rounded-full border-2 border-white overflow-hidden bg-gray-100 shadow-sm relative group/avatar" title={user.name}>
+                                                    <Image unoptimized width={50} height={50} src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || "User")}`} alt={user.name || "User Avatar"} className="w-full h-full object-cover" />
+                                                </div>
+                                            ))}
+                                            <span className="ml-3 text-[10px] font-bold text-gray-400 uppercase tracking-tight">
+                                                {report.entityType}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5 whitespace-nowrap">
+                                        <div className="flex items-center gap-2">
+                                            <div className={cn("w-1.5 h-1.5 rounded-full", statusStyles.bg)} />
+                                            <span className={cn("text-xs font-bold uppercase", statusStyles.color)}>{report.status.replace("_", " ")}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-5 whitespace-nowrap text-right">
+                                        <button className={cn("p-2 transition-all", isSelected ? "text-emerald-500" : "text-gray-300 group-hover:text-gray-900")}>
+                                            <Eye size={18} />
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                        {reports.length === 0 && (
+                            <tr>
+                                <td colSpan={5} className="px-6 py-20 text-center text-gray-400 font-bold uppercase tracking-widest text-xs">
+                                    No reports found
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
 
             <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
-                <p className="text-[11px] text-gray-400 font-bold">Showing 1 to 10 of 14 entries</p>
-                <div className="flex items-center gap-2">
-                    <button className="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-[#111827] text-[11px] font-bold hover:bg-gray-50 transition-all shadow-sm">Prev</button>
-                    <div className="flex items-center gap-1">
-                        <button className="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-500 text-white text-[11px] font-bold">1</button>
-                        <button className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-white border border-transparent hover:border-gray-200 transition-all text-[#111827] text-[11px] font-bold">2</button>
-                    </div>
-                    <button className="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-[#111827] text-[11px] font-bold hover:bg-gray-50 transition-all shadow-sm">Next</button>
-                </div>
+                <p className="text-[11px] text-gray-400 font-bold tracking-tight">Total {reports.length} security alerts active.</p>
             </div>
         </div>
     );

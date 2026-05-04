@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Clock, ChevronRight as ChevronIcon, Calendar as CalendarIcon, Globe, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 
@@ -195,7 +196,7 @@ export default function BrandCalendarPage() {
                             >
                                 <div className="w-14 h-14 rounded-[20px] bg-emerald-50 flex items-center justify-center shrink-0 shadow-sm transition-transform group-hover:scale-105 overflow-hidden">
                                     {gig.influencerId?.profileImageUrl || gig.influencerId?.profileImage ? (
-                                        <img src={gig.influencerId.profileImageUrl || gig.influencerId.profileImage} alt="" className="w-full h-full object-cover" />
+                                        <Image src={gig.influencerId.profileImageUrl || gig.influencerId.profileImage || ""} alt="" width={56} height={56} className="w-full h-full object-cover" />
                                     ) : (
                                         <Globe className="w-6 h-6 text-emerald-500" />
                                     )}
