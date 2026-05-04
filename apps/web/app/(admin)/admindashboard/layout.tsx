@@ -16,7 +16,7 @@ export default function AdminDashboardLayout({
 
     return (
         <AdminGuard>
-            <div className="min-h-screen bg-[#fcfcfd] flex">
+            <div className="min-h-screen bg-[#F1F5F9] flex">
                 {/* Sidebar */}
                 <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 

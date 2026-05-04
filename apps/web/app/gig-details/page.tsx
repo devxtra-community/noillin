@@ -18,6 +18,8 @@ import { ReportingModal } from "@/components/shared/ReportingModal";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
+import DashboardHeader from "@/components/DashboardHeader";
+import NotificationBell from "@/components/NotificationBell";
 
 interface GigData {
     _id: string;
@@ -140,7 +142,7 @@ function GigDetailsContent() {
     const avatar = influencer.profileImageUrl || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150";
 
     return (
-        <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 relative flex flex-col">
+        <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 relative flex flex-col">
             {/* Toast Notification */}
             {showToast && (
                 <div className="fixed top-24 right-8 z-[200] animate-in slide-in-from-right duration-300">
@@ -160,61 +162,11 @@ function GigDetailsContent() {
             )}
 
             {/* Navbar */}
-            <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-                    <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-2"
-                    >
-                        <div className="w-8 h-8 text-emerald-500">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
-                        </div>
-                        <span className="text-xl font-bold tracking-tight text-slate-900">Noillin</span>
-                    </motion.div>
-
-                    <div className="hidden md:flex items-center gap-10 text-[13px] font-semibold text-slate-500 uppercase tracking-wider">
-                        {[
-                            { name: "About", href: "#" },
-                            { name: "Influencers", href: "#" },
-                            { name: "Gigs", href: "/gig-list" },
-                            { name: "Support", href: "#" }
-                        ].map((item) => (
-                            <Link key={item.name} href={item.href} className="hover:text-emerald-600 transition-colors relative group">
-                                {item.name}
-                                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-emerald-500 transition-all group-hover:w-full" />
-                            </Link>
-                        ))}
-                    </div>
-
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="flex items-center gap-4"
-                    >
-                        {user ? (
-                            <Link href="/brand-dashboard" className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center overflow-hidden hover:ring-4 hover:ring-[#0CAF60]/10 transition-all">
-                                <Image src={(user as { profileImage?: string }).profileImage || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100"} alt="User" width={40} height={40} />
-                            </Link>
-                        ) : (
-                            <>
-                                <Link href="/login">
-                                    <Button variant="ghost" className="text-slate-600 font-semibold hover:text-emerald-600 hover:bg-emerald-50 transition-all px-6">
-                                        Sign In
-                                    </Button>
-                                </Link>
-                                <Link href="/signup">
-                                    <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 shadow-lg shadow-emerald-200 rounded-lg">
-                                        Get Started
-                                    </Button>
-                                </Link>
-                            </>
-                        )}
-                    </motion.div>
+            <DashboardHeader>
+                <div className="flex items-center gap-6">
+                    <NotificationBell />
                 </div>
-            </nav>
+            </DashboardHeader>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
                 {/* Breadcrumb */}
@@ -405,8 +357,8 @@ function GigDetailsContent() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-12 pb-20 border-b border-white/5">
                         <div className="flex items-center gap-3 group cursor-pointer">
-                            <div className="w-10 h-10 text-white bg-emerald-500 rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6">
+                            <div className="w-10 h-10 text-white bg-[#10B981] rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-white">
                                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                                 </svg>
                             </div>

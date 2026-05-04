@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
+import Logo from "@/components/shared/Logo";
 import { useAuthStore } from "@/store/auth.store";
 
 interface SetupNavbarProps {
@@ -41,24 +42,7 @@ export default function SetupNavbar({ step = 3, mode = "onboarding" }: SetupNavb
         <div className="flex justify-between items-center h-16">
           {/* Logo Section */}
           <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-              <div className="w-8 h-8 bg-[#10B981] rounded-lg flex items-center justify-center transform group-hover:rotate-12 transition-transform shadow-sm">
-                <svg 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  className="h-5 w-5 text-white"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <span className="text-xl font-bold text-gray-900 tracking-tight">
-                Noillin
-              </span>
-            </Link>
+            <Logo />
             <div className="hidden sm:block h-6 w-[1px] bg-gray-200"></div>
             <div className="hidden sm:flex items-center gap-2">
               <span className="text-sm font-semibold text-gray-900">Step {step}</span>
@@ -82,9 +66,9 @@ export default function SetupNavbar({ step = 3, mode = "onboarding" }: SetupNavb
                 <span>Account Recovery</span>
               </div>
             )}
-            
+
             <div className="h-8 w-[1px] bg-gray-100 hidden md:block"></div>
-            
+
             {user ? (
               <button
                 onClick={handleLogout}
@@ -108,11 +92,11 @@ export default function SetupNavbar({ step = 3, mode = "onboarding" }: SetupNavb
           </div>
         </div>
       </div>
-      
+
       {/* Progress Bar */}
       <div className="h-1.5 w-full bg-gray-100/50 overflow-hidden">
-        <motion.div 
-          className="h-full bg-linear-to-r from-emerald-400 via-teal-500 to-[#10B981] animate-progress-flow" 
+        <motion.div
+          className="h-full bg-linear-to-r from-emerald-400 via-teal-500 to-[#10B981] animate-progress-flow"
           initial={{ width: 0 }}
           animate={{ width: currentStep.width }}
           transition={{ duration: 0.8, ease: "easeOut" }}

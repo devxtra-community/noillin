@@ -8,6 +8,7 @@ import { LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
+import Logo from "@/components/shared/Logo";
 
 
 
@@ -79,27 +80,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-20">
           {/* Logo Section */}
           <div className="flex items-center">
-            <Link href="/" className="shrink-0 flex items-center gap-2 group">
-              <div className="w-8 h-8 bg-[#059669] rounded-lg flex items-center justify-center transform group-hover:rotate-12 transition-transform">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2.5}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-              <span className="text-2xl font-bold text-gray-900 tracking-tight">
-                Noillin
-              </span>
-            </Link>
+            <Logo />
           </div>
 
           {/* Desktop Navigation */}

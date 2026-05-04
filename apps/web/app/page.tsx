@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import Logo from "@/components/shared/Logo";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -164,21 +165,15 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
 export default function HomePage() {
   const pathname = usePathname();
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2"
           >
-            <div className="w-8 h-8 text-emerald-500">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">Noillin</span>
+            <Logo />
           </motion.div>
 
           <div className="hidden md:flex items-center gap-10 text-[13px] font-semibold text-slate-500 uppercase tracking-wider">
@@ -388,7 +383,7 @@ export default function HomePage() {
         </section>
 
         {/* Stats Section */}
-        <section className="bg-slate-50/50 py-20 border-y border-slate-100">
+        <section className="bg-[#F1F5F9]/50 py-20 border-y border-slate-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-16">Trusted by brand & creators</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:divide-x divide-slate-200">
@@ -416,7 +411,7 @@ export default function HomePage() {
         </section>
 
         {/* How it Works */}
-        <section className="py-28 relative overflow-hidden bg-gray-200">
+        <section className="py-28 relative overflow-hidden bg-[#F1F5F9]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="text-center max-w-2xl mx-auto mb-20">
               <h2 className="text-4xl font-extrabold text-slate-900 mb-6">How Noillin Works</h2>
@@ -463,7 +458,7 @@ export default function HomePage() {
         </section>
 
         {/* Platform Features */}
-        <section className="py-28 bg-white overflow-hidden">
+        <section className="py-28 bg-[#F1F5F9] overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-24">
               <h2 className="text-4xl font-extrabold text-slate-900">Platform Features</h2>
@@ -552,7 +547,7 @@ export default function HomePage() {
         </section>
 
         {/* Testimonials */}
-        <section className="py-28 bg-gray-200">
+        <section className="py-28 bg-[#F1F5F9]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-24">
               <h2 className="text-4xl font-extrabold text-slate-900">Community Stories</h2>
