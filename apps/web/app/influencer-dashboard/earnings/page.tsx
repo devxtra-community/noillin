@@ -355,7 +355,7 @@ export default function EarningsPage() {
                                         <span className="text-[14px] font-black text-gray-900">₹{(selectedOrder.amount || 0).toLocaleString()}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-[13px] font-bold text-gray-500">Platform Fee (10%)</span>
+                                        <span className="text-[13px] font-bold text-gray-500">Platform Fee (5%)</span>
                                         <span className="text-[14px] font-bold text-rose-500">-₹{(selectedOrder.platformFee || 0).toLocaleString()}</span>
                                     </div>
                                     <div className="h-[1px] bg-gray-200/60 my-2"></div>

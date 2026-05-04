@@ -320,7 +320,7 @@ export const getOrderBySession = async (req: AuthRequest, res: Response) => {
 
     // 🔥 AUTO-HEAL status: If Stripe webhook was bypassed
     if (session.payment_status === "paid" && order.status === "PENDING") {
-      const platformFee = order.amount * 0.10;
+      const platformFee = order.amount * 0.05;
       const influencerAmount = order.amount - platformFee;
 
       order.status = "IN_ESCROW";

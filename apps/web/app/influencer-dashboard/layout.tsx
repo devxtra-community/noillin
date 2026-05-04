@@ -108,8 +108,46 @@ export default function InfluencerDashboardLayout({
                                 href="/gig/create"
                                 className="hidden md:flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold text-sm transition-colors shadow-sm"
                             >
-                                Create Gig
-                            </Link>
+                                <div className="text-right hidden sm:block min-w-[80px]">
+                                    {isLoadingProfile ? (
+                                        <div className="space-y-1">
+                                            <div className="h-4 w-24 bg-gray-100 animate-pulse rounded"></div>
+                                            <div className="h-3 w-16 bg-gray-50 animate-pulse rounded ml-auto"></div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <p className="text-sm font-bold text-gray-900">{displayName}</p>
+                                            <p className="text-xs text-gray-500 font-medium">Active Member</p>
+                                        </>
+                                    )}
+                                </div>
+                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold border-2 border-white shadow-sm group-hover:shadow-md transition-all overflow-hidden relative">
+                                    {isLoadingProfile ? (
+                                        <div className="absolute inset-0 bg-gray-100 animate-pulse"></div>
+                                    ) : profileImage ? (
+                                        <img
+                                            src={profileImage}
+                                            alt={displayName}
+                                            className="w-full h-full object-cover"
+                                            referrerPolicy="no-referrer"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                (e.target as HTMLImageElement).parentElement!.classList.add('bg-emerald-100');
+                                            }}
+                                        />
+                                    ) : (
+                                        displayName.charAt(0).toUpperCase()
+                                    )}
+                            </div>
+                            </button>
+                            {showLogoutModal && (
+                                <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50">
+                                    <div className="px-4 py-3 border-b border-gray-50 mb-1">
+                                        <p className="text-sm text-gray-900 font-bold truncate">{user?.email}</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">
+                                            {user?.role === "INFLUENCER" ? "Influencer" : "Brand"} Dashboard
+                                        </p>
+                                    </div>
 
                             <NotificationBell />
                         </div>

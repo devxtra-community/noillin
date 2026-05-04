@@ -41,8 +41,8 @@ const orderSchema = new mongoose.Schema(
     rejectionNote: String,
 
     stripePaymentIntentId: String,
-    platformFee: Number, // 10% fee
-    influencerAmount: Number, // 90% share
+    platformFee: Number, // 5% fee
+    influencerAmount: Number, // 95% share
 
     payoutStatus: {
       type: String,

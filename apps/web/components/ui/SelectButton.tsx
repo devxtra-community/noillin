@@ -21,6 +21,7 @@ const SelectButton = forwardRef<HTMLButtonElement, SelectButtonProps>(
                     selected
                         ? "border-green-400 bg-green-50 text-green-700"
                         : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50",
+                    props.disabled && "opacity-50 cursor-not-allowed hover:bg-white",
                     className
                 )}
                 ref={ref}
