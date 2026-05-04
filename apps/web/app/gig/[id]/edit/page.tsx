@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { FaCheck } from "react-icons/fa";
 
 import api from "@/lib/axios.client";
-import Navbar from "@/components/Navbar";
+import DashboardHeader from "@/components/DashboardHeader";
 import { StepIndicator } from "@/components/gig-create/StepIndicator";
 import { GigDetails } from "@/components/gig-create/GigDetails";
 import { Deliverables } from "@/components/gig-create/Deliverables";
@@ -68,7 +68,7 @@ export default function EditGigPage() {
 
   return (
     <div className="min-h-screen bg-gray-50/50">
-      <Navbar />
+      <DashboardHeader backPath="/influencer-dashboard" />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-28">
         <div className="mb-10 text-center">
@@ -109,7 +109,7 @@ export default function EditGigPage() {
                   Your gig is now live and visible to brands. You can manage it from your dashboard.
                 </p>
                 <button
-                  onClick={() => window.location.href = "/dashboard"}
+                  onClick={() => window.location.href = "/influencer-dashboard"}
                   className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-all mt-6"
                 >
                   Go to Dashboard
