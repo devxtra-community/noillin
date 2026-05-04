@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { 
-  History, 
-  Search, 
-  CheckCircle2, 
-  Clock, 
+import {
+  History,
+  Search,
+  CheckCircle2,
+  Clock,
   XCircle,
   MoreVertical,
   ChevronRight,
@@ -14,7 +14,8 @@ import {
 import Image from "next/image";
 
 import api from "@/lib/axios.client";
-import Navbar from "@/components/Navbar";
+import { useAuthStore } from "@/store/auth.store";
+import DashboardHeader from "@/components/DashboardHeader";
 
 const formatDate = (dateString: string) => {
   return new Intl.DateTimeFormat("en-US", {
@@ -50,6 +51,8 @@ interface Order {
 }
 
 export default function TransactionHistoryPage() {
+  const { user } = useAuthStore();
+  const dashboardPath = user?.role === "BRAND" ? "/brand-dashboard" : "/influencer-dashboard";
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -99,15 +102,15 @@ export default function TransactionHistoryPage() {
     }
   };
 
-  const filteredOrders = orders.filter(order => 
+  const filteredOrders = orders.filter(order =>
     order.gigId?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     order._id.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      <Navbar />
-      
+      <DashboardHeader backPath={dashboardPath} />
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6">
@@ -161,8 +164,8 @@ export default function TransactionHistoryPage() {
         <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm mb-6 flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search by gig title or order ID..."
               className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 transition-all"
               value={searchTerm}
@@ -197,12 +200,12 @@ export default function TransactionHistoryPage() {
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
                             {order.gigId?.thumbnail ? (
-                              <Image 
-                                src={order.gigId.thumbnail} 
-                                alt={order.gigId?.title || ""} 
-                                width={48} 
-                                height={48} 
-                                className="w-full h-full object-cover" 
+                              <Image
+                                src={order.gigId.thumbnail}
+                                alt={order.gigId?.title || ""}
+                                width={48}
+                                height={48}
+                                className="w-full h-full object-cover"
                                 unoptimized
                               />
                             ) : (
