@@ -62,8 +62,8 @@ export function Deliverables({ onBack, onNext }: DeliverablesProps) {
     return (
         <div className="p-8 sm:p-10 space-y-8">
             <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">What will you deliver?</h2>
-                <p className="text-sm text-gray-500">Define the specifics of your content deliverables.</p>
+                <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">What will you deliver? (Optional)</h2>
+                <p className="text-sm text-gray-500">Define the specifics of your content deliverables, or skip for now.</p>
 
                 {/* Deliverable Type */}
                 <div>
@@ -93,7 +93,7 @@ export function Deliverables({ onBack, onNext }: DeliverablesProps) {
                 {/* Quantity & Specs */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Input
-                        label="Quantity"
+                        label="Quantity (Optional)"
                         type="number"
                         value={quantity}
                         onChange={(e) => setQuantity(Number(e.target.value))}
@@ -101,7 +101,7 @@ export function Deliverables({ onBack, onNext }: DeliverablesProps) {
                         helperText="How many posts/stories?"
                     />
                     <Input
-                        label="Duration / Size"
+                        label="Duration / Size (Optional)"
                         value={specification}
                         onChange={(e) => setSpecification(e.target.value)}
                         placeholder="e.g. 60 seconds, 1080x1350"
