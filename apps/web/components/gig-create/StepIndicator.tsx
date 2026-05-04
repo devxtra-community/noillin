@@ -12,8 +12,7 @@ const steps = [
     { id: 1, label: 'Details' },
     { id: 2, label: 'Deliverables' },
     { id: 3, label: 'Pricing' },
-    { id: 4, label: 'Availability' },
-    { id: 5, label: 'Review' },
+    { id: 4, label: 'Review' },
 ];
 
 export function StepIndicator({ currentStep = 1 }: StepIndicatorProps) {

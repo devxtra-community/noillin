@@ -14,28 +14,7 @@ export interface PricingState {
   revisionsIncluded: number;
 }
 
-export interface AvailabilitySlot {
-  startTime: string;
-  endTime: string;
-}
 
-export interface WeeklyRule {
-  day: string;
-  isEnabled: boolean;
-  slots: AvailabilitySlot[];
-}
-
-export interface DateOverride {
-  date: string;
-  isAvailable: boolean;
-  slots: AvailabilitySlot[];
-}
-
-export interface AvailabilityState {
-  timezone: string;
-  weeklyRules: WeeklyRule[];
-  dateOverrides: DateOverride[];
-}
 
 interface GigCreateState {
   mode: "create" | "edit";
@@ -53,13 +32,11 @@ interface GigCreateState {
 
   deliverables: GigDeliverable[];
   pricing: PricingState | null;
-  availability: AvailabilityState | null;
 
   setGigId: (id: string) => void;
   setDetails: (data: Partial<GigCreateState["details"]>) => void;
   setDeliverables: (data: GigDeliverable[]) => void;
   setPricing: (data: PricingState) => void;
-  setAvailability: (data: AvailabilityState) => void;
   reset: () => void;
 }
 
@@ -79,7 +56,6 @@ export const useGigCreateStore = create<GigCreateState>((set) => ({
 
   deliverables: [],
   pricing: null,
-  availability: null,
 
   setGigId: (id) => set({ gigId: id }),
 
@@ -94,8 +70,7 @@ export const useGigCreateStore = create<GigCreateState>((set) => ({
   setPricing: (data) =>
     set({ pricing: data }),
 
-  setAvailability: (data) =>
-    set({ availability: data }),
+
 
   reset: () =>
   set({
@@ -110,8 +85,7 @@ export const useGigCreateStore = create<GigCreateState>((set) => ({
       tags: []
     },
     deliverables: [],
-    pricing: null,
-    availability: null
+    pricing: null
   })
 }));
 
