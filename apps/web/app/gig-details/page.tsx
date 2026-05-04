@@ -4,7 +4,6 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
     Star, CheckCircle2, ChevronRight, Heart,
     MessageSquare, Check,
@@ -15,7 +14,6 @@ import {
 
 
 import { ReportingModal } from "@/components/shared/ReportingModal";
-import { Button } from "@/components/ui/button";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
 import DashboardHeader from "@/components/DashboardHeader";

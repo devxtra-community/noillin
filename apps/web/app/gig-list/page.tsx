@@ -1,17 +1,13 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { motion } from "framer-motion";
 import { Zap, Check, ArrowRight, Calendar } from "lucide-react";
 
-import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
 import DashboardHeader from "@/components/DashboardHeader";
 import NotificationBell from "@/components/NotificationBell";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type Platform = "IG" | "YT" | "TT" | "PT";
 type ViewMode = "grid" | "list";
 type SortOption = "recommended" | "price_asc" | "price_desc" | "next_available";
 
@@ -55,19 +51,7 @@ const LIMIT = 9;
 // Replace with your actual API base URL
 // const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
-const platformColors: Record<Platform, string> = {
-  IG: "bg-pink-100 text-pink-600",
-  YT: "bg-red-100 text-red-600",
-  TT: "bg-slate-100 text-slate-700",
-  PT: "bg-orange-100 text-orange-600",
-};
-
-const platformIcons: Record<Platform, string> = {
-  IG: "📸",
-  YT: "▶",
-  TT: "♪",
-  PT: "📌",
-};
+// Unused constants removed
 
 const categories: string[] = [
   "Fashion & Beauty",
@@ -147,7 +131,6 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
   const influencer = gig.primaryInfluencerId;
   const name = influencer?.fullName ?? "Unknown Creator";
   const niche = gig.category;
-  const platforms: Platform[] = [];
   const availableFrom = undefined;
   const color = avatarColor(gig._id);
 
@@ -260,8 +243,6 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
 const MAX_PRICE_LIMIT = 50000;
 
 export default function ExploreGigs() {
-  const { user } = useAuthStore();
-  const pathname = usePathname();
   const [search, setSearch] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activePlatform, setActivePlatform] = useState<string | null>(null);
@@ -363,11 +344,6 @@ export default function ExploreGigs() {
       setPage(1);
     }
   };
-  const handleSearchClear = () => {
-    setSearch("");
-    setCommittedSearch("");
-    setPage(1);
-  };
 
   const totalPages = pagination?.totalPages ?? 1;
 
@@ -400,7 +376,7 @@ export default function ExploreGigs() {
               Explore Influencer Gigs
             </h1>
             <p className="text-slate-500 text-base max-w-md">
-              The world's most elite creators, verified and ready for your next campaign.
+              The world&apos;s most elite creators, verified and ready for your next campaign.
             </p>
           </div>
           <div className="flex items-center gap-3">

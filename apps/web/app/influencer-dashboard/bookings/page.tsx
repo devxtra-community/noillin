@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { Search, ChevronRight, Calendar, Clock, XCircle, AlertCircle, Check, Loader2, CheckCircle2, UploadCloud, FileText, CheckCircle, Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 import { uploadToS3 } from "@/lib/s3-uploads";
@@ -208,7 +209,7 @@ function BookingsContent() {
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-3">
                                                 {b.brandProfile?.profileImageUrl ? (
-                                                    <img src={b.brandProfile.profileImageUrl} alt="" className="w-8 h-8 rounded-full object-cover shadow-sm bg-gray-100" />
+                                                    <Image src={b.brandProfile.profileImageUrl} width={32} height={32} alt="" className="w-8 h-8 rounded-full object-cover shadow-sm bg-gray-100" />
                                                 ) : (
                                                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600">
                                                         {(b.brandProfile?.companyName || "B").charAt(0)}
@@ -260,7 +261,7 @@ function BookingsContent() {
                                     <div className="flex flex-col items-center text-center mb-8">
                                         <div className="relative mb-4">
                                             {selectedBooking.brandProfile?.profileImageUrl ? (
-                                                <img src={selectedBooking.brandProfile.profileImageUrl} alt="" className="w-16 h-16 rounded-[20px] object-cover shadow-lg shadow-gray-200/50" />
+                                                <Image src={selectedBooking.brandProfile.profileImageUrl} width={64} height={64} alt="" className="w-16 h-16 rounded-[20px] object-cover shadow-lg shadow-gray-200/50" />
                                             ) : (
                                                 <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
                                                     {(selectedBooking.brandProfile?.companyName || "B").charAt(0)}

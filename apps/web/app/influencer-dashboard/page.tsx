@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
   DollarSign,
   Calendar,
@@ -65,7 +64,6 @@ export default function InfluencerDashboardPage() {
     };
     fetchDashboardData();
   }, []);
-  const router = useRouter()
 
   const stats = {
     earnings: orders

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     Search,
     Clock,
@@ -26,7 +26,7 @@ export default function DisputesReportsPage() {
     const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
 
-    const fetchReports = async () => {
+    const fetchReports = useCallback(async () => {
         try {
             const res = await api.get("/admin/reports");
             setReports(res.data.data);
@@ -38,13 +38,13 @@ export default function DisputesReportsPage() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [selectedReportId]);
 
     useEffect(() => {
         fetchReports();
         const timer = setTimeout(() => setIsAtRest(true), 500);
         return () => clearTimeout(timer);
-    }, []);
+    }, [fetchReports]);
 
     return (
         <AdminGuard>

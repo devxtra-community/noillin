@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Plus, DollarSign, Clock, Calendar, ChevronRight, Loader2, ShieldAlert } from "lucide-react";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 
@@ -131,7 +132,7 @@ export default function BrandTransactionsPage() {
                                         <td className="py-6 px-10">
                                             <div className="flex items-center gap-3">
                                                 {t.influencerProfile?.profileImageUrl ? (
-                                                    <img src={t.influencerProfile.profileImageUrl} alt="" className="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover" />
+                                                    <Image src={t.influencerProfile.profileImageUrl} width={32} height={32} alt="" className="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover" />
                                                 ) : (
                                                     <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs">
                                                         {(t.influencerProfile?.fullName || t.influencerProfile?.username || "A").charAt(0).toUpperCase()}
@@ -162,7 +163,7 @@ export default function BrandTransactionsPage() {
                             <div className="flex items-center justify-between mb-10 pb-8 border-b border-gray-50">
                                 <div className="flex items-center gap-4">
                                     {selectedTransaction.influencerProfile?.profileImageUrl ? (
-                                        <img src={selectedTransaction.influencerProfile.profileImageUrl} alt="" className="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover" />
+                                        <Image src={selectedTransaction.influencerProfile.profileImageUrl} width={48} height={48} alt="" className="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover" />
                                     ) : (
                                         <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-lg shadow-sm">
                                             {(selectedTransaction.influencerProfile?.fullName || selectedTransaction.influencerProfile?.username || "A").charAt(0).toUpperCase()}
