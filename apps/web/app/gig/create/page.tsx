@@ -8,13 +8,12 @@ import Navbar from "@/components/Navbar";
 import { GigDetails } from "@/components/gig-create/GigDetails";
 import { Deliverables } from "@/components/gig-create/Deliverables";
 import { Pricing } from "@/components/gig-create/Pricing";
-import { Availability } from "@/components/gig-create/Availability";
 import { ReviewAndPublish } from "@/components/gig-create/ReviewAndPublish";
 import { useGigCreateStore } from "@/store/gigCreate.store";
 
 export default function GigCreatePage() {
     const [currentStep, setCurrentStep] = useState(1);
-    const totalSteps = 6;
+    const totalSteps = 5;
     const reset = useGigCreateStore((s) => s.reset);
     const setMode = useGigCreateStore((s) => s.setMode);
 
@@ -78,12 +77,9 @@ export default function GigCreatePage() {
                             <Pricing onBack={prevStep} onNext={nextStep} />
                         )}
                         {currentStep === 4 && (
-                            <Availability onBack={prevStep} onNext={nextStep} />
-                        )}
-                        {currentStep === 5 && (
                             <ReviewAndPublish onBack={prevStep} onNext={nextStep} goToStep={goToStep} />
                         )}
-                        {currentStep === 6 && (
+                        {currentStep === 5 && (
                             <div className="p-16 text-center space-y-6">
                                 <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <FaCheck size={40} />

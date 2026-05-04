@@ -45,7 +45,7 @@ export function Pricing({ onBack, onNext }: PricingProps) {
         }
     };
 
-    const platformFeeRate = 0; // 0% for now
+    const platformFeeRate = 0.05; // 5%
     const platformFee = basePrice * platformFeeRate;
     const totalPayout = basePrice - platformFee;
 
@@ -167,8 +167,8 @@ export function Pricing({ onBack, onNext }: PricingProps) {
                             <span className="font-semibold text-gray-900">${basePrice.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-gray-500 font-medium">Platform fee (0%)</span>
-                            <span className="text-green-500 font-semibold">-$0.00</span>
+                            <span className="text-gray-500 font-medium">Platform fee (5%)</span>
+                            <span className="text-red-500 font-semibold">-${platformFee.toFixed(2)}</span>
                         </div>
                         <div className="pt-4 border-t border-gray-100 flex justify-between items-end">
                             <span className="text-sm font-bold text-gray-900 pb-1">Total Payout</span>
@@ -177,7 +177,7 @@ export function Pricing({ onBack, onNext }: PricingProps) {
                     </div>
 
                     <p className="text-[10px] text-gray-400 leading-relaxed">
-                        Noillin charges 0% commission for creators. The price you set is exactly what you&apos;ll receive upon successful completion.
+                        Noillin charges a 5% platform fee for creators. This helps us maintain and improve the platform.
                     </p>
                 </div>
             </div>

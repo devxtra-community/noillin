@@ -10,21 +10,19 @@ import { StepIndicator } from "@/components/gig-create/StepIndicator";
 import { GigDetails } from "@/components/gig-create/GigDetails";
 import { Deliverables } from "@/components/gig-create/Deliverables";
 import { Pricing } from "@/components/gig-create/Pricing";
-import { Availability } from "@/components/gig-create/Availability";
 import { ReviewAndPublish } from "@/components/gig-create/ReviewAndPublish";
 import { useGigCreateStore } from "@/store/gigCreate.store";
 
 export default function EditGigPage() {
   const params = useParams();
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6;
+  const totalSteps = 5;
   const setMode = useGigCreateStore((s) => s.setMode);
   const {
     setGigId,
     setDetails,
     setDeliverables,
-    setPricing,
-    setAvailability
+    setPricing
   } = useGigCreateStore();
 
   useEffect(() => {
@@ -45,23 +43,10 @@ export default function EditGigPage() {
 
       setDeliverables(gig.deliverables);
       setPricing(gig.pricing);
-      console.log(gig.primaryInfluencerId)
-      const influencerId =
-        typeof gig.primaryInfluencerId === "string"
-          ? gig.primaryInfluencerId
-          : gig.primaryInfluencerId?._id;
-
-      if (influencerId) {
-        const availabilityRes = await api.get(
-          `/availability/${influencerId}`
-        );
-
-        setAvailability(availabilityRes.data.data);
-      }
     };
 
     fetchGig();
-  }, [params.id, setAvailability, setDeliverables, setDetails, setGigId, setMode, setPricing]);
+  }, [params.id, setDeliverables, setDetails, setGigId, setMode, setPricing]);
 
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -108,16 +93,13 @@ export default function EditGigPage() {
               <Pricing onBack={prevStep} onNext={nextStep} />
             )}
             {currentStep === 4 && (
-              <Availability onBack={prevStep} onNext={nextStep} />
-            )}
-            {currentStep === 5 && (
               <ReviewAndPublish
                 onBack={prevStep}
                 onNext={nextStep}
                 goToStep={goToStep}
               />
             )}
-            {currentStep === 6 && (
+            {currentStep === 5 && (
               <div className="p-16 text-center space-y-6">
                 <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FaCheck size={40} />

@@ -168,11 +168,11 @@ export function GigDetails({ onNext }: GigDetailsProps) {
                                 className="justify-center"
                             />
                             <SelectButton
-                                label="Group / Collab"
+                                label="Group / Collab (Soon)"
                                 icon={<FaUsers className="w-4 h-4" />}
-                                selected={form.gigType === 'group'}
-                                onClick={() => handleChange("gigType", 'group')}
-                                className="justify-center"
+                                selected={false}
+                                disabled
+                                className="justify-center bg-gray-50 border-gray-100 text-gray-400 cursor-not-allowed"
                             />
                         </div>
                     </div>
