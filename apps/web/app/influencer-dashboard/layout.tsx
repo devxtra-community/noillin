@@ -190,10 +190,8 @@ export default function InfluencerDashboardLayout({
                                     ) : (
                                         displayName.charAt(0).toUpperCase()
                                     )}
-                                </div>
-                                    </button>
+                            </div>
                             </button>
-
                             {showLogoutModal && (
                                 <div className="absolute right-0 mt-3 w-56 bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 py-2 z-50">
                                     <div className="px-4 py-3 border-b border-gray-50 mb-1">
