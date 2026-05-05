@@ -19,6 +19,7 @@ import {
 import { useAuthStore } from "@/store/auth.store";
 import RoleGuard from "@/components/rbac/RoleGuard";
 import api from "@/lib/axios.client";
+import NotificationBell from "@/components/NotificationBell";
 
 
 export default function InfluencerDashboardLayout({
@@ -155,7 +156,18 @@ export default function InfluencerDashboardLayout({
                             <Menu className="w-6 h-6" />
                         </button>
 
-                        <div className="relative ml-auto" ref={dropdownRef}>
+                        <div className="flex items-center gap-6 ml-auto">
+                            {/* Explore Gigs Button */}
+                            <Link
+                                href="/gig-list"
+                                className="hidden md:flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold text-sm transition-colors shadow-sm"
+                            >
+                                Explore gigs
+                            </Link>
+
+                            <NotificationBell />
+
+                            <div className="relative" ref={dropdownRef}>
                             <button
                                 onClick={() => setShowLogoutModal(!showLogoutModal)}
                                 className="flex items-center gap-3 group focus:outline-none"
@@ -210,6 +222,7 @@ export default function InfluencerDashboardLayout({
                                     </button>
                                 </div>
                             )}
+                        </div>
                         </div>
                     </header>
 
