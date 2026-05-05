@@ -14,12 +14,18 @@ export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const mountedRef = useRef(false);
+
+useEffect(() => {
+  mountedRef.current = true;
+}, []);
+
   // Fetch notifications on mount if user is logged in
   useEffect(() => {
-    if (accessToken) {
+    if (mountedRef && accessToken) {
       fetchNotifications();
     }
-  }, [accessToken, fetchNotifications]);
+  }, [mountedRef, accessToken, fetchNotifications]);
 
   // Handle clicking outside to close dropdown
   useEffect(() => {
@@ -38,8 +44,8 @@ export default function NotificationBell() {
     };
   }, [isOpen]);
 
-  // Don't render the bell if the user is not authenticated
-  if (!accessToken) return null;
+  // Don't render the bell if the user is not authenticated or component is not mounted
+  if (!mountedRef || !accessToken) return null;
 
   const handleNotificationClick = (notification: Notification) => {
     console.log("🔥 CLICKED NOTIFICATION FULL:", JSON.stringify(notification, null, 2));

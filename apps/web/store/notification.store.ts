@@ -12,6 +12,7 @@ export interface Notification {
     gigRequestId?: string;
     conversationId?: string;
   };
+  isRead?: boolean;
   createdAt: string;
 }
 
@@ -35,7 +36,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   // ✅ Normalize incoming data (VERY IMPORTANT)
   const normalized: Notification = {
     ...notification,
-    read: notification.read ?? false,
+    read: notification.isRead ?? notification.read ?? false,
     metadata: notification.metadata || {},
   };
 
@@ -70,7 +71,7 @@ if (Array.isArray(raw)) {
 // const unreadCount = notifications.filter((n) => !n.read).length;
 const normalized = notifications.map((n) => ({
   ...n,
-  read: n.read ?? false,
+  read: n.isRead ?? n.read ?? false,
   metadata: n.metadata || {},
 }));
 
