@@ -174,9 +174,9 @@ export const respondToDeliverable = async (
       gigRequestId: message.gigRequestId,
       senderId: userId,
       receiverId: message.senderId.toString(),
-      content: "✅ Deliverable Approved! Escrow funds have been released to the influencer.",
+      content: "Collaboration Successful! The order is now complete.",
       status: "SENT",
-      messageType: "SYSTEM"
+      messageType: "ORDER_COMPLETED"
     });
   } else {
     order.workStatus = "NOT_STARTED";

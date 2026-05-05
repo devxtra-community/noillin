@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 import { SecureMediaPreview } from "../shared/SecureMediaPreview";
 
@@ -11,7 +12,7 @@ export interface Message {
   content: string;
   createdAt: string;
   status: "SENT" | "DELIVERED" | "READ";
-  messageType?: "TEXT" | "PROPOSAL" | "SYSTEM" | "DELIVERABLE";
+  messageType?: "TEXT" | "PROPOSAL" | "SYSTEM" | "DELIVERABLE" | "ORDER_COMPLETED";
   proposalData?: {
     date: string;
     time: string;
@@ -40,6 +41,7 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
   const isProposal = message.messageType === "PROPOSAL";
   const isSystem = message.messageType === "SYSTEM";
   const isDeliverable = message.messageType === "DELIVERABLE";
+  const isOrderCompleted = message.messageType === "ORDER_COMPLETED";
   const pData = message.proposalData;
   const dData = message.deliverableData;
 
@@ -55,13 +57,13 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
     <div
       className={cn(
         "flex w-full mb-4",
-        isSystem ? "justify-center" : isMine ? "justify-end" : "justify-start"
+        isSystem || isOrderCompleted ? "justify-center" : isMine ? "justify-end" : "justify-start"
       )}
     >
       <div
         className={cn(
           "relative shadow-sm transition-all overflow-hidden",
-          isSystem || isProposal || isDeliverable
+          isSystem || isProposal || isDeliverable || isOrderCompleted
             ? "w-full max-w-sm bg-white border border-gray-100 rounded-[24px]"
             : cn(
               "px-5 py-3 max-w-[75%] sm:max-w-md text-[15px] leading-relaxed",
@@ -71,7 +73,40 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
             )
         )}
       >
-        {isSystem ? (() => {
+        {isOrderCompleted ? (
+          <div className="flex flex-col w-full">
+            <div className="p-6 bg-gradient-to-br from-emerald-50/50 to-emerald-100/30 text-center">
+              <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mx-auto mb-4 border border-emerald-50">
+                <span className="text-3xl">🎉</span>
+              </div>
+              <h3 className="text-lg font-black text-emerald-950 uppercase tracking-tighter mb-1">
+                {isBrand ? "Collaboration Finished!" : "Earnings Available!"}
+              </h3>
+              <p className="text-xs text-emerald-700 font-medium leading-relaxed max-w-[240px] mx-auto">
+                {isBrand 
+                  ? "Thank you for choosing this influencer! We hope you enjoyed the content." 
+                  : "Excellent work! Your deliverable has been approved and funds are now in your wallet."}
+              </p>
+            </div>
+            {!isBrand && (
+              <div className="p-4 bg-white border-t border-emerald-50">
+                <Link 
+                  href="/influencer-dashboard/earnings"
+                  className="block w-full py-3.5 rounded-2xl text-[13px] font-black text-center text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all active:scale-95 uppercase tracking-[0.2em]"
+                >
+                  View Earnings
+                </Link>
+              </div>
+            )}
+            {isBrand && (
+              <div className="p-4 bg-white border-t border-emerald-50">
+                 <p className="text-[10px] text-center font-black uppercase tracking-widest text-emerald-600/60">
+                   Transaction Completed successfully
+                 </p>
+              </div>
+            )}
+          </div>
+        ) : isSystem ? (() => {
           let title = "System Update";
           let subtitle = "Status Update";
           let icon = "🔔";

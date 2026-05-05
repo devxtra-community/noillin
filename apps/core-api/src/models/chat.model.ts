@@ -9,7 +9,7 @@ export interface MessageDocument {
 
   content: string;
 
-  messageType?: "TEXT" | "PROPOSAL" | "SYSTEM" | "DELIVERABLE";
+  messageType?: "TEXT" | "PROPOSAL" | "SYSTEM" | "DELIVERABLE" | "ORDER_COMPLETED";
   proposalData?: {
     date: Date;
     time: string;
@@ -58,7 +58,7 @@ const MessageSchema = new Schema<MessageDocument>(
 
     messageType: {
       type: String,
-      enum: ["TEXT", "PROPOSAL", "SYSTEM", "DELIVERABLE"],
+      enum: ["TEXT", "PROPOSAL", "SYSTEM", "DELIVERABLE", "ORDER_COMPLETED"],
       default: "TEXT"
     },
 
