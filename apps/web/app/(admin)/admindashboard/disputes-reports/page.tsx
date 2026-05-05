@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     Search,
     Clock,
@@ -13,19 +13,38 @@ import MetricCardSkeleton from "@/components/admindashboard/MetricCardSkeleton";
 import TableSkeleton from "@/components/admindashboard/TableSkeleton";
 import InvestigationSkeleton from "@/components/admindashboard/InvestigationSkeleton";
 import DisputeTabs from "@/components/admindashboard/DisputeTabs";
-import DisputeTable from "@/components/admindashboard/DisputeTable";
+import DisputeTable, { Report } from "@/components/admindashboard/DisputeTable";
 import DisputeInvestigation from "@/components/admindashboard/DisputeInvestigation";
 import { FadeIn } from "@/components/animations/FadeIn";
 import { AdminGuard } from "@/components/rbac/Guards";
+import api from "@/lib/axios.client";
 
 export default function DisputesReportsPage() {
     const [isAtRest, setIsAtRest] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [reports, setReports] = useState<Report[]>([]);
+    const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
+
+
+    const fetchReports = useCallback(async () => {
+        try {
+            const res = await api.get("/admin/reports");
+            setReports(res.data.data);
+            if (res.data.data.length > 0 && !selectedReportId) {
+                setSelectedReportId(res.data.data[0]._id);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [selectedReportId]);
 
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 1500);
+        fetchReports();
+        const timer = setTimeout(() => setIsAtRest(true), 500);
         return () => clearTimeout(timer);
-    }, []);
+    }, [fetchReports]);
 
     return (
         <AdminGuard>
@@ -101,7 +120,7 @@ export default function DisputesReportsPage() {
                         {isLoading ? (
                             <TableSkeleton startLoading={isAtRest} />
                         ) : (
-                            <DisputeTable />
+                            <DisputeTable reports={reports} selectedReportId={selectedReportId} onSelect={setSelectedReportId} />
                         )}
                     </FadeIn>
                 </div>
@@ -112,7 +131,7 @@ export default function DisputesReportsPage() {
                         {isLoading ? (
                             <InvestigationSkeleton startLoading={isAtRest} />
                         ) : (
-                            <DisputeInvestigation />
+                            <DisputeInvestigation reportId={selectedReportId} onReportResolved={fetchReports} />
                         )}
                     </FadeIn>
                 </div>

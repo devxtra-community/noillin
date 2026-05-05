@@ -188,7 +188,7 @@ export const respondToDeliverable = async (
       receiverId: message.senderId.toString(),
       content: `❌ Deliverable Rejected. Reason: ${rejectionNote || "No note provided."}`,
       status: "SENT",
-      messageType: "TEXT"
+      messageType: "SYSTEM"
     });
   }
 

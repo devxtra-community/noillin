@@ -49,11 +49,10 @@ api.interceptors.response.use(
         // Don't attempt refresh loop for auth-related routes
         const isAuthRoute = originalRequest.url?.includes("/auth/");
 
-        if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) 
-        {
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthRoute) {
             if (isRefreshing) {
                 // If already refreshing, queue this request
-                
+
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject });
                 }).then(token => {
@@ -68,10 +67,9 @@ api.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                // Try to refresh the token
-                // const response = await api.post("/auth/refresh");
-                // const newAccessToken = response.data.data.accessToken;
-                const response = await api.post("/auth/refresh");
+                // Try to refresh the token using Role specific cookie support
+                const currentRole = useAuthStore.getState().user?.role;
+                const response = await api.post("/auth/refresh", { role: currentRole });
                 const { accessToken, user } = response.data.data;
 
                 // useAuthStore.getState().setAuth(accessToken, user);

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { Search, ChevronRight, CheckCircle2, Loader2, ShieldCheck, Download, Undo2, Ban } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 import { SecureMediaPreview } from "@/components/shared/SecureMediaPreview";
@@ -199,7 +200,7 @@ function BrandBookingsContent() {
                                         <td className="py-5 px-6">
                                             <div className="flex items-center gap-3">
                                                 {booking.influencerProfile?.profileImageUrl ? (
-                                                    <img src={booking.influencerProfile.profileImageUrl} alt="" className="w-8 h-8 rounded-full object-cover shadow-sm bg-gray-100 border border-gray-200" />
+                                                    <Image src={booking.influencerProfile.profileImageUrl} width={32} height={32} alt="" className="w-8 h-8 rounded-full object-cover shadow-sm bg-gray-100 border border-gray-200" />
                                                 ) : (
                                                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-emerald-100 text-emerald-600 shadow-sm">
                                                         {(booking.influencerProfile?.fullName || booking.influencerProfile?.username || "A").charAt(0).toUpperCase()}
@@ -238,7 +239,7 @@ function BrandBookingsContent() {
                                 <div className="flex flex-col items-center mb-8 text-center">
                                     <div className="relative mb-4">
                                         {selectedBooking.influencerProfile?.profileImageUrl ? (
-                                            <img src={selectedBooking.influencerProfile.profileImageUrl} alt="" className="w-24 h-24 rounded-full object-cover p-1 border-2 border-emerald-50 shadow-sm" />
+                                            <Image src={selectedBooking.influencerProfile.profileImageUrl} width={96} height={96} alt="" className="w-24 h-24 rounded-full object-cover p-1 border-2 border-emerald-50 shadow-sm" />
                                         ) : (
                                             <div className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold shrink-0 bg-emerald-100 text-emerald-600 shadow-sm">
                                                 {(selectedBooking.influencerProfile?.fullName || selectedBooking.influencerProfile?.username || "A").charAt(0).toUpperCase()}
