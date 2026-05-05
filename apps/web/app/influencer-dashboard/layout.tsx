@@ -120,7 +120,7 @@ export default function InfluencerDashboardLayout({
                             <NotificationBell />
 
                             <div className="relative" ref={dropdownRef}>
-                            <button
+                                <button
                                 onClick={() => setShowLogoutModal(!showLogoutModal)}
                                 className="flex items-center gap-3 group focus:outline-none"
                     <DashboardHeader
@@ -139,7 +139,7 @@ export default function InfluencerDashboardLayout({
 
                             <NotificationBell />
                         </div>
-                        </div>
+                    </div>
                     </header>
                     </DashboardHeader>
 
