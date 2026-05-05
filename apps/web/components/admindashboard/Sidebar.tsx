@@ -14,6 +14,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
+import NoillinIcon from "../NoillinIcon";
+
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth.store";
 import { FadeIn } from "@/components/animations/FadeIn";
@@ -53,12 +55,9 @@ export default function Sidebar({ isOpen, setIsOpen }: { isOpen: boolean; setIsO
             )}>
                 {/* Logo Section */}
                 <FadeIn delay={0.1}>
-                    <div className="p-8 flex items-center gap-3">
-                        <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-                            N
-                        </div>
-                        <span className="text-xl font-bold text-gray-900 tracking-tight">Noillin</span>
-                        <button className="lg:hidden ml-auto text-gray-400" onClick={() => setIsOpen(false)}>
+                    <div className="p-8 flex items-center justify-between">
+                        <NoillinIcon />
+                        <button className="lg:hidden text-gray-400" onClick={() => setIsOpen(false)}>
                             <X size={20} />
                         </button>
                     </div>

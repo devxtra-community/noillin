@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import Logo from "@/components/shared/Logo";
+import NoillinIcon from "@/components/NoillinIcon";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -173,7 +173,7 @@ export default function HomePage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <Logo />
+            <NoillinIcon />
           </motion.div>
 
           <div className="hidden md:flex items-center gap-10 text-[13px] font-semibold text-slate-500 uppercase tracking-wider">

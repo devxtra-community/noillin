@@ -1,11 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
-import Logo from "@/components/shared/Logo";
-import { useAuthStore } from "@/store/auth.store";
+import NoillinIcon from "./NoillinIcon";
 
 interface SetupNavbarProps {
   step?: 1 | 2 | 3;
@@ -13,14 +11,6 @@ interface SetupNavbarProps {
 }
 
 export default function SetupNavbar({ step = 3, mode = "onboarding" }: SetupNavbarProps) {
-  const { user, clearAuth } = useAuthStore();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    clearAuth();
-    router.push("/login");
-  };
-
   const onboardingSteps = [
     { id: 1, label: "Account Details", width: "33%" },
     { id: 2, label: "Security Verification", width: "66%" },
@@ -41,54 +31,8 @@ export default function SetupNavbar({ step = 3, mode = "onboarding" }: SetupNavb
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo Section */}
-          <div className="flex items-center gap-4">
-            <Logo />
-            <div className="hidden sm:block h-6 w-[1px] bg-gray-200"></div>
-            <div className="hidden sm:flex items-center gap-2">
-              <span className="text-sm font-semibold text-gray-900">Step {step}</span>
-              <span className="text-xs text-gray-400">•</span>
-              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">{currentStep.label}</span>
-            </div>
-          </div>
-
-          {/* User Section / Help */}
-          <div className="flex items-center gap-3 sm:gap-6">
-            {user ? (
-              <div className="hidden md:flex flex-col items-end">
-                <span className="text-xs font-bold text-gray-900 leading-none mb-1">{user?.fullName || "Account Setup"}</span>
-                <span className="text-[10px] text-gray-400 leading-none">{user?.email}</span>
-              </div>
-            ) : (
-              <div className="hidden md:flex items-center gap-2 text-xs font-medium text-gray-500">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Account Recovery</span>
-              </div>
-            )}
-
-            <div className="h-8 w-[1px] bg-gray-100 hidden md:block"></div>
-
-            {user ? (
-              <button
-                onClick={handleLogout}
-                className="group flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-red-600 transition-all duration-200"
-              >
-                <span className="hidden sm:inline">Sign Out</span>
-                <div className="p-1.5 rounded-full group-hover:bg-red-50 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </div>
-              </button>
-            ) : (
-              <Link
-                href="/login"
-                className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
-              >
-                Back to Login
-              </Link>
-            )}
+          <div className="flex items-center">
+            <NoillinIcon />
           </div>
         </div>
       </div>

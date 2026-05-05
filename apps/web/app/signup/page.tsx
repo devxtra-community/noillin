@@ -93,9 +93,9 @@ function SignupForm() {
           className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8 sm:m-0"
         >
 
-          <div className="text-center mb-3">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">Welcome Back</h1>
-            <p className="text-sm text-gray-500 mt-1">Join as a Brand or Influencer</p>
+          <div className="text-center mb-6">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create your Account</h1>
+            <p className="text-sm text-gray-500 mt-2">Join as a Brand or Influencer to get started</p>
           </div>
 
           {(

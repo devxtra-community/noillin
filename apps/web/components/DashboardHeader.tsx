@@ -6,6 +6,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
 
+import NoillinIcon from "./NoillinIcon";
+
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
 import Logo from "@/components/shared/Logo";
@@ -74,22 +76,20 @@ export default function DashboardHeader({
 
 
     return (
-        <header className={`${isFixed ? "fixed top-0 left-0 right-0" : "relative"} bg-white border-b border-gray-100 h-20 z-50 flex justify-center`}>
-            <div className="w-full max-w-[1400px] flex items-center justify-between px-4 sm:px-8">
-                <div className="flex items-center gap-4">
-                    {showSidebarToggle && (
-                        <button
-                            className="lg:hidden text-gray-500 hover:text-gray-900 p-2"
-                            onClick={onSidebarToggle}
-                        >
-                            <Menu className="w-6 h-6" />
-                        </button>
-                    )}
-                    {!hideLogo && (
-                        <Logo hideTextOnMobile={true} />
-                    )}
-
+        <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-100 h-20 flex items-center justify-between px-4 sm:px-8 z-50">
+            <div className="flex items-center gap-4">
+                {showSidebarToggle && (
+                    <button
+                        className="lg:hidden text-gray-500 hover:text-gray-900 p-2"
+                        onClick={onSidebarToggle}
+                    >
+                        <Menu className="w-6 h-6" />
+                    </button>
+                )}
+                <div className="flex items-center">
+                    <NoillinIcon />
                 </div>
+            </div>
 
                 <div className="flex items-center gap-4 sm:gap-6 ml-auto">
                     {children}
@@ -175,7 +175,6 @@ export default function DashboardHeader({
                         </div>
                     )}
                 </div>
-            </div>
         </header>
     );
 }

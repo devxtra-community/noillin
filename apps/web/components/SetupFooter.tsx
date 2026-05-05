@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import NoillinIcon from "./NoillinIcon";
+
 export default function SetupFooter() {
   const currentYear = new Date().getFullYear();
 
@@ -11,21 +13,8 @@ export default function SetupFooter() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
           {/* Brand Column */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 bg-[#10B981] rounded flex items-center justify-center">
-                <svg 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  className="h-3.5 w-3.5 text-white"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <span className="text-lg font-bold text-gray-900 tracking-tight">Noillin</span>
+            <div className="flex items-center">
+              <NoillinIcon />
             </div>
             <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
               The premium platform for creators and brands to collaborate and grow together.

@@ -6,9 +6,10 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { LogOut, LayoutDashboard, ChevronDown } from "lucide-react";
 
+import NoillinIcon from "./NoillinIcon";
+
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
-import Logo from "@/components/shared/Logo";
 
 
 
@@ -80,7 +81,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-20">
           {/* Logo Section */}
           <div className="flex items-center">
-            <Logo />
+            <NoillinIcon />
           </div>
 
           {/* Desktop Navigation */}

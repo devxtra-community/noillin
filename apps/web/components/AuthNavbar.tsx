@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import Logo from "@/components/shared/Logo";
+import NoillinIcon from "./NoillinIcon";
 
 export default function AuthNavbar() {
   return (
@@ -11,7 +11,7 @@ export default function AuthNavbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo Section */}
           <div className="flex items-center">
-            <Logo />
+            <NoillinIcon />
           </div>
 
           {/* Right Section */}

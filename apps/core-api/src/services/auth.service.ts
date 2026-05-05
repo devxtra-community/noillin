@@ -63,6 +63,7 @@ export const signupService = async (data: SignupInput) => {
   });
 
   //  Send REAL Gmail OTP
+  console.log("SIGNUP OTP:", otp);
   await sendOtpEmail(data.email, otp);
   return { message: "OTP sent to your email" };
 
@@ -106,6 +107,7 @@ export const resendSignupOtpService = async (email: string) => {
 
   await pending.save();
 
+  console.log("RESEND OTP:", otp);
   await sendOtpEmail(email, otp);
 
   return { message: "OTP resent successfully" };
@@ -397,6 +399,7 @@ export const forgotPasswordService = async (email: string) => {
     expiry
   );
 
+  console.log("RESEND OTP:", otp);
   await sendOtpEmail(email, otp);
 
   logger.info(`Reset OTP sent to ${email}`);

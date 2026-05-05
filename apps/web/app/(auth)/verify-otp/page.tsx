@@ -19,6 +19,17 @@ function VerifyOtpContent() {
   const [error, setError] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState("");
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   // Redirect back if no email is provided (only for reset flow)
   useEffect(() => {
@@ -72,6 +83,7 @@ function VerifyOtpContent() {
         await api.post("/auth/forgot-password", { email });
       }
       setResendMessage("OTP resent successfully!");
+      setCountdown(60);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to resend OTP.";
       const errorObj = err as { response?: { data?: { message?: string } } };
@@ -136,10 +148,10 @@ function VerifyOtpContent() {
             <button
               type="button"
               onClick={handleResend}
-              disabled={resendLoading}
-              className="text-emerald-600 font-bold hover:underline bg-transparent border-none p-0 ml-1"
+              disabled={resendLoading || countdown > 0}
+              className="text-emerald-600 font-bold hover:underline bg-transparent border-none p-0 ml-1 disabled:text-gray-400 disabled:no-underline"
             >
-              {resendLoading ? "Resending..." : "Resend"}
+              {resendLoading ? "Resending..." : countdown > 0 ? `Resend in ${countdown}s` : "Resend"}
             </button>
           </p>
 
