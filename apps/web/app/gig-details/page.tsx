@@ -181,7 +181,7 @@ function GigDetailsContent() {
                     <div className="w-full lg:w-[65%] xl:w-[70%] space-y-8">
                         {/* Header */}
                         <div>
-                            <div className="flex items-center gap-4 mb-5">
+                            <Link href={`/influencer-profile-page?id=${influencer._id}`} className="flex items-center gap-4 mb-5 hover:opacity-80 transition-opacity">
                                 <Image src={avatar} alt={influencer.fullName || "Influencer"} width={64} height={64} className="rounded-full object-cover border border-gray-100 shadow-sm" />
                                 <div>
                                     <div className="flex items-center gap-2">
@@ -202,7 +202,7 @@ function GigDetailsContent() {
                                         </span>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
 
                             <h2 className="text-3xl font-extrabold text-gray-900 leading-tight mb-5 pr-8">
                                 {gig.title}

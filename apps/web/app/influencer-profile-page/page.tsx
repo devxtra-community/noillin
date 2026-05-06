@@ -31,10 +31,10 @@ interface GigData {
 }
 
 interface ProfileData {
-  displayName?: string;
+  fullName?: string;
   username?: string;
   bio?: string;
-  profileImage?: string;
+  profileImageUrl?: string;
   isVerified?: boolean;
   categories?: string[];
   instagramUrl?: string;
@@ -69,9 +69,9 @@ function ProfileContent() {
   if (!data || !data.profile) return <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center font-medium text-lg text-red-500">Profile not found.</div>;
 
   const { profile, gigs } = data;
-  const name = profile.displayName || profile.username || "Unknown Influencer";
+  const name = profile.fullName || profile.username || "Unknown Influencer";
   const bio = profile.bio || "No bio available.";
-  const avatar = profile.profileImage || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150";
+  const avatar = profile.profileImageUrl || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150";
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-slate-900 font-sans sm:px-0">
