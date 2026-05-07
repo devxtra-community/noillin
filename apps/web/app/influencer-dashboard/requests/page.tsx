@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Search, ChevronRight, Calendar, Globe, Loader2 } from "lucide-react";
 import Image from "next/image";
 
@@ -166,7 +167,9 @@ export default function RequestsPage() {
                                                         req.brandId?.fullName?.charAt(0) || "B"
                                                     )}
                                                 </div>
-                                                <span className="font-bold text-[14px] text-gray-900 truncate max-w-[150px]">{req.brandId?.fullName || "Brand User"}</span>
+                                                <Link href={`/brand-profile-page?id=${req.brandId?._id}`} className="font-bold text-[14px] text-gray-900 truncate max-w-[150px] hover:text-emerald-600 transition-colors">
+                                                    {req.brandId?.fullName || "Brand User"}
+                                                </Link>
                                             </div>
                                         </td>
                                         <td className="py-4 px-6 text-[14px] font-medium text-gray-500 truncate max-w-[200px]">{req.gigId?.title || "Gig Request"}</td>
@@ -208,7 +211,9 @@ export default function RequestsPage() {
                                                     selectedRequest.brandId?.fullName?.charAt(0) || "B"
                                                 )}
                                             </div>
-                                            <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedRequest.brandId?.fullName || "Brand User"}</h3>
+                                            <Link href={`/brand-profile-page?id=${selectedRequest.brandId?._id}`} className="hover:opacity-80 transition-opacity">
+                                                <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedRequest.brandId?.fullName || "Brand User"}</h3>
+                                            </Link>
                                             <p className="text-xs text-gray-500 font-medium mb-3">{selectedRequest.gigId?.title}</p>
                                             <div className="flex items-center justify-center gap-2">
                                                 <span className="px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide rounded-full bg-emerald-50 text-emerald-600 flex items-center gap-1.5">

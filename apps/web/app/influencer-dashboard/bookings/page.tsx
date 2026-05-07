@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import { Search, ChevronRight, Calendar, Clock, XCircle, AlertCircle, Check, Loader2, CheckCircle2, UploadCloud, FileText, CheckCircle, Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 import api from "@/lib/axios.client";
 import { uploadToS3 } from "@/lib/s3-uploads";
@@ -26,6 +27,8 @@ interface Order {
         description?: string;
     };
     brandProfile?: {
+        _id: string;
+        userId?: string;
         companyName: string;
         contactEmail?: string;
         profileImageUrl?: string;
@@ -208,22 +211,17 @@ function BookingsContent() {
                                     >
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-[11px]">
-                                                    {b.brandProfile?.profileImageUrl ? (
-                                                        <Image 
-                                                            src={b.brandProfile.profileImageUrl} 
-                                                            width={32} 
-                                                            height={32} 
-                                                            alt="" 
-                                                            className="w-full h-full object-cover"
-                                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                                        />
-                                                    ) : (
-                                                        (b.brandProfile?.companyName || "B").charAt(0)
-                                                    )}
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-[14px] text-gray-900 truncate max-w-[150px]">{b.brandProfile?.companyName || "Unknown Brand"}</span>
+                                                {b.brandProfile?.profileImageUrl ? (
+                                                    <Image src={b.brandProfile.profileImageUrl} width={32} height={32} alt="" className="w-8 h-8 rounded-full object-cover shadow-sm bg-gray-100" />
+                                                ) : (
+                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600">
+                                                        {(b.brandProfile?.companyName || "B").charAt(0)}
+                                                    </div>
+                                                )}
+                                                 <div className="flex flex-col">
+                                                    <Link href={`/brand-profile-page?id=${b.brandProfile?._id || b.brandProfile?.userId}`} className="font-bold text-[14px] text-gray-900 truncate max-w-[150px] hover:text-emerald-600 transition-colors">
+                                                        {b.brandProfile?.companyName || "Unknown Brand"}
+                                                    </Link>
                                                     {b.brandProfile?.contactEmail && (
                                                         <span className="text-[11px] text-gray-400 font-medium">{b.brandProfile.contactEmail}</span>
                                                     )}
@@ -282,7 +280,9 @@ function BookingsContent() {
                                                 )}
                                             </div>
                                         </div>
-                                        <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{selectedBooking.brandProfile?.companyName || "Unknown Brand"}</h3>
+                                        <Link href={`/brand-profile-page?id=${selectedBooking.brandProfile?._id || selectedBooking.brandProfile?.userId}`} className="hover:opacity-80 transition-opacity">
+                                            <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{selectedBooking.brandProfile?.companyName || "Unknown Brand"}</h3>
+                                        </Link>
                                         {selectedBooking.brandProfile?.contactEmail && (
                                             <p className="text-xs text-gray-400 font-medium mb-3">{selectedBooking.brandProfile.contactEmail}</p>
                                         )}
