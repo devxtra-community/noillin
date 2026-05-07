@@ -76,7 +76,7 @@ export default function DashboardHeader({
 
 
     return (
-        <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-100 h-20 flex items-center justify-between px-4 sm:px-8 z-50">
+        <header className={`${isFixed ? "fixed top-0 left-0 right-0" : "sticky top-0"} bg-white border-b border-gray-100 h-20 flex items-center justify-between px-4 sm:px-8 z-40 shrink-0 w-full`}>
             <div className="flex items-center gap-4">
                 {showSidebarToggle && (
                     <button
@@ -86,9 +86,11 @@ export default function DashboardHeader({
                         <Menu className="w-6 h-6" />
                     </button>
                 )}
-                <div className="flex items-center">
-                    <NoillinIcon />
-                </div>
+                {!hideLogo && (
+                    <div className="flex items-center">
+                        <NoillinIcon />
+                    </div>
+                )}
             </div>
 
                 <div className="flex items-center gap-4 sm:gap-6 ml-auto">
