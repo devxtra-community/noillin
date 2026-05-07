@@ -131,13 +131,20 @@ export default function BrandTransactionsPage() {
                                         </td>
                                         <td className="py-6 px-10">
                                             <div className="flex items-center gap-3">
-                                                {t.influencerProfile?.profileImageUrl ? (
-                                                    <Image src={t.influencerProfile.profileImageUrl} width={32} height={32} alt="" className="w-8 h-8 rounded-full border-2 border-white shadow-sm object-cover" />
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-xs">
-                                                        {(t.influencerProfile?.fullName || t.influencerProfile?.username || "A").charAt(0).toUpperCase()}
-                                                    </div>
-                                                )}
+                                                <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-[10px]">
+                                                    {t.influencerProfile?.profileImageUrl ? (
+                                                        <Image 
+                                                            src={t.influencerProfile.profileImageUrl} 
+                                                            width={32} 
+                                                            height={32} 
+                                                            alt="" 
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                        />
+                                                    ) : (
+                                                        (t.influencerProfile?.fullName || t.influencerProfile?.username || "A").charAt(0).toUpperCase()
+                                                    )}
+                                                </div>
                                                 <span className="text-sm font-bold text-gray-900">{t.influencerProfile?.fullName || t.influencerProfile?.username || "Unknown Provider"}</span>
                                             </div>
                                         </td>
@@ -162,13 +169,20 @@ export default function BrandTransactionsPage() {
 
                             <div className="flex items-center justify-between mb-10 pb-8 border-b border-gray-50">
                                 <div className="flex items-center gap-4">
-                                    {selectedTransaction.influencerProfile?.profileImageUrl ? (
-                                        <Image src={selectedTransaction.influencerProfile.profileImageUrl} width={48} height={48} alt="" className="w-12 h-12 rounded-full border-2 border-white shadow-sm object-cover" />
-                                    ) : (
-                                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-lg shadow-sm">
-                                            {(selectedTransaction.influencerProfile?.fullName || selectedTransaction.influencerProfile?.username || "A").charAt(0).toUpperCase()}
-                                        </div>
-                                    )}
+                                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-lg">
+                                        {selectedTransaction.influencerProfile?.profileImageUrl ? (
+                                            <Image 
+                                                src={selectedTransaction.influencerProfile.profileImageUrl} 
+                                                width={48} 
+                                                height={48} 
+                                                alt="" 
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                            />
+                                        ) : (
+                                            (selectedTransaction.influencerProfile?.fullName || selectedTransaction.influencerProfile?.username || "A").charAt(0).toUpperCase()
+                                        )}
+                                    </div>
                                     <div>
                                         <h3 className="text-sm font-bold text-gray-900">{selectedTransaction.influencerProfile?.fullName || selectedTransaction.influencerProfile?.username || "Unknown Provider"}</h3>
                                         <p className="text-xs text-gray-400 font-medium">{selectedTransaction.gigId?.title || "Booking"}</p>

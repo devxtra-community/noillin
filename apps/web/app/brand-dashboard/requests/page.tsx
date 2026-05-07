@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Search, ChevronRight, } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 
@@ -107,8 +108,12 @@ export default function BrandRequestsPage() {
                                     >
                                         <td className="py-5 px-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600">
-                                                    {req.influencerId?.fullName?.charAt(0) || "I"}
+                                                <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600 relative">
+                                                    {req.influencerId?.profileImageUrl ? (
+                                                        <Image src={req.influencerId.profileImageUrl} alt={req.influencerId.fullName} fill className="object-cover" />
+                                                    ) : (
+                                                        req.influencerId?.fullName?.charAt(0) || "I"
+                                                    )}
                                                 </div>
                                                 <span className="text-sm font-bold text-gray-900">{req.influencerId?.fullName}</span>
                                             </div>
@@ -146,8 +151,12 @@ export default function BrandRequestsPage() {
                             <>
                                 <div className="flex flex-col items-center mb-8">
                                     <div className="relative mb-4">
-                                        <div className="w-24 h-24 rounded-[20px] flex items-center justify-center text-3xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
-                                            {selectedRequest.influencerId?.fullName?.charAt(0) || "I"}
+                                        <div className="w-24 h-24 rounded-[20px] overflow-hidden flex items-center justify-center text-3xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600 relative">
+                                            {selectedRequest.influencerId?.profileImageUrl ? (
+                                                <Image src={selectedRequest.influencerId.profileImageUrl} alt={selectedRequest.influencerId.fullName} fill className="object-cover" />
+                                            ) : (
+                                                selectedRequest.influencerId?.fullName?.charAt(0) || "I"
+                                            )}
                                         </div>
                                     </div>
                                     <h2 className="text-xl font-bold text-gray-900">{selectedRequest.influencerId?.fullName}</h2>

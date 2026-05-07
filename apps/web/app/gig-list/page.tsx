@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Zap, Check, ArrowRight, Calendar } from "lucide-react";
 
 import api from "@/lib/axios.client";
@@ -25,9 +26,11 @@ interface Gig {
     _id: string;
     fullName: string;
     profileImageUrl?: string;
+    profileImage?: string;
     followersCount?: number;
     categories?: string[];
   };
+  bannerUrl?: string;
   shortDescription: string;
   createdAt: string;
 }
@@ -79,13 +82,16 @@ const avatarColor = (id: string) => {
   return colors[Math.abs(hash) % colors.length];
 };
 
-const initials = (name: string) =>
-  name
-    .split(" ")
+const initials = (name: string) => {
+  if (!name) return "";
+  return name
+    .trim()
+    .split(/\s+/)
     .slice(0, 2)
-    .map((w) => w[0])
+    .map((w) => w[0] || "")
     .join("")
     .toUpperCase();
+};
 
 const formatCurrency = (amount: number, currency = "INR") => {
   if (currency === "INR") return `₹${amount.toLocaleString("en-IN")}`;
@@ -138,17 +144,41 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
     ? new Date(availableFrom).toLocaleDateString("en-US", { month: "short", day: "numeric" })
     : "Available";
 
+  const categoryImages: Record<string, string> = {
+    "Fashion & Style": "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&q=80&w=600",
+    "Tech & Gadgets": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600",
+    "Fitness & Health": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=600",
+    "Lifestyle & Vlog": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=600",
+    "Beauty & Cosmetics": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=600",
+    "Food & Beverage": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600",
+    "default": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=600"
+  };
+
+  const gigImage = gig.bannerUrl || categoryImages[gig.category] || categoryImages["default"];
+
   if (view === "list") {
     return (
       <Link
         href={`/gig-details?id=${gig._id}`}
         className="bg-white rounded-[1.5rem] border border-slate-50 shadow-2xl shadow-slate-100/30 hover:shadow-emerald-50/50 transition-all duration-500 overflow-hidden group flex items-center gap-8 px-8 py-6 hover:-translate-y-1 relative cursor-pointer"
       >
-        <div
-          className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-inner shrink-0"
-          style={{ background: color }}
-        >
-          {initials(name)}
+        <div className="relative w-14 h-14 rounded-full overflow-hidden shadow-inner shrink-0 flex items-center justify-center font-bold text-white text-sm" style={{ background: color }}>
+          {(influencer?.profileImageUrl || influencer?.profileImage) ? (
+            <Image 
+              src={influencer.profileImageUrl || influencer.profileImage || ""} 
+              fill 
+              unoptimized
+              alt={name} 
+              className="object-cover"
+              onError={(e) => { 
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const sibling = target.nextElementSibling as HTMLElement;
+                if (sibling) sibling.style.display = 'block';
+              }}
+            />
+          ) : null}
+          <span className="relative z-[1]" style={{ display: (influencer?.profileImageUrl || influencer?.profileImage) ? 'none' : 'block' }}>{initials(name)}</span>
         </div>
 
         <div className="flex-1 min-w-0">
@@ -187,32 +217,62 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
       href={`/gig-details?id=${gig._id}`}
       className="bg-white rounded-[2.5rem] border border-slate-50 shadow-2xl shadow-slate-100/30 hover:shadow-emerald-50/50 transition-all duration-500 hover:-translate-y-2 overflow-hidden group flex flex-col h-full cursor-pointer"
     >
-      <div className="p-10 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-8">
+      <div className="h-48 w-full relative overflow-hidden bg-slate-50">
+        <Image 
+          fill 
+          unoptimized
+          src={gigImage} 
+          alt={gig.title} 
+          className="object-cover group-hover:scale-105 transition-transform duration-500" 
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            const fallback = categoryImages[gig.category] || categoryImages["default"];
+            if (target.src !== fallback) {
+              target.src = fallback;
+            }
+          }}
+        />
+        <div className="absolute top-4 right-4 flex items-center gap-1.2 text-[9px] font-bold text-white bg-black/20 backdrop-blur-md px-2.5 py-1 rounded-full group-hover:bg-emerald-500/80 transition-colors">
+          <Calendar className="w-3 h-3" />
+          {availableLabel}
+        </div>
+      </div>
+      <div className="p-8 flex flex-col flex-1">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-inner shrink-0"
-              style={{ background: color }}
-            >
-              {initials(name)}
+            <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-[10px]">
+            {(influencer?.profileImageUrl || influencer?.profileImage) ? (
+              <>
+                <Image 
+                  fill 
+                  unoptimized
+                  src={influencer.profileImageUrl || influencer.profileImage || ""} 
+                  alt={name} 
+                  className="object-cover"
+                  onError={(e) => { 
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const fallback = target.nextElementSibling as HTMLElement;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+                <span className="hidden w-full h-full items-center justify-center">{initials(name)}</span>
+              </>
+            ) : initials(name)}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-slate-900 text-sm">{name}</span>
                 <div className="bg-emerald-500 rounded-full p-0.5">
-                  <Check className="w-2 h-2 text-white" />
+                  <Check className="w-2.5 h-2.5 text-white" />
                 </div>
               </div>
               <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-0.5">{niche}</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.2 text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-full group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-colors">
-            <Calendar className="w-3 h-3" />
-            {availableLabel}
-          </div>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-6">
           <h3 className="text-xl font-extrabold text-slate-900 mb-2 leading-tight group-hover:text-emerald-600 transition-colors line-clamp-2">
             {gig.title}
           </h3>
@@ -221,7 +281,7 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
           </p>
         </div>
 
-        <div className="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
+        <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
           <div>
             <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 leading-none">Starting at</p>
             <p className="text-2xl font-black text-slate-900 tracking-tight leading-none">

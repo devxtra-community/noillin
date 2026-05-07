@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, ChevronRight, Calendar, Globe, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 import { useDashboardStore } from "@/store/dashboard.store";
@@ -158,8 +159,12 @@ export default function RequestsPage() {
                                     >
                                         <td className="py-4 px-6 text-center">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600">
-                                                    {req.brandId?.fullName?.charAt(0) || "B"}
+                                                <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600 relative">
+                                                    {req.brandId?.profileImageUrl ? (
+                                                        <Image src={req.brandId.profileImageUrl} alt={req.brandId.fullName} fill className="object-cover" />
+                                                    ) : (
+                                                        req.brandId?.fullName?.charAt(0) || "B"
+                                                    )}
                                                 </div>
                                                 <span className="font-bold text-[14px] text-gray-900 truncate max-w-[150px]">{req.brandId?.fullName || "Brand User"}</span>
                                             </div>
@@ -196,8 +201,12 @@ export default function RequestsPage() {
                                     <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
                                         {/* Brand Profile */}
                                         <div className="flex flex-col items-center text-center mb-8">
-                                            <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
-                                                {selectedRequest.brandId?.fullName?.charAt(0) || "B"}
+                                            <div className="w-16 h-16 rounded-[20px] overflow-hidden flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600 relative">
+                                                {selectedRequest.brandId?.profileImageUrl ? (
+                                                    <Image src={selectedRequest.brandId.profileImageUrl} alt={selectedRequest.brandId.fullName} fill className="object-cover" />
+                                                ) : (
+                                                    selectedRequest.brandId?.fullName?.charAt(0) || "B"
+                                                )}
                                             </div>
                                             <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedRequest.brandId?.fullName || "Brand User"}</h3>
                                             <p className="text-xs text-gray-500 font-medium mb-3">{selectedRequest.gigId?.title}</p>

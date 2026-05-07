@@ -132,19 +132,20 @@ interface CreateGigInput {
   gigType: GigType;
 
   category: string;
-  tags: string[];
+  tags?: string[];
 
-  deliverables: GigDeliverable[];
+  deliverables?: GigDeliverable[];
 
-  basePrice: number;
-  currency: "INR" | "USD";
+  basePrice?: number;
+  currency?: "INR" | "USD";
   negotiationAllowed?: boolean;
-  deliveryTimeInDays: number;
-  revisionsIncluded: number;
+  deliveryTimeInDays?: number;
+  revisionsIncluded?: number;
 
   maxBookingsPerSlot?: number;
 
   collaboratorIds?: string[];
+  bannerUrl?: string;
 }
 
 /* ================= CREATE GIG ================= */
@@ -179,24 +180,26 @@ export const createGigService = async (
     platform: input.platform,
     gigType: input.gigType,
     category: input.category,
-    tags: input.tags,
+    tags: input.tags || [],
+    bannerUrl: input.bannerUrl || "",
 
-    influencerIds: [influencerProfile._id],
-    primaryInfluencerId: influencerProfile._id,
+    influencerIds: [influencerProfile._id as Types.ObjectId],
+    primaryInfluencerId: influencerProfile._id as Types.ObjectId,
 
     pricing: {
-      basePrice: 0,
-      currency: "INR",
-      negotiationAllowed: false,
-      deliveryTimeInDays: 1,
-      revisionsIncluded: 0
+      basePrice: input.basePrice ?? 0,
+      currency: input.currency ?? "INR",
+      negotiationAllowed: input.negotiationAllowed || false,
+      deliveryTimeInDays: input.deliveryTimeInDays ?? 1,
+      revisionsIncluded: input.revisionsIncluded ?? 0
     },
 
-    deliverables: [],
+    deliverables: input.deliverables || [],
 
     status: "draft",
     isDeleted: false,
-    reportCount: 0
+    reportCount: 0,
+    maxBookingsPerSlot: input.maxBookingsPerSlot || 1
   });
 
 
@@ -330,6 +333,7 @@ type EditableGigFields = {
   };
   maxBookingsPerSlot?: number;
   status?: "draft" | "published" | "paused" | "archived";
+  bannerUrl?: string;
 };
 
 export const editGigService = async (
@@ -421,6 +425,10 @@ export const editGigService = async (
 
   if (updateData.status !== undefined) {
     gig.status = updateData.status;
+  }
+  
+  if (updateData.bannerUrl !== undefined) {
+    gig.bannerUrl = updateData.bannerUrl;
   }
 
   await gig.save();

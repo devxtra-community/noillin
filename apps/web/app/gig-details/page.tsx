@@ -35,6 +35,7 @@ interface GigData {
         fullName: string;
         username: string;
         profileImageUrl?: string;
+        profileImage?: string;
         bio?: string;
         categories: string[];
         location?: string;
@@ -42,6 +43,7 @@ interface GigData {
         followersCount?: number;
     };
     category: string;
+    bannerUrl?: string;
     deliverables: Array<{
         contentType: string;
         quantity: number;
@@ -137,7 +139,19 @@ function GigDetailsContent() {
     );
 
     const influencer = gig.primaryInfluencerId;
-    const avatar = influencer.profileImageUrl || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150";
+    const avatar = influencer ? (influencer.profileImageUrl || influencer.profileImage || null) : null;
+    
+    const categoryHeroImages: Record<string, string> = {
+        "fashion": "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&q=80&w=1200",
+        "tech": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1200",
+        "fitness": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=1200",
+        "lifestyle": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=1200",
+        "beauty": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=1200",
+        "food": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1200",
+        "default": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=1200"
+    };
+
+    const gigHeroImage = gig.bannerUrl || categoryHeroImages[gig.category?.toLowerCase() || "default"] || categoryHeroImages["default"];
 
     return (
         <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 relative flex flex-col">
@@ -173,38 +187,84 @@ function GigDetailsContent() {
                     <ChevronRight className="w-4 h-4 mx-2" />
                     <Link href="/gig-list" className="hover:text-gray-900">Gigs</Link>
                     <ChevronRight className="w-4 h-4 mx-2" />
-                    <span className="text-gray-900">{influencer.fullName}</span>
+                    <span className="text-gray-900">{influencer?.fullName || "Influencer"}</span>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-10 relative items-start">
                     {/* Main Left Column */}
                     <div className="w-full lg:w-[65%] xl:w-[70%] space-y-8">
+                        {/* Gig Hero Image */}
+                        <div className="relative w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200/50 group">
+                            <Image
+                                src={gigHeroImage}
+                                alt={gig.title}
+                                fill
+                                unoptimized
+                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                priority
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const fallback = categoryHeroImages[gig.category.toLowerCase()] || categoryHeroImages["default"];
+                                    if (target.src !== fallback) {
+                                        target.src = fallback;
+                                    }
+                                }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+                            <div className="absolute bottom-8 left-8 right-8">
+                                <span className="bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/30 mb-4 inline-block">
+                                    {gig.category}
+                                </span>
+                            </div>
+                        </div>
+
                         {/* Header */}
                         <div>
-                            <Link href={`/influencer-profile-page?id=${influencer._id}`} className="flex items-center gap-4 mb-5 hover:opacity-80 transition-opacity">
-                                <Image src={avatar} alt={influencer.fullName || "Influencer"} width={64} height={64} className="rounded-full object-cover border border-gray-100 shadow-sm" />
+                            <Link href={`/influencer-profile-page?id=${influencer?._id}`} className="flex items-center gap-4 mb-6 hover:opacity-80 transition-opacity bg-white p-4 rounded-3xl border border-slate-100 shadow-sm w-fit">
+                                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-xl">
+                                    {avatar ? (
+                                        <>
+                                            <Image 
+                                                src={avatar} 
+                                                alt={influencer?.fullName || "Influencer"} 
+                                                fill 
+                                                unoptimized
+                                                className="object-cover"
+                                                onError={(e) => {
+                                                    const target = e.target as HTMLImageElement;
+                                                    target.style.display = 'none';
+                                                    const fallback = target.nextElementSibling as HTMLElement;
+                                                    if (fallback) fallback.style.display = 'block';
+                                                }}
+                                            />
+                                            <span className="hidden">{(influencer?.fullName || "I").charAt(0).toUpperCase()}</span>
+                                        </>
+                                    ) : (
+                                        (influencer?.fullName || "I").charAt(0).toUpperCase()
+                                    )}
+                                </div>
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <h1 className="text-xl font-bold text-gray-900">{influencer.fullName}</h1>
-                                        {influencer.isVerified && (
-                                            <span className="bg-[#E6F6ED] text-[#0CAF60] text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                                        <h1 className="text-xl font-bold text-gray-900">{influencer?.fullName || "Unknown Creator"}</h1>
+                                        {influencer?.isVerified && (
+                                            <span className="bg-[#E6F6ED] text-[#0CAF60] text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                                                 <CheckCircle2 className="w-3 h-3 fill-current" />
                                                 Verified
                                             </span>
                                         )}
                                     </div>
-                                    <div className="text-sm text-gray-500 flex items-center gap-3 mt-1 font-medium">
+                                    <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5 font-medium">
                                         <span>{influencer.categories.join(" & ")}</span>
                                         <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                                         <span className="flex items-center text-gray-700">
-                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                                            <span className="font-bold mr-1">New Creator</span>
+                                            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 mr-1" />
+                                            <span className="font-bold">New Creator</span>
                                         </span>
                                     </div>
                                 </div>
                             </Link>
 
-                            <h2 className="text-3xl font-extrabold text-gray-900 leading-tight mb-5 pr-8">
+                            <h2 className="text-4xl font-black text-gray-900 leading-tight mb-5 pr-8">
                                 {gig.title}
                             </h2>
 
@@ -287,6 +347,39 @@ function GigDetailsContent() {
                                     <MessageSquare className="w-4 h-4 text-orange-600 mb-2" />
                                     <div className="text-2xl font-extrabold text-gray-900 mb-1">85%</div>
                                     <div className="text-[10px] font-bold text-gray-500 uppercase">Positive Sentiment</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Reviews */}
+                        <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-100/50">
+                            <h3 className="text-xl font-bold text-gray-900 mb-6">Recent Brand Reviews</h3>
+                            <div className="space-y-6">
+                                <div className="p-6 bg-slate-50/50 rounded-3xl border border-gray-100 flex flex-col gap-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-slate-200 bg-white shadow-sm flex items-center justify-center font-bold text-slate-400">
+                                                <Image 
+                                                    fill 
+                                                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=100" 
+                                                    alt="Glow Cosmetics" 
+                                                    className="object-cover"
+                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                />
+                                                G
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-bold text-gray-900">Glow Cosmetics</h4>
+                                                <p className="text-[10px] font-bold text-gray-400">2 weeks ago</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-0.5">
+                                            {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />)}
+                                        </div>
+                                    </div>
+                                    <p className="text-sm font-medium text-gray-600 leading-relaxed italic">
+                                        &quot;Working with {influencer.fullName} was a breeze. The deliverables were top-notch and perfectly aligned with our brand voice.&quot;
+                                    </p>
                                 </div>
                             </div>
                         </div>

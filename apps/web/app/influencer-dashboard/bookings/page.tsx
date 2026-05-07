@@ -208,13 +208,20 @@ function BookingsContent() {
                                     >
                                         <td className="py-4 px-6">
                                             <div className="flex items-center gap-3">
-                                                {b.brandProfile?.profileImageUrl ? (
-                                                    <Image src={b.brandProfile.profileImageUrl} width={32} height={32} alt="" className="w-8 h-8 rounded-full object-cover shadow-sm bg-gray-100" />
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600">
-                                                        {(b.brandProfile?.companyName || "B").charAt(0)}
-                                                    </div>
-                                                )}
+                                                <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm bg-slate-100 flex items-center justify-center font-bold text-slate-600 text-[11px]">
+                                                    {b.brandProfile?.profileImageUrl ? (
+                                                        <Image 
+                                                            src={b.brandProfile.profileImageUrl} 
+                                                            width={32} 
+                                                            height={32} 
+                                                            alt="" 
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                        />
+                                                    ) : (
+                                                        (b.brandProfile?.companyName || "B").charAt(0)
+                                                    )}
+                                                </div>
                                                 <div className="flex flex-col">
                                                     <span className="font-bold text-[14px] text-gray-900 truncate max-w-[150px]">{b.brandProfile?.companyName || "Unknown Brand"}</span>
                                                     {b.brandProfile?.contactEmail && (
@@ -260,13 +267,20 @@ function BookingsContent() {
                                     {/* Brand Profile */}
                                     <div className="flex flex-col items-center text-center mb-8">
                                         <div className="relative mb-4">
-                                            {selectedBooking.brandProfile?.profileImageUrl ? (
-                                                <Image src={selectedBooking.brandProfile.profileImageUrl} width={64} height={64} alt="" className="w-16 h-16 rounded-[20px] object-cover shadow-lg shadow-gray-200/50" />
-                                            ) : (
-                                                <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
-                                                    {(selectedBooking.brandProfile?.companyName || "B").charAt(0)}
-                                                </div>
-                                            )}
+                                            <div className="relative w-16 h-16 rounded-[20px] overflow-hidden shadow-lg shadow-gray-200/50 bg-emerald-50 flex items-center justify-center text-xl font-black text-emerald-600">
+                                                {selectedBooking.brandProfile?.profileImageUrl ? (
+                                                    <Image 
+                                                        src={selectedBooking.brandProfile.profileImageUrl} 
+                                                        width={64} 
+                                                        height={64} 
+                                                        alt="" 
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                    />
+                                                ) : (
+                                                    (selectedBooking.brandProfile?.companyName || "B").charAt(0)
+                                                )}
+                                            </div>
                                         </div>
                                         <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{selectedBooking.brandProfile?.companyName || "Unknown Brand"}</h3>
                                         {selectedBooking.brandProfile?.contactEmail && (

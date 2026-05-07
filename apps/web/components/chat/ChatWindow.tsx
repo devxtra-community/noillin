@@ -414,10 +414,27 @@ export function ChatWindow({
           <div className="relative">
             <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center ring-2 ring-white shadow-sm relative">
               {receiverImage ? (
-                <Image src={receiverImage} alt={receiverName || "profile"} fill className="object-cover" unoptimized />
+                <>
+                  <Image 
+                    src={receiverImage} 
+                    alt={receiverName || "profile"} 
+                    fill 
+                    className="object-cover" 
+                    unoptimized 
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                  <span className="hidden w-full h-full items-center justify-center text-[16px] font-semibold text-gray-500">
+                    {(receiverName || "U").substring(0, 2).toUpperCase()}
+                  </span>
+                </>
               ) : (
                 <span className="text-[16px] font-semibold text-gray-500">
-                  {receiverName?.substring(0, 2).toUpperCase()}
+                  {(receiverName || "U").substring(0, 2).toUpperCase()}
                 </span>
               )}
             </div>
