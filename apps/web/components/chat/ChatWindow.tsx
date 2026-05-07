@@ -15,6 +15,7 @@ import { ChatInput } from "./ChatInput";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
 import { uploadToS3 } from "@/lib/s3-uploads";
+import { useDashboardStore } from "@/store/dashboard.store";
 
 export interface Message {
   _id: string;
@@ -47,6 +48,14 @@ interface ChatWindowProps {
   disabled?: boolean;
 }
 
+interface Order {
+  _id: string;
+  connectionId: string;
+  status: "PENDING" | "IN_ESCROW" | "COMPLETED" | "CANCELLED" | "DISPUTED";
+  workStatus: "NOT_STARTED" | "SUBMITTED" | "APPROVED" | "REJECTED";
+  deliverableUrl?: string;
+}
+
 export function ChatWindow({
   currentUserId,
   gigRequestId,
@@ -61,6 +70,7 @@ export function ChatWindow({
   const socketRef = useRef<Socket | null>(null);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
   const { accessToken, user } = useAuthStore();
+  const { fetchCounts } = useDashboardStore();
   const [connection, setConnection] = useState<{ _id: string; status: string; gigId?: string } | null>(null);
 
   // Proposal State
@@ -72,7 +82,7 @@ export function ChatWindow({
   const [isSubmittingDeliverable, setIsSubmittingDeliverable] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [activeOrder, setActiveOrder] = useState<Record<string, unknown> | null>(null);
+  const [activeOrder, setActiveOrder] = useState<Order | null>(null);
 
   // Reporting State
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
@@ -136,18 +146,24 @@ export function ChatWindow({
     }
   }, [gigRequestId]);
 
+  const fetchOrder = useCallback(async () => {
+    try {
+      const res = await api.get(`/orders/history`);
+      const order = res.data.find((o: Order) => o.connectionId === gigRequestId);
+      setActiveOrder(order || null);
+    } catch (err) {
+      console.error("Failed to fetch order:", err);
+    }
+  }, [gigRequestId]);
+
   useEffect(() => {
     if (gigRequestId && accessToken) {
       setTimeout(() => {
         fetchConnection();
-        // Fetch order details too
-        api.get(`/orders/history`).then(res => {
-          const order = res.data.find((o: { connectionId: string }) => o.connectionId === gigRequestId);
-          setActiveOrder(order);
-        }).catch(console.error);
+        fetchOrder();
       }, 0);
     }
-  }, [gigRequestId, accessToken, fetchConnection]);
+  }, [gigRequestId, accessToken, fetchConnection, fetchOrder]);
 
   // ✅ socket
   useEffect(() => {
@@ -189,6 +205,11 @@ export function ChatWindow({
       setMessages((prev) =>
         prev.map((m) => m._id === updatedMessage._id ? updatedMessage : m)
       );
+
+      // If it's a deliverable update, refetch the order
+      if (updatedMessage.messageType === "DELIVERABLE") {
+        fetchOrder();
+      }
     });
 
     socketInstance.on("messages_read", ({ gigRequestId: readGigRequestId }: { gigRequestId: string; readByUserId: string }) => {
@@ -377,11 +398,13 @@ export function ChatWindow({
 
   useEffect(() => {
     if (!gigRequestId) return;
-    api.post(`/chat/read/${gigRequestId}`).catch(console.error);
+    api.post(`/chat/read/${gigRequestId}`).then(() => {
+      fetchCounts();
+    }).catch(console.error);
     if (socketRef.current?.connected) {
       socketRef.current.emit("mark_read", gigRequestId);
     }
-  }, [gigRequestId, accessToken]);
+  }, [gigRequestId, accessToken, fetchCounts]);
 
   return (
     <div className="flex flex-col h-full bg-[#f8f9fa] shadow-2xl relative w-full overflow-hidden">
@@ -583,13 +606,13 @@ export function ChatWindow({
             </button>
           )}
 
-          {isInfluencer && activeOrder?.status === "IN_ESCROW" && (
+          {isInfluencer && activeOrder?.status === "IN_ESCROW" && activeOrder?.workStatus !== "APPROVED" && (
             <button onClick={() => setIsSubmittingDeliverable(true)} className="w-full sm:w-auto flex items-center justify-center gap-2 text-blue-600 hover:text-blue-700 font-bold text-[13px] px-5 py-2.5 rounded-xl border border-blue-100 hover:bg-blue-50 transition-all uppercase tracking-wider">
-              🎁 Submit Final Work
+              🎁 { activeOrder?.workStatus === "SUBMITTED" ? "Update Submission" : "Submit Final Work" }
             </button>
           )}
 
-          {isBrand && (
+          {isBrand && (!activeOrder || activeOrder.status === "PENDING") && (
             <button
               onClick={async () => {
                 if (!connection?._id) return;

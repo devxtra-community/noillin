@@ -1,5 +1,10 @@
 import { Router } from "express";
 
-const router: Router = Router()
+import { getDashboardCounts } from "../controllers/user.controller.js";
+import { authenticate } from "../middlewares/auth.middleware.js";
 
-export default router
+const router: Router = Router();
+
+router.get("/counts", authenticate, getDashboardCounts);
+
+export default router;

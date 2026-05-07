@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
     Users,
@@ -11,15 +11,13 @@ import {
     MessageSquare,
     Calendar,
     DollarSign,
-    Menu,
     X
 } from "lucide-react";
 
-import { useAuthStore } from "@/store/auth.store";
 import RoleGuard from "@/components/rbac/RoleGuard";
-import api from "@/lib/axios.client";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardHeader from "@/components/DashboardHeader";
+import { useDashboardStore } from "@/store/dashboard.store";
 
 
 export default function InfluencerDashboardLayout({
@@ -29,12 +27,20 @@ export default function InfluencerDashboardLayout({
 }) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { counts, fetchCounts } = useDashboardStore();
+
+    useEffect(() => {
+        fetchCounts();
+        // Set up interval to refresh counts every minute
+        const interval = setInterval(fetchCounts, 60000);
+        return () => clearInterval(interval);
+    }, [fetchCounts]);
 
     const navItems = [
         { name: "Overview", href: "/influencer-dashboard", icon: LayoutDashboard },
-        { name: "Requests", href: "/influencer-dashboard/requests", icon: Users, badge: "12" },
+        { name: "Requests", href: "/influencer-dashboard/requests", icon: Users, badge: counts.pendingRequestsCount > 0 ? counts.pendingRequestsCount.toString() : undefined },
         { name: "Bookings", href: "/influencer-dashboard/bookings", icon: Briefcase },
-        { name: "Messages", href: "/influencer-dashboard/messages", icon: MessageSquare, badge: "3", badgeColor: "bg-rose-100 text-rose-600" },
+        { name: "Messages", href: "/influencer-dashboard/messages", icon: MessageSquare, badge: counts.unreadMessagesCount > 0 ? counts.unreadMessagesCount.toString() : undefined, badgeColor: "bg-rose-100 text-rose-600" },
         { name: "Calendar", href: "/influencer-dashboard/calendar", icon: Calendar },
         { name: "Earnings", href: "/influencer-dashboard/earnings", icon: DollarSign },
     ];

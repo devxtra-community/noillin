@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search, ChevronRight, Calendar, Globe, Loader2 } from "lucide-react";
 
 import api from "@/lib/axios.client";
+import { useDashboardStore } from "@/store/dashboard.store";
 
 interface ConnectionRequest {
     _id: string;
@@ -22,6 +23,7 @@ export default function RequestsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeFilter, setActiveFilter] = useState("Pending");
+    const { fetchCounts } = useDashboardStore();
 
     const fetchRequests = async () => {
         try {
@@ -67,6 +69,7 @@ export default function RequestsPage() {
         try {
             await api.patch(`/connections/${connectionId}/accept`);
             fetchRequests();
+            fetchCounts();
         } catch (error) {
             console.error("Failed to accept request:", error);
         }
@@ -76,6 +79,7 @@ export default function RequestsPage() {
         try {
             await api.patch(`/connections/${connectionId}/reject`);
             fetchRequests();
+            fetchCounts();
         } catch (error) {
             console.error("Failed to reject request:", error);
         }
