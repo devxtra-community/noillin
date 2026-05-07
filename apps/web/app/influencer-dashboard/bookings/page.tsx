@@ -27,6 +27,8 @@ interface Order {
         description?: string;
     };
     brandProfile?: {
+        _id: string;
+        userId?: string;
         companyName: string;
         contactEmail?: string;
         profileImageUrl?: string;
