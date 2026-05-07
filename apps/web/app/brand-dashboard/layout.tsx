@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -17,6 +17,7 @@ import {
 import RoleGuard from "@/components/rbac/RoleGuard";
 import NotificationBell from "@/components/NotificationBell";
 import DashboardHeader from "@/components/DashboardHeader";
+import { useDashboardStore } from "@/store/dashboard.store";
 
 export default function BrandDashboardLayout({
     children,
@@ -25,12 +26,20 @@ export default function BrandDashboardLayout({
 }) {
     const pathname = usePathname();
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { counts, fetchCounts } = useDashboardStore();
+
+    useEffect(() => {
+        fetchCounts();
+        // Set up interval to refresh counts every minute
+        const interval = setInterval(fetchCounts, 60000);
+        return () => clearInterval(interval);
+    }, [fetchCounts]);
 
     const navItems = [
         { name: "Overview", href: "/brand-dashboard", icon: LayoutDashboard },
-        { name: "Requests", href: "/brand-dashboard/requests", icon: Users, badge: "12" },
+        { name: "Requests", href: "/brand-dashboard/requests", icon: Users, badge: counts.pendingRequestsCount > 0 ? counts.pendingRequestsCount.toString() : undefined },
         { name: "Bookings", href: "/brand-dashboard/bookings", icon: Briefcase },
-        { name: "Messages", href: "/brand-dashboard/messages", icon: MessageSquare, badge: "3", badgeColor: "bg-rose-100 text-rose-600" },
+        { name: "Messages", href: "/brand-dashboard/messages", icon: MessageSquare, badge: counts.unreadMessagesCount > 0 ? counts.unreadMessagesCount.toString() : undefined, badgeColor: "bg-rose-100 text-rose-600" },
         { name: "Calendar", href: "/brand-dashboard/calendar", icon: Calendar },
         { name: "Transactions", href: "/brand-dashboard/transactions", icon: ArrowLeftRight },
     ];

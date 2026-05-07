@@ -168,7 +168,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6 py-4 flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -215,7 +215,7 @@ export default function HomePage() {
 
       <main>
         {/* Hero Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-28 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center overflow-hidden">
+        <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6 py-16 md:py-28 grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-12 items-center overflow-hidden">
           <motion.div
             initial="initial"
             animate="animate"
@@ -384,7 +384,7 @@ export default function HomePage() {
 
         {/* Stats Section */}
         <section className="bg-[#F1F5F9]/50 py-20 border-y border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6">
             <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-16">Trusted by brand & creators</p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:divide-x divide-slate-200">
               {[
@@ -412,7 +412,7 @@ export default function HomePage() {
 
         {/* How it Works */}
         <section className="py-28 relative overflow-hidden bg-[#F1F5F9]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6 relative z-10">
             <div className="text-center max-w-2xl mx-auto mb-20">
               <h2 className="text-4xl font-extrabold text-slate-900 mb-6">How Noillin Works</h2>
               <p className="text-slate-500 font-medium text-lg leading-relaxed">
@@ -459,7 +459,7 @@ export default function HomePage() {
 
         {/* Platform Features */}
         <section className="py-28 bg-[#F1F5F9] overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6">
             <div className="text-center mb-24">
               <h2 className="text-4xl font-extrabold text-slate-900">Platform Features</h2>
             </div>
@@ -492,7 +492,7 @@ export default function HomePage() {
         </section>
 
         {/* Brand vs Creator */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Brand Card */}
           <motion.div
             whileHover={{ scale: 1.01 }}
@@ -548,7 +548,7 @@ export default function HomePage() {
 
         {/* Testimonials */}
         <section className="py-28 bg-[#F1F5F9]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6">
             <div className="text-center mb-24">
               <h2 className="text-4xl font-extrabold text-slate-900">Community Stories</h2>
             </div>
@@ -562,7 +562,7 @@ export default function HomePage() {
 
         {/* Final CTA */}
         <section className="px-4 sm:px-6 lg:px-8 py-10">
-          <div className="max-w-7xl mx-auto h-[500px] bg-emerald-500 rounded-[4rem] relative overflow-hidden flex flex-col items-center justify-center text-center px-6 group">
+          <div className="max-w-[1440px] mx-auto h-[500px] bg-emerald-500 rounded-[4rem] relative overflow-hidden flex flex-col items-center justify-center text-center px-6 group">
             {/* Animated Circles */}
             <motion.div
               animate={{ scale: [1, 1.1, 1] }}
@@ -599,7 +599,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer className="bg-[#0F172A] pt-28 pb-16 text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-12 pb-20 border-b border-white/5">
             <div className="flex items-center gap-3 group cursor-pointer">
               <div className="w-10 h-10 text-white bg-emerald-500 rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">

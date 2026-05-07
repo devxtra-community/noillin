@@ -263,13 +263,20 @@ function BookingsContent() {
                                     {/* Brand Profile */}
                                     <div className="flex flex-col items-center text-center mb-8">
                                         <div className="relative mb-4">
-                                            {selectedBooking.brandProfile?.profileImageUrl ? (
-                                                <Image src={selectedBooking.brandProfile.profileImageUrl} width={64} height={64} alt="" className="w-16 h-16 rounded-[20px] object-cover shadow-lg shadow-gray-200/50" />
-                                            ) : (
-                                                <div className="w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600">
-                                                    {(selectedBooking.brandProfile?.companyName || "B").charAt(0)}
-                                                </div>
-                                            )}
+                                            <div className="relative w-16 h-16 rounded-[20px] overflow-hidden shadow-lg shadow-gray-200/50 bg-emerald-50 flex items-center justify-center text-xl font-black text-emerald-600">
+                                                {selectedBooking.brandProfile?.profileImageUrl ? (
+                                                    <Image 
+                                                        src={selectedBooking.brandProfile.profileImageUrl} 
+                                                        width={64} 
+                                                        height={64} 
+                                                        alt="" 
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                    />
+                                                ) : (
+                                                    (selectedBooking.brandProfile?.companyName || "B").charAt(0)
+                                                )}
+                                            </div>
                                         </div>
                                         <Link href={`/brand-profile-page?id=${selectedBooking.brandProfile?._id || selectedBooking.brandProfile?.userId}`} className="hover:opacity-80 transition-opacity">
                                             <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{selectedBooking.brandProfile?.companyName || "Unknown Brand"}</h3>

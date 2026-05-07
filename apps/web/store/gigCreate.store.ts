@@ -28,6 +28,7 @@ interface GigCreateState {
     gigType: string;
     category: string;
     tags: string[];
+    bannerUrl: string;
   };
 
   deliverables: GigDeliverable[];
@@ -51,7 +52,8 @@ export const useGigCreateStore = create<GigCreateState>((set) => ({
     platform: "instagram",
     gigType: "solo",
     category: "",
-    tags: []
+    tags: [],
+    bannerUrl: ""
   },
 
   deliverables: [],
@@ -82,7 +84,8 @@ export const useGigCreateStore = create<GigCreateState>((set) => ({
       platform: "instagram",
       gigType: "solo",
       category: "",
-      tags: []
+      tags: [],
+      bannerUrl: ""
     },
     deliverables: [],
     pricing: null

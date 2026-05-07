@@ -13,9 +13,9 @@ const nextConfig: NextConfig = {
         hostname: "i.pravatar.cc",
       },
       {
-      protocol: "https",
-      hostname: "noillin-media.s3.eu-north-1.amazonaws.com"
-    }
+        protocol: "https",
+        hostname: "**.amazonaws.com",
+      }
     ],
   },
 };
