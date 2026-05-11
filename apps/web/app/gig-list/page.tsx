@@ -6,7 +6,6 @@ import { Zap, Check, ArrowRight, Calendar } from "lucide-react";
 
 import api from "@/lib/axios.client";
 import DashboardHeader from "@/components/DashboardHeader";
-import NotificationBell from "@/components/NotificationBell";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type ViewMode = "grid" | "list";
@@ -422,11 +421,7 @@ export default function ExploreGigs() {
   return (
     <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-20">
       {/* Navbar */}
-      <DashboardHeader>
-        <div className="flex items-center gap-6">
-          <NotificationBell />
-        </div>
-      </DashboardHeader>
+      <DashboardHeader />
 
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header Section */}

@@ -17,7 +17,6 @@ import { ReportingModal } from "@/components/shared/ReportingModal";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
 import DashboardHeader from "@/components/DashboardHeader";
-import NotificationBell from "@/components/NotificationBell";
 
 interface GigData {
     _id: string;
@@ -174,11 +173,7 @@ function GigDetailsContent() {
             )}
 
             {/* Navbar */}
-            <DashboardHeader>
-                <div className="flex items-center gap-6">
-                    <NotificationBell />
-                </div>
-            </DashboardHeader>
+            <DashboardHeader />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
                 {/* Breadcrumb */}
