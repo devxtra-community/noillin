@@ -1,0 +1,28 @@
+
+import { UserRole } from "../models/user.model.js";
+
+import { Permission } from "./permission.js";
+
+export const RolePermissions: Record<UserRole, Permission[]> = {
+  [UserRole.ADMIN]: [
+    Permission.CREATE_PROFILE,
+    Permission.UPDATE_PROFILE,
+    Permission.APPROVE_SIGNUP,
+    Permission.REJECT_SIGNUP,
+    Permission.MANAGE_USERS,
+    Permission.DELETE_GIG,
+  ],
+  [UserRole.BRAND]: [
+    Permission.CREATE_PROFILE,
+    Permission.UPDATE_PROFILE,
+  ],
+  [UserRole.INFLUENCER]: [
+    Permission.CREATE_PROFILE,
+    Permission.UPDATE_PROFILE,
+    Permission.CREATE_GIG,
+    Permission.UPDATE_GIG,
+    Permission.DELETE_GIG,
+    Permission.PUBLISH_GIG,
+    Permission.REPORT_GIG
+  ],
+};

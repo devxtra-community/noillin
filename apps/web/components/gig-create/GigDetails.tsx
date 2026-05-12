@@ -1,0 +1,274 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { FaInstagram, FaYoutube, FaTiktok, FaUser, FaUsers } from "react-icons/fa";
+import { UploadCloud, X, Loader2 } from "lucide-react";
+import Image from "next/image";
+
+import api from "@/lib/axios.client";
+import { useGigCreateStore } from "@/store/gigCreate.store";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { SelectButton } from "@/components/ui/SelectButton";
+import { uploadToS3 } from "@/lib/s3-uploads";
+
+
+interface GigDetailsProps {
+    onNext: () => void;
+}
+
+type GigDetailsForm = {
+    title: string;
+    shortDescription: string;
+    platform: string;
+    gigType: string;
+    category: string;
+    tags: string[];
+    bannerUrl: string;
+};
+
+
+export function GigDetails({ onNext }: GigDetailsProps) {
+    const { gigId, mode, setGigId, setDetails, details } = useGigCreateStore();
+
+    const [form, setForm] = useState<GigDetailsForm>({
+        title: "",
+        shortDescription: "",
+        platform: "instagram",
+        gigType: "solo",
+        category: "",
+        tags: [],
+        bannerUrl: ""
+    });
+    useEffect(() => {
+        setForm({
+            title: details.title || "",
+            shortDescription: details.shortDescription || "",
+            platform: details.platform || "instagram",
+            gigType: details.gigType || "solo",
+            category: details.category || "",
+            tags: details.tags || [],
+            bannerUrl: details.bannerUrl || ""
+        });
+    }, [details]);
+    const [isUploading, setIsUploading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleChange = <K extends keyof GigDetailsForm>(
+        key: K,
+        value: GigDetailsForm[K]
+    ) => {
+        setForm((prev) => ({
+            ...prev,
+            [key]: value
+        }));
+    };
+
+    const handleSubmit = async () => {
+        if (isLoading) return;
+        setIsLoading(true);
+
+        try {
+            if (mode === "create") {
+                const response = await api.post("/gigs/create_gig", form);
+
+                const createdGigId = response.data.data._id;
+
+                setGigId(createdGigId);
+            } else {
+                if (!gigId) {
+                    console.error("Gig ID missing for edit");
+                    return;
+                }
+
+                await api.patch(`/gigs/${gigId}`, form);
+            }
+
+            setDetails(form);
+            onNext();
+
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    
+    const handleImageUpload = async (file: File) => {
+        try {
+            setIsUploading(true);
+            const url = await uploadToS3(file, "gig-banners");
+            handleChange("bannerUrl", url);
+        } catch (err) {
+            console.error("Banner upload failed:", err);
+            alert("Failed to upload image. Please try again.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    return (
+        <div className="p-8 sm:p-10 space-y-8">
+            {/* Section: Basic Info */}
+            <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">Gig Basics</h2>
+
+                <div className="grid gap-6">
+                    <Input
+                        label="Gig Title"
+                        placeholder="e.g., Authentic Instagram Reel for Lifestyle Brands"
+                        helperText="Keep it catchy and descriptive (Max 80 chars)"
+                        value={form.title}
+                        onChange={(e) => handleChange("title", e.target.value)}
+                        className="text-lg"
+                    />
+
+                    <Textarea
+                        label="Short Description"
+                        value={form.shortDescription}
+                        onChange={(e) => handleChange("shortDescription", e.target.value)}
+                        placeholder="Describe what you will deliver..."
+                        className="min-h-30"
+                    />
+
+                    <div className="space-y-4">
+                        <label className="block text-sm font-semibold text-gray-700">Gig Banner Image</label>
+                        <div className="relative group">
+                            {form.bannerUrl ? (
+                                <div className="relative w-full h-64 rounded-2xl overflow-hidden border-2 border-gray-100 shadow-sm">
+                                    <Image src={form.bannerUrl} alt="Gig Banner" fill className="object-cover" />
+                                    <button 
+                                        type="button"
+                                        onClick={() => handleChange("bannerUrl", "")}
+                                        className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-all"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className={`relative w-full h-64 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all ${isUploading ? 'bg-gray-50 border-green-300' : 'bg-white border-gray-200 hover:border-green-400 hover:bg-green-50/30'}`}>
+                                    {isUploading ? (
+                                        <Loader2 className="w-10 h-10 text-green-500 animate-spin" />
+                                    ) : (
+                                        <UploadCloud className="w-12 h-12 text-gray-300 group-hover:text-green-400" />
+                                    )}
+                                    <div className="text-center">
+                                        <p className="text-sm font-bold text-gray-900">{isUploading ? "Uploading Banner..." : "Click to Upload Banner"}</p>
+                                        <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-black">Recommended: 1200x400 (PNG/JPG)</p>
+                                    </div>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*"
+                                        className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                        disabled={isUploading}
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) handleImageUpload(file);
+                                        }}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Section: Platform & Category */}
+            <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">Platform & Category</h2>
+
+                <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">Select Platform</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <SelectButton
+                            label="Instagram"
+                            icon={<FaInstagram className="w-5 h-5" />}
+                            selected={form.platform === 'instagram'}
+                            onClick={() => handleChange("platform", "instagram")}
+                        />
+                        <SelectButton
+                            label="YouTube"
+                            icon={<FaYoutube className="w-5 h-5" />}
+                            selected={form.platform === 'youtube'}
+                            onClick={() => handleChange("platform", 'youtube')}
+                        />
+                        <SelectButton
+                            label="TikTok"
+                            icon={<FaTiktok className="w-5 h-5" />}
+                            selected={form.platform === 'tiktok'}
+                            onClick={() => handleChange("platform", 'tiktok')}
+                        />
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Category / Niche</label>
+                        <select className="w-full h-12 rounded-lg border border-gray-200 bg-white px-4 text-sm outline-none focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-shadow appearance-none cursor-pointer"
+                            value={form.category}
+                            onChange={(e) => handleChange("category", e.target.value)}>
+
+                            <option value="">Select a Category</option>
+                            <option value="fashion">Fashion & Style</option>
+                            <option value="tech">Tech & Gadgets</option>
+                            <option value="lifestyle">Lifestyle & Vlog</option>
+                            <option value="beauty">Beauty & Cosmetics</option>
+                            <option value="food">Food & Beverage</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">Gig Type</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <SelectButton
+                                label="solo Creator"
+                                icon={<FaUser className="w-4 h-4" />}
+                                selected={form.gigType === 'solo'}
+                                onClick={() => handleChange("gigType", 'solo')}
+                                className="justify-center"
+                            />
+                            <SelectButton
+                                label="Group / Collab (Soon)"
+                                icon={<FaUsers className="w-4 h-4" />}
+                                selected={false}
+                                disabled
+                                className="justify-center bg-gray-50 border-gray-100 text-gray-400 cursor-not-allowed"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="flex items-center justify-between border-t border-gray-100 pt-6 mt-8">
+                <button type="button" className="text-gray-600 hover:text-gray-900 font-medium text-sm flex items-center gap-2 transition-colors">
+                    {/* Placeholder for Back button alignment if needed, or empty */}
+                </button>
+
+                <div className="flex items-center gap-4">
+                    <button
+                        type="button"
+                        onClick={() => console.log("Save as draft clicked")}
+                        className="text-gray-500 hover:text-gray-900 font-medium text-sm transition-colors"
+                    >
+                        Save as Draft
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={isLoading}
+                        className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold text-sm shadow-sm hover:shadow-md transition-all transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                        {isLoading ? (
+                            <>
+                                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                Saving...
+                            </>
+                        ) : (
+                            "Continue to Deliverables"
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}

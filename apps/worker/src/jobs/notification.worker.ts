@@ -1,0 +1,328 @@
+import { Worker } from "bullmq";
+import amqp from "amqplib";
+
+import { logger } from "../utils/logger.js";
+import { webPushService } from "../services/web-push.service.js";
+import { NotificationModel } from "../../../core-api/src/models/notification.model.js";
+import { PushSubscriptionModel } from "../../../core-api/src/models/push-subscription.model.js";
+import { User } from "../../../core-api/src/models/user.model.js";
+import { sendTransactionalEmail } from "../../../core-api/src/utils/sendotpEmail.js";
+
+
+let rabbitChannel: amqp.Channel;
+
+async function getRabbitChannel() {
+  if (!rabbitChannel) {
+    const conn = await amqp.connect(process.env.RABBIT_URL || "amqp://localhost:5672");
+    rabbitChannel = await conn.createChannel();
+    await rabbitChannel.assertQueue("notification.events", { durable: true });
+  }
+  return rabbitChannel;
+}
+
+async function emitRealtimeNotification(userId: string, payload: unknown) {
+  try {
+    const channel = await getRabbitChannel();
+    console.log("Emitting realtime notification to:", userId);
+    
+    channel.sendToQueue("notification.events", Buffer.from(JSON.stringify({
+      event: "notification:new",
+      room: `user:${userId}`,
+      payload
+    })));
+    
+    console.log("Realtime event published to RabbitMQ");
+  } catch (err) {
+    console.error("Notification worker error:", err);
+  }
+}
+
+console.log("🚀 Notification Worker started");
+
+export const notificationWorker = new Worker(
+  "notification-queue",
+  async (job) => {
+    console.log("Worker received job:", job.name, job.data);
+    console.log("🔥 JOB RECEIVED:", job.name);
+    console.log("📦 JOB DATA:", job.data);
+
+    if (job.name === "new-notification") {
+      console.log("Processing notification job", job.data.type);
+    }
+
+    if (job.name === "new-notification" && job.data.type === "ORDER_CREATED") {
+      console.log("Handling ORDER_CREATED notification");
+      console.log("🔔 Processing order notification...");
+      const { userId, type, title, message, metadata } = job.data;
+
+      const notification = await NotificationModel.create({
+        userId,
+        type,
+        title,
+        message,
+        metadata
+      });
+
+      const user = await User.findById(userId);
+      if (user && user.email) {
+        console.log("Sending email to:", user.email);
+        await sendTransactionalEmail(user.email, title, message);
+        console.log("Email sent successfully");
+      }
+
+      await emitRealtimeNotification(userId, notification);
+
+      logger.info(`Notification processed for order ${metadata.orderId}`);
+    } else if (job.name === "gig-request-created") {
+      const { id, brandId, influencerId, note } = job.data;
+      
+      // Feature Flags
+      const enableWebPush = process.env.ENABLE_WEB_PUSH === "true";
+      const enableEmailNotifications = process.env.ENABLE_EMAIL_NOTIFICATIONS === "true";
+
+      if (process.env.ENABLE_WEB_PUSH === undefined) {
+        console.warn("⚠️ WARNING: ENABLE_WEB_PUSH is not defined in env");
+      }
+
+      // 1. Save In-App Notification (Always enabled for core platform UX)
+      const notification = await NotificationModel.create({
+        userId: influencerId,
+        type: "GIG_REQUEST",
+        title: "New Gig Request",
+        message: "New gig request received",
+        metadata: { 
+          connectionId: id,
+          gigRequestId: id, 
+          brandId, 
+          note 
+        }
+      });
+      logger.info(`Saved in-app notification for ${influencerId}`);
+      await emitRealtimeNotification(influencerId, notification);
+
+      // 2. Web Push
+      let pushSuccessCount = 0;
+      if (enableWebPush) {
+        console.log("🔍 Fetching subscriptions for userId:", influencerId);
+        const subscriptions = await PushSubscriptionModel.find({ userId: influencerId });
+        console.log(`Found ${subscriptions.length} subscriptions`);
+
+        const pushPayload = {
+          title: "New Notification",
+          body: "You have a new gig request",
+          url: `/influencer-dashboard/requests/${id}`
+        };
+
+        for (const sub of subscriptions) {
+  if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+    console.warn("Skipping invalid subscription:", sub.endpoint);
+
+    // Optional: clean invalid entries
+    await PushSubscriptionModel.deleteOne({ _id: sub._id });
+
+    continue;
+  }
+
+  console.log("Sending push to:", sub.endpoint);
+
+  const success = await webPushService.sendNotification(
+    {
+      endpoint: sub.endpoint,
+      keys: {
+        p256dh: sub.keys.p256dh,
+        auth: sub.keys.auth,
+      },
+    },
+    pushPayload
+  );
+
+  if (success) {
+    pushSuccessCount++;
+  } else {
+    console.log("Push failed, removing subscription:", sub.endpoint);
+    await PushSubscriptionModel.deleteOne({ _id: sub._id });
+  }
+}
+      } else {
+        logger.info(`Web push skipped (feature flag disabled)`);
+      }
+
+      // 3. Email Fallback
+      if (pushSuccessCount === 0 && enableEmailNotifications) {
+        logger.info(`No successful web push for ${influencerId}, enqueueing email fallback`);
+        const influencer = await User.findById(influencerId);
+        
+        if (influencer) {
+          // Scaffolded: Add to email queue
+          // await emailQueue.add("send-email", {
+          //   to: influencer.email,
+          //   template: "gig_request_received",
+          //   data: { brandId, note, gigRequestId: id }
+          // });
+          logger.info(`(Simulated Queue) Enqueued fallback email for ${influencer.email}`);
+        }
+      } else if (pushSuccessCount === 0) {
+        logger.info(`Email fallback skipped (feature flag disabled)`);
+      }
+    } 
+    else if (job.name === "gig-request-accepted") {
+  const { id, brandId } = job.data;
+
+  const notification = await NotificationModel.create({
+    userId: brandId,
+    type: "GIG_REQUEST",
+    title: "Request Accepted",
+    message: "Your gig request was accepted",
+    metadata: {
+      connectionId: id,
+    },
+  });
+
+  logger.info(`Saved accepted notification for ${brandId}`);
+
+  // 🔥 REALTIME
+  await emitRealtimeNotification(brandId, notification);
+
+  // 🔔 PUSH
+  if (process.env.ENABLE_WEB_PUSH === "true") {
+    const subscriptions = await PushSubscriptionModel.find({ userId: brandId });
+
+    const pushPayload = {
+      title: "Request Accepted",
+      body: "Your gig request was accepted",
+      url: `/brand-dashboard/requests/${id}`,
+    };
+
+    for (const sub of subscriptions) {
+      if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+  logger.warn("Skipping invalid push subscription", { endpoint: sub.endpoint });
+  continue;
+}
+
+await webPushService.sendNotification(
+  {
+    endpoint: sub.endpoint,
+    keys: {
+      p256dh: sub.keys.p256dh,
+      auth: sub.keys.auth,
+    },
+  },
+  pushPayload
+);
+    }
+  }
+}
+
+else if (job.name === "gig-request-rejected") {
+  const { id, brandId } = job.data;
+
+  const notification = await NotificationModel.create({
+    userId: brandId,
+    type: "GIG_REQUEST",
+    title: "Request Rejected",
+    message: "Your gig request was rejected",
+    metadata: {
+      connectionId: id,
+    },
+  });
+
+  logger.info(`Saved rejected notification for ${brandId}`);
+
+  // 🔥 REALTIME
+  await emitRealtimeNotification(brandId, notification);
+
+  // 🔔 PUSH
+  if (process.env.ENABLE_WEB_PUSH === "true") {
+    const subscriptions = await PushSubscriptionModel.find({ userId: brandId });
+
+    const pushPayload = {
+      title: "Request Rejected",
+      body: "Your gig request was rejected",
+      url: `/brand-dashboard/requests/${id}`,
+    };
+
+    for (const sub of subscriptions) {
+      if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+  logger.warn("Skipping invalid push subscription", { endpoint: sub.endpoint });
+  continue;
+}
+
+await webPushService.sendNotification(
+  {
+    endpoint: sub.endpoint,
+    keys: {
+      p256dh: sub.keys.p256dh,
+      auth: sub.keys.auth,
+    },
+  },
+  pushPayload
+);
+    }
+  }
+}
+    else if (job.name === "new-message" || job.name === "NEW_MESSAGE") {
+      const userId = job.data.userId || job.data.receiverId;
+      const conversationId = job.data.metadata?.conversationId || job.data.conversationId;
+      const title = job.data.title || "New Message";
+      const messageText = job.data.message || "New message received";
+      const metadata = job.data.metadata || { conversationId };
+
+      const notification = await NotificationModel.create({
+        userId,
+        type: "NEW_MESSAGE",
+        title,
+        message: messageText,
+        metadata
+      });
+      logger.info(`Saved in-app notification for message in ${conversationId}`);
+      await emitRealtimeNotification(userId, notification);
+
+      // Web Push for messages
+      if (process.env.ENABLE_WEB_PUSH === "true") {
+        const subscriptions = await PushSubscriptionModel.find({ userId });
+        console.log(`Found ${subscriptions.length} subscriptions for message notification`);
+        
+        const pushPayload = {
+          title,
+          body: messageText,
+          url: `/messages/${conversationId}`
+        };
+
+        for (const sub of subscriptions) {
+          if (!sub.keys || !sub.keys.p256dh || !sub.keys.auth) {
+            console.warn("Skipping invalid subscription:", sub.endpoint);
+            continue;
+          }
+
+          console.log("Sending push to:", sub.endpoint);
+
+          await webPushService.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: {
+                p256dh: sub.keys.p256dh,
+                auth: sub.keys.auth,
+              },
+            },
+            pushPayload
+          );
+        }
+      }
+    }
+  },
+  {
+    connection: {
+      host: "127.0.0.1",
+      port: 6379,
+    },
+  }
+);
+
+notificationWorker.on("completed", (job) => {
+  console.log(`✅ Job completed: ${job.id}`);
+});
+
+notificationWorker.on("failed", (job, err) => {
+  console.error("Notification worker error:", err);
+  console.error(`❌ Job failed: ${job?.id}`, err);
+});

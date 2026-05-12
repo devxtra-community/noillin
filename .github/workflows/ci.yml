@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
 
 jobs:
@@ -26,6 +26,9 @@ jobs:
 
       - name: Verify pnpm
         run: pnpm -v
+
+      - name: Force npm registry
+        run: pnpm config set registry https://registry.npmjs.org/
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

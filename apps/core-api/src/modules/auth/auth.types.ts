@@ -1,4 +1,4 @@
-import { UserRole, AdminLevel } from "../users/user.model.js";
+import { UserRole, AdminLevel } from "../../models/user.model.js";
 
 export interface JwtPayload {
   userId: string;

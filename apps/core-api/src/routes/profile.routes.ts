@@ -1,5 +1,17 @@
 import { Router } from "express";
 
-const router : Router = Router()
+import { authenticate } from "../middlewares/auth.middleware.js";
+import {
+  getMyProfileController,
+  updateProfileController,
+  getPublicInfluencerProfileController
+} from "../controllers/profile.controller.js";
 
-export default router
+const router: Router = Router();
+
+router.get("/get_profile", authenticate, getMyProfileController);
+router.patch("/update_profile", authenticate, updateProfileController);
+router.get("/influencer/:id", getPublicInfluencerProfileController);
+
+
+export default router;

@@ -2,9 +2,12 @@ import type { Request, Response, NextFunction } from "express";
 
 import { verifyAccessToken } from "../modules/auth/auth.utils.js";
 import type { JwtPayload } from "../modules/auth/auth.utils.js";
+import { RolePermissions } from "../rbac/role-permission.js";
+import type { Permission } from "../rbac/permission.js";
 
 export interface AuthRequest extends Request {
   user?: JwtPayload;
+  files?: unknown;
 }
 
 interface HttpError extends Error {
@@ -38,8 +41,23 @@ export const authenticate = (
     next();
   } catch (error) {
     const err = error as HttpError;
-  if (!err.statusCode) err.statusCode = 401;
-  next(err);
-}
+    if (!err.statusCode) err.statusCode = 401;
+    next(err);
+  }
 
+};
+export const authorizePermission = (permission: Permission) => {
+  return (req: AuthRequest, _res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return next(Object.assign(new Error("Unauthorized"), { statusCode: 401 }));
+    }
+
+    const permissions = RolePermissions[req.user.role] ?? [];
+
+    if (!permissions.includes(permission)) {
+      return next(Object.assign(new Error("Forbidden"), { statusCode: 403 }));
+    }
+
+    next();
+  };
 };

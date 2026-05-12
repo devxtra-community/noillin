@@ -1,0 +1,77 @@
+import { PendingSignup } from "../models/pendingSignup.models.js";
+import type { PendingSignupFilter } from "../types/pendingSignup.types.js";
+
+interface CreatePendingSignupInput {
+  fullName: string;
+  email: string;
+  passwordHash: string;
+  documents: string;
+  role: "INFLUENCER" | "BRAND" | "ADMIN";
+  adminLevel?: "SUPER" | "NORMAL";
+
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  profileData?: Record<string, unknown>;
+
+  //  OTP fields (optional)
+  emailOtpHash?: string | null;
+  emailOtpExpiresAt?: Date | null;
+  otpAttempts?: number;
+  otpResendCount?: number;
+  otpLastSentAt?: Date | null;
+  otpLockedUntil?: Date | null;
+  isEmailVerified?: boolean;
+}
+
+
+
+class PendingSignupRepository {
+  // ================= CREATE =================
+  create(data: CreatePendingSignupInput) {
+    return PendingSignup.create(data);
+  }
+
+  //==================GET ALL PENDING SIGNUPS==================
+  getAllPendingSignups(filter:PendingSignupFilter={}) {
+    return PendingSignup.find(filter).sort({ createdAt: -1 });
+  }
+
+  // ================= FIND =================
+  findByEmail(email: string) {
+    return PendingSignup
+      .findOne({ email })
+      .select("+emailOtpHash");
+  }
+
+
+  // ================= UPDATE STATUS =================
+  updateStatus(email: string, status: "APPROVED" | "REJECTED") {
+    return PendingSignup.findOneAndUpdate(
+      { email },
+      { status },
+      { new: true }
+    );
+  }
+
+  // ================= DELETE ONE =================
+  deleteByEmail(email: string) {
+    return PendingSignup.findOneAndDelete({ email });
+  }
+
+  // ================= UPDATE PROFILE DATA =================
+  updateProfileData(email: string, profileData: Record<string, unknown>) {
+    return PendingSignup.findOneAndUpdate(
+      { email },
+      { $set: { profileData } },
+      { new: true }
+    );
+  }
+
+  // ================= DELETE MANY (FOR CLEANUP) =================
+  deleteMany(filter: Record<string, unknown>): Promise<unknown> {
+    return PendingSignup.deleteMany(filter);
+  }
+
+}
+
+export const pendingSignupRepository =
+  new PendingSignupRepository();

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-import type { AdminLevel, UserRole } from "../users/user.model.js";
+import type { AdminLevel, UserRole } from "../../models/user.model.js";
 
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET!;
