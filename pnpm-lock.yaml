@@ -296,6 +296,9 @@ importers:
       mongoose:
         specifier: ^9.1.5
         version: 9.1.5
+      nodemailer:
+        specifier: ^8.0.1
+        version: 8.0.1
       web-push:
         specifier: ^3.6.7
         version: 3.6.7
@@ -309,6 +312,9 @@ importers:
       "@types/node":
         specifier: ^25.0.10
         version: 25.0.10
+      "@types/nodemailer":
+        specifier: ^7.0.9
+        version: 7.0.9
       "@types/web-push":
         specifier: ^3.6.4
         version: 3.6.4
