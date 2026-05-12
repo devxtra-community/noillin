@@ -3,7 +3,5 @@ node_modules
 .env.*
 dist
 .next
-!.env.example
-seed_test.ts
-
+!.env.example 
 data.ms/
