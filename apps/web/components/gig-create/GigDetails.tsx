@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FaInstagram, FaYoutube, FaTiktok, FaUser, FaUsers } from "react-icons/fa";
 import { UploadCloud, X, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 import { useGigCreateStore } from "@/store/gigCreate.store";
@@ -135,7 +136,7 @@ export function GigDetails({ onNext }: GigDetailsProps) {
                         <div className="relative group">
                             {form.bannerUrl ? (
                                 <div className="relative w-full h-64 rounded-2xl overflow-hidden border-2 border-gray-100 shadow-sm">
-                                    <img src={form.bannerUrl} alt="Gig Banner" className="w-full h-full object-cover" />
+                                    <Image src={form.bannerUrl} alt="Gig Banner" fill className="object-cover" />
                                     <button 
                                         type="button"
                                         onClick={() => handleChange("bannerUrl", "")}

@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from 'next/link';
+import Image from 'next/image';
 import {
     BadgeCheck,
     Globe,
@@ -116,7 +117,7 @@ function BrandProfileContent() {
                     <div className="shrink-0 group">
                         {brand.profileImageUrl ? (
                             <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-4 border-slate-50 shadow-xl shadow-slate-100 relative transition-transform duration-500 group-hover:scale-105">
-                                <img src={brand.profileImageUrl} alt={brand.companyName} className="w-full h-full object-cover" />
+                                <Image src={brand.profileImageUrl} alt={brand.companyName} fill className="object-cover" />
                             </div>
                         ) : (
                             <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-[2rem] flex items-center justify-center text-white text-5xl font-black shadow-xl shadow-emerald-100 transition-transform duration-500 group-hover:scale-105">

@@ -232,7 +232,7 @@ export function ChatWindow({
       console.log("Disconnecting chat socket...");
       socketInstance.disconnect();
     };
-  }, [currentUserId, gigRequestId, fetchConnection]);
+  }, [currentUserId, gigRequestId, fetchConnection, fetchOrder]);
 
   // ✅ auto scroll
   useEffect(() => {
