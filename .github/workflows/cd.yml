@@ -56,7 +56,7 @@ jobs:
           script: |
             set -e
 
-            cd /home/ubuntu/apps/noillin
+            cd ~/apps/noillin
 
             echo "Pulling latest code..."
             git pull origin main
@@ -68,7 +68,7 @@ jobs:
             echo "Installing dependencies..."
             pnpm install --frozen-lockfile
 
-                        echo "Building shared..."
+            echo "Building shared..."
             pnpm --filter shared build
 
             echo "Building core-api..."
