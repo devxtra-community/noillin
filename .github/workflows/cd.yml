@@ -1,13 +1,47 @@
+# name: CD
+
+# on:
+#   workflow_run:
+#     workflows: ["CI"]
+#     types:
+#       - completed
+
+# jobs:
+#   deploy-core-api:
+#     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Deploy to EC2
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ${{ secrets.EC2_USER }}
+#           key: ${{ secrets.EC2_SSH_KEY }}
+#           script: |
+#             cd ${{ secrets.EC2_APP_PATH }}
+
+#             git pull origin main
+
+#             corepack enable
+#             corepack prepare pnpm@latest --activate
+
+#             pnpm install --frozen-lockfile
+#             pnpm --filter core-api build:prod
+
+#             pm2 restart core-api
+
 name: CD
 
 on:
   workflow_run:
     workflows: ["CI"]
+    branches: [main]
     types:
       - completed
 
 jobs:
-  deploy-core-api:
+  deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
@@ -18,15 +52,35 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            cd ${{ secrets.EC2_APP_PATH }}
 
+          script: |
+            set -e
+
+            cd /home/ubuntu/apps/noillin
+
+            echo "Pulling latest code..."
             git pull origin main
 
+            echo "Enabling corepack..."
             corepack enable
             corepack prepare pnpm@latest --activate
 
+            echo "Installing dependencies..."
             pnpm install --frozen-lockfile
+
+            echo "Building core-api..."
             pnpm --filter core-api build:prod
 
-            pm2 restart core-api
+            echo "Building realtime..."
+            pnpm --filter realtime build
+
+            echo "Building web..."
+            pnpm --filter web build
+
+            echo "Restarting PM2 services..."
+            pm2 reload ecosystem.config.js --update-env || pm2 start ecosystem.config.js
+
+            echo "Saving PM2..."
+            pm2 save
+
+            echo "Deployment completed successfully."

@@ -169,7 +169,8 @@ export function ChatWindow({
   useEffect(() => {
     if (!currentUserId) return;
 
-    const socketInstance = io("http://localhost:6001", {
+    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL!, {
+      path: "/socket.io",
       auth: { userId: currentUserId },
       transports: ["websocket"],
       reconnection: true,
