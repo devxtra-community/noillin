@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
+    "rootDir": "./src",
     "outDir": "./dist",
 
-    "module": "nodenext",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "target": "esnext",
     "types": ["node"],
 
@@ -16,13 +18,11 @@
     "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
 
-    // 🔥 ADD THESE
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["../../packages/shared/*"]
