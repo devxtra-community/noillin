@@ -6,3 +6,4 @@ dist
 !.env.example
 seed_test.ts
 data.ms
+data.ms/
