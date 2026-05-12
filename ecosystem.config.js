@@ -32,7 +32,7 @@ export const apps = [
     {
         name: "worker",
         cwd: "./apps/worker",
-        script: "./dist/main.js",
+        script: "./dist/worker/src/main.js",
         env: {
             NODE_ENV: "production",
         },
