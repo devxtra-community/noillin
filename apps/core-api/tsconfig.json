@@ -25,7 +25,7 @@
     // 🔥 ADD THESE
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../../packages/shared/*"]
     }
   }
 }
