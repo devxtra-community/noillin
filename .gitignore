@@ -3,4 +3,5 @@ node_modules
 .env.*
 dist
 .next
-!.env.example
+!.env.example 
+data.ms/
