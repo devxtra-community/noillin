@@ -68,11 +68,17 @@ jobs:
             echo "Installing dependencies..."
             pnpm install --frozen-lockfile
 
+                        echo "Building shared..."
+            pnpm --filter shared build
+
             echo "Building core-api..."
-            pnpm --filter core-api build:prod
+            pnpm --filter core-api build
 
             echo "Building realtime..."
             pnpm --filter realtime build
+
+            echo "Building worker..."
+            pnpm --filter worker build
 
             echo "Building web..."
             pnpm --filter web build
