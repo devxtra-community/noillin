@@ -127,6 +127,7 @@ export default function InfluencerDashboardLayout({
                     <div
                         className={`flex-1 w-full ${pathname.includes("/messages") ? "overflow-hidden" : "overflow-y-auto pb-10"
                             }`}
+                        data-lenis-prevent
                     >
                         {children}
                     </div>

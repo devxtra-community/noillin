@@ -388,6 +388,7 @@ export default function ExploreGigs() {
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-4 sm:mb-12">
           <div>
+          <br />
             <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none mb-2 sm:mb-4">
               Explore Influencer Gigs
             </h1>
