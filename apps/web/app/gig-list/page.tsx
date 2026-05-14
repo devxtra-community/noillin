@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Zap, Check, ArrowRight, Calendar } from "lucide-react";
+import { Check, ArrowRight, Calendar } from "lucide-react";
 
 import api from "@/lib/axios.client";
 import Navbar from "@/components/Navbar";

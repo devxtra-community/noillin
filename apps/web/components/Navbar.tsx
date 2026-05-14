@@ -10,8 +10,7 @@ import {
   LogOut, 
   LayoutDashboard, 
   ChevronDown,
-  User as UserIcon,
-  Zap
+  User as UserIcon
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 

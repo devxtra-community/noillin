@@ -79,11 +79,11 @@ export default function DashboardHeader({
         }
     };
 
-    const headerBaseStyles = isFixed ? 'fixed top-0 left-0 right-0' : 'relative';
-    const pillStyles = isPill ? 'top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl rounded-full shadow-2xl border border-gray-100 px-6 sm:px-10' : 'w-full border-b border-gray-100 px-4 sm:px-8';
+    const headerBaseStyles = isFixed ? (isPill ? 'fixed top-4 left-1/2 -translate-x-1/2' : 'fixed top-0 left-0 right-0') : 'relative';
+    const pillStyles = isPill ? 'w-[95%] max-w-7xl rounded-full shadow-2xl border border-gray-100 px-6 sm:px-10' : 'w-full border-b border-gray-100 px-4 sm:px-8';
 
     return (
-        <header className={`${isFixed ? (isPill ? 'fixed top-4 left-1/2 -translate-x-1/2' : 'fixed top-0 left-0 right-0') : 'relative'} ${isPill ? 'w-[95%] max-w-7xl rounded-full shadow-2xl border border-gray-100 px-6 sm:px-10' : 'w-full border-b border-gray-100 px-4 sm:px-8'} bg-white h-16 flex items-center justify-between z-50 transition-all duration-300`}>
+        <header className={`${headerBaseStyles} ${pillStyles} bg-white h-16 flex items-center justify-between z-50 transition-all duration-300`}>
             <div className="flex items-center gap-4">
                 {showSidebarToggle && (
                     <button

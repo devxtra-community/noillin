@@ -13,7 +13,7 @@ export default function Footer() {
           <div className="md:col-span-1 space-y-6">
             <NoillinIcon />
             <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xs">
-              The world's most advanced infrastructure for professional brand-creator collaborations.
+              The world&apos;s most advanced infrastructure for professional brand-creator collaborations.
             </p>
           </div>
           

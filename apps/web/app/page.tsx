@@ -3,7 +3,6 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { motion, useInView, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -12,18 +11,14 @@ import {
   Calendar,
   MessageCircle,
   ArrowRight,
-  CheckCircle2,
   Star,
   Search,
   CreditCard,
   Zap,
-  Check,
-  Menu,
-  X
+  Check
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import NoillinIcon from "@/components/NoillinIcon";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 
@@ -176,7 +171,6 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
 }
 
 export default function HomePage() {
-  const pathname = usePathname();
   return (
     <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       <Navbar />
@@ -471,7 +465,7 @@ export default function HomePage() {
                 Ready to Join the <br/><span className="text-emerald-500">Future Economy?</span>
               </h2>
               <p className="text-slate-400 text-base sm:text-lg md:text-xl font-medium mb-10 sm:mb-12 max-w-xl mx-auto leading-relaxed">
-                Unlock elite partnerships and scale your presence with the world's most advanced influencer infrastructure.
+                Unlock elite partnerships and scale your presence with the world&apos;s most advanced influencer infrastructure.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                 <Link href="/signup">

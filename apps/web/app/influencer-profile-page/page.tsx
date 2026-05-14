@@ -12,8 +12,6 @@ import {
   Lock,
   Instagram,
   Youtube,
-  Twitter,
-  Linkedin,
   ArrowRight
 } from 'lucide-react';
 
