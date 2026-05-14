@@ -5,7 +5,8 @@ import Image from "next/image";
 import { Zap, Check, ArrowRight, Calendar } from "lucide-react";
 
 import api from "@/lib/axios.client";
-import DashboardHeader from "@/components/DashboardHeader";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type ViewMode = "grid" | "list";
@@ -421,7 +422,7 @@ export default function ExploreGigs() {
   return (
     <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-20">
       {/* Navbar */}
-      <DashboardHeader />
+      <Navbar />
 
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header Section */}
@@ -683,47 +684,7 @@ export default function ExploreGigs() {
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="bg-[#0F172A] pt-28 pb-16 text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-12 pb-20 border-b border-white/5">
-            <div className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 text-white bg-[#10B981] rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-white">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <span className="text-2xl font-black text-white tracking-tight ">Noillin</span>
-            </div>
-
-            <div className="flex gap-16 text-[13px] font-bold uppercase tracking-widest">
-              {["About", "Support", "Privacy", "Terms"].map(l => (
-                <a key={l} href="#" className="hover:text-emerald-500 transition-colors">{l}</a>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-8">
-              {[
-                { label: "SECURE PAYMENTS", icon: "🔒" },
-                { label: "VERIFIED PROFILES", icon: "✔" }
-              ].map((badge, i) => (
-                <div key={i} className="flex items-center gap-3 text-[10px] font-black tracking-[.2em] opacity-80 group">
-                  <span className="text-emerald-500 text-lg group-hover:scale-125 transition-transform">{badge.icon}</span>
-                  <span className="text-slate-100">{badge.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] font-bold tracking-widest opacity-30">
-            <p>&copy; 2026 NOILLIN INC. ALL RIGHTS RESERVED.</p>
-            <p className="flex items-center gap-2">
-              <Zap className="w-3 h-3 fill-white" />
-              BUILT FOR THE FUTURE OF INFLUENCE
-            </p>
-          </div>
-        </div>
-      </footer >
-    </div >
+      <Footer />
+    </div>
   );
 }

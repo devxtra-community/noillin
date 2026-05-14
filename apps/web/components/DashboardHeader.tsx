@@ -20,6 +20,7 @@ interface DashboardHeaderProps {
     showBackButton?: boolean;
     backHref?: string;
     children?: React.ReactNode;
+    isPill?: boolean;
 }
 
 export default function DashboardHeader({
@@ -29,7 +30,8 @@ export default function DashboardHeader({
     hideLogo = false,
     showBackButton = false,
     backHref = "/influencer-dashboard",
-    children
+    children,
+    isPill = false
 }: DashboardHeaderProps) {
     const router = useRouter();
     const { user, clearAuth } = useAuthStore();
@@ -77,8 +79,11 @@ export default function DashboardHeader({
         }
     };
 
+    const headerBaseStyles = isFixed ? 'fixed top-0 left-0 right-0' : 'relative';
+    const pillStyles = isPill ? 'top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl rounded-full shadow-2xl border border-gray-100 px-6 sm:px-10' : 'w-full border-b border-gray-100 px-4 sm:px-8';
+
     return (
-        <header className={`${isFixed ? 'fixed top-0 left-0 right-0' : 'relative'} bg-white border-b border-gray-100 h-20 flex items-center justify-between px-4 sm:px-8 z-50`}>
+        <header className={`${isFixed ? (isPill ? 'fixed top-4 left-1/2 -translate-x-1/2' : 'fixed top-0 left-0 right-0') : 'relative'} ${isPill ? 'w-[95%] max-w-7xl rounded-full shadow-2xl border border-gray-100 px-6 sm:px-10' : 'w-full border-b border-gray-100 px-4 sm:px-8'} bg-white h-16 flex items-center justify-between z-50 transition-all duration-300`}>
             <div className="flex items-center gap-4">
                 {showSidebarToggle && (
                     <button

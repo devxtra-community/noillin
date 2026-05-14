@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 
 import api from "@/lib/axios.client";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 interface GigData {
   _id: string;
@@ -88,41 +90,9 @@ function ProfileContent() {
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-slate-900 font-sans sm:px-0">
-      {/* Navigation */}
-      <nav className="bg-white border-b border-slate-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-12">
-            {/* Logo */}
-            <div className="flex items-center gap-2 cursor-pointer">
-              <Link href="/">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center text-white font-bold text-xl">
-                    N
-                  </div>
-                  <span className="text-xl font-bold tracking-tight text-slate-900">Noillin</span>
-                </div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Links */}
-          <div className="hidden md:flex items-center  gap-8 text-sm font-medium">
-            <Link href="#" className="text-slate-500 hover:text-slate-900 transition-colors">About</Link>
-            <Link href="/gig-list" className="text-slate-500 hover:text-slate-900 transition-colors">Influencers</Link>
-            <div className="relative h-20 flex items-center">
-              <Link href="#" className="text-emerald-600 font-semibold">Gigs</Link>
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></div>
-            </div>
-            <Link href="#" className="text-slate-500 hover:text-slate-900 transition-colors">Support</Link>
-          </div>
-
-
-          <div className="flex flex-row items-center gap-4 sm:gap-6 text-sm font-medium">
-            <Link href="/login" className="text-slate-600 hover:text-slate-900 hidden sm:block">Sign In</Link>
-            <Link href="/signup" className="px-4 py-2 sm:px-5 sm:py-2.5 text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-colors font-semibold">Get Started</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
+      
+      <div className="pt-24 sm:pt-32">
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
 
@@ -475,61 +445,8 @@ function ProfileContent() {
         </div>
 
       </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 py-16 px-4 md:px-8 mt-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-12 mb-16">
-            <div className="lg:col-span-2 space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center text-white font-bold text-xl">
-                  N
-                </div>
-                <span className="text-xl font-bold tracking-tight text-slate-900">Noillin</span>
-              </div>
-              <p className="text-slate-500 text-sm max-w-sm leading-relaxed">
-                The professional marketplace for influencer-brand collaborations.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-bold text-slate-900 text-sm">Platform</h4>
-              <ul className="space-y-3">
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Browse Influencers</Link></li>
-                <li><Link href="/gig-list" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Explore Gigs</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">How it Works</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-bold text-slate-900 text-sm">Company</h4>
-              <ul className="space-y-3">
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">About Us</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Careers</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Blog</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-bold text-slate-900 text-sm">Support</h4>
-              <ul className="space-y-3">
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Help Center</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Terms of Service</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Privacy Policy</Link></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-slate-400 text-sm">© 2024 Noillin. All rights reserved.</p>
-            <div className="flex gap-4">
-              <Link href="#" className="text-slate-400 hover:text-slate-600 transition-colors"><Twitter className="w-5 h-5" /></Link>
-              <Link href="#" className="text-slate-400 hover:text-slate-600 transition-colors"><Instagram className="w-5 h-5" /></Link>
-              <Link href="#" className="text-slate-400 hover:text-slate-600 transition-colors"><Linkedin className="w-5 h-5" /></Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      </div>
+      <Footer />
     </div>
   );
 }

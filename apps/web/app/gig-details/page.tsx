@@ -16,7 +16,8 @@ import {
 import { ReportingModal } from "@/components/shared/ReportingModal";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
-import DashboardHeader from "@/components/DashboardHeader";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 interface GigData {
     _id: string;
@@ -173,9 +174,9 @@ function GigDetailsContent() {
             )}
 
             {/* Navbar */}
-            <DashboardHeader />
+            <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 pb-12 flex-1 w-full">
                 {/* Breadcrumb */}
                 <div className="flex items-center text-sm text-gray-500 mb-8 font-medium">
                     <Link href="/" className="hover:text-gray-900">Home</Link>
@@ -213,10 +214,12 @@ function GigDetailsContent() {
                             </div>
                         </div>
 
-                        {/* Header */}
+                        {/* Content Wrapper */}
                         <div>
-                            <Link href={`/influencer-profile-page?id=${influencer?._id}`} className="flex items-center gap-4 mb-6 hover:opacity-80 transition-opacity bg-white p-4 rounded-3xl border border-slate-100 shadow-sm w-fit">
-                                <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-xl">
+                            {/* Header & Mobile Action */}
+                            <div className="flex flex-row items-center justify-between gap-3 sm:gap-6 mb-8">
+                                <Link href={`/influencer-profile-page?id=${influencer?._id}`} className="flex items-center gap-3 sm:gap-4 hover:opacity-80 transition-opacity bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm flex-1 min-w-0 group">
+                                <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-lg sm:text-xl">
                                     {avatar ? (
                                         <>
                                             <Image 
@@ -238,26 +241,44 @@ function GigDetailsContent() {
                                         (influencer?.fullName || "I").charAt(0).toUpperCase()
                                     )}
                                 </div>
-                                <div>
+                                <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2">
-                                        <h1 className="text-xl font-bold text-gray-900">{influencer?.fullName || "Unknown Creator"}</h1>
+                                        <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{influencer?.fullName || "Unknown Creator"}</h1>
                                         {influencer?.isVerified && (
-                                            <span className="bg-[#E6F6ED] text-[#0CAF60] text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                            <span className="bg-[#E6F6ED] text-[#0CAF60] text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                                                 <CheckCircle2 className="w-3 h-3 fill-current" />
                                                 Verified
                                             </span>
                                         )}
                                     </div>
-                                    <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5 font-medium">
+                                    <div className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-2 mt-0.5 font-medium">
                                         <span>{influencer.categories.join(" & ")}</span>
                                         <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                                         <span className="flex items-center text-gray-700">
                                             <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 mr-1" />
-                                            <span className="font-bold">New Creator</span>
+                                            <span className="font-bold">New</span>
                                         </span>
                                     </div>
                                 </div>
                             </Link>
+
+                            {/* Mobile/Tablet Request Button */}
+                            <div className="lg:hidden">
+                                <button
+                                    onClick={() => {
+                                        if (!user) {
+                                            router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+                                            return;
+                                        }
+                                        setIsModalOpen(true);
+                                    }}
+                                    disabled={!isInitialized || alreadyRequested || isRequestSuccess}
+                                    className="h-12 sm:h-14 px-8 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-2xl font-bold text-sm sm:text-base transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap"
+                                >
+                                    {alreadyRequested ? "Requested" : "Request Now"}
+                                </button>
+                            </div>
+                        </div>
 
                             <h2 className="text-4xl font-black text-gray-900 leading-tight mb-5 pr-8">
                                 {gig.title}
@@ -438,48 +459,6 @@ function GigDetailsContent() {
                 </div>
             </main>
 
-            {/* Footer */}
-            <footer className="bg-[#0F172A] pt-28 pb-16 text-slate-400 mt-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-12 pb-20 border-b border-white/5">
-                        <div className="flex items-center gap-3 group cursor-pointer">
-                            <div className="w-10 h-10 text-white bg-[#10B981] rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-white">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                </svg>
-                            </div>
-                            <span className="text-2xl font-black text-white tracking-tight ">Noillin</span>
-                        </div>
-
-                        <div className="flex gap-16 text-[13px] font-bold uppercase tracking-widest">
-                            {["About", "Support", "Privacy", "Terms"].map(l => (
-                                <a key={l} href="#" className="hover:text-emerald-500 transition-colors">{l}</a>
-                            ))}
-                        </div>
-
-                        <div className="flex items-center gap-8">
-                            {[
-                                { label: "SECURE PAYMENTS", icon: "🔒" },
-                                { label: "VERIFIED PROFILES", icon: "✔" }
-                            ].map((badge, i) => (
-                                <div key={i} className="flex items-center gap-3 text-[10px] font-black tracking-[.2em] opacity-80 group">
-                                    <span className="text-emerald-500 text-lg group-hover:scale-125 transition-transform">{badge.icon}</span>
-                                    <span className="text-slate-100">{badge.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] font-bold tracking-widest opacity-30">
-                        <p>&copy; 2026 NOILLIN INC. ALL RIGHTS RESERVED.</p>
-                        <p className="flex items-center gap-2">
-                            <Zap className="w-3 h-3 fill-white" />
-                            BUILT FOR THE FUTURE OF INFLUENCE
-                        </p>
-                    </div>
-                </div>
-            </footer>
-
             {/* Booking Modal */}
             {/* Booking Modal */}
             {isModalOpen && (
@@ -557,6 +536,7 @@ function GigDetailsContent() {
                 entityId={gig._id}
                 entityType="GIG"
             />
+            <Footer />
         </div>
     );
 }
