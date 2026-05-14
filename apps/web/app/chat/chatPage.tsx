@@ -64,13 +64,29 @@ export default function ChatPage() {
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-200 rounded-full shrink-0 overflow-hidden relative">
-                  {conv.user.profileImage && (
-                    <Image
-                      src={conv.user.profileImage}
-                      alt={conv.user.name}
-                      fill
-                      className="object-cover"
-                    />
+                  {conv.user.profileImage ? (
+                      <>
+                        <Image
+                          src={conv.user.profileImage}
+                          alt={conv.user.name}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                          onError={(e) => { 
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                            const fallback = target.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                        <div className="hidden w-full h-full items-center justify-center bg-emerald-100 text-emerald-600 font-bold text-xs">
+                          {conv.user.name.charAt(0)}
+                        </div>
+                      </>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-emerald-100 text-emerald-600 font-bold text-xs">
+                      {conv.user.name.charAt(0)}
+                    </div>
                   )}
                 </div>
                 <div className="min-w-0">

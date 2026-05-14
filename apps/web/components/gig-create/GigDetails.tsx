@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { FaInstagram, FaYoutube, FaTiktok, FaUser, FaUsers } from "react-icons/fa";
+import { UploadCloud, X, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 import { useGigCreateStore } from "@/store/gigCreate.store";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { SelectButton } from "@/components/ui/SelectButton";
+import { uploadToS3 } from "@/lib/s3-uploads";
 
 
 interface GigDetailsProps {
@@ -21,6 +24,7 @@ type GigDetailsForm = {
     gigType: string;
     category: string;
     tags: string[];
+    bannerUrl: string;
 };
 
 
@@ -33,7 +37,8 @@ export function GigDetails({ onNext }: GigDetailsProps) {
         platform: "instagram",
         gigType: "solo",
         category: "",
-        tags: []
+        tags: [],
+        bannerUrl: ""
     });
     useEffect(() => {
         setForm({
@@ -42,9 +47,11 @@ export function GigDetails({ onNext }: GigDetailsProps) {
             platform: details.platform || "instagram",
             gigType: details.gigType || "solo",
             category: details.category || "",
-            tags: details.tags || []
+            tags: details.tags || [],
+            bannerUrl: details.bannerUrl || ""
         });
     }, [details]);
+    const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = <K extends keyof GigDetailsForm>(
@@ -86,6 +93,19 @@ export function GigDetails({ onNext }: GigDetailsProps) {
             setIsLoading(false);
         }
     };
+    
+    const handleImageUpload = async (file: File) => {
+        try {
+            setIsUploading(true);
+            const url = await uploadToS3(file, "gig-banners");
+            handleChange("bannerUrl", url);
+        } catch (err) {
+            console.error("Banner upload failed:", err);
+            alert("Failed to upload image. Please try again.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     return (
         <div className="p-8 sm:p-10 space-y-8">
@@ -110,6 +130,46 @@ export function GigDetails({ onNext }: GigDetailsProps) {
                         placeholder="Describe what you will deliver..."
                         className="min-h-30"
                     />
+
+                    <div className="space-y-4">
+                        <label className="block text-sm font-semibold text-gray-700">Gig Banner Image</label>
+                        <div className="relative group">
+                            {form.bannerUrl ? (
+                                <div className="relative w-full h-64 rounded-2xl overflow-hidden border-2 border-gray-100 shadow-sm">
+                                    <Image src={form.bannerUrl} alt="Gig Banner" fill className="object-cover" />
+                                    <button 
+                                        type="button"
+                                        onClick={() => handleChange("bannerUrl", "")}
+                                        className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full backdrop-blur-sm transition-all"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className={`relative w-full h-64 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all ${isUploading ? 'bg-gray-50 border-green-300' : 'bg-white border-gray-200 hover:border-green-400 hover:bg-green-50/30'}`}>
+                                    {isUploading ? (
+                                        <Loader2 className="w-10 h-10 text-green-500 animate-spin" />
+                                    ) : (
+                                        <UploadCloud className="w-12 h-12 text-gray-300 group-hover:text-green-400" />
+                                    )}
+                                    <div className="text-center">
+                                        <p className="text-sm font-bold text-gray-900">{isUploading ? "Uploading Banner..." : "Click to Upload Banner"}</p>
+                                        <p className="text-xs text-gray-400 mt-1 uppercase tracking-widest font-black">Recommended: 1200x400 (PNG/JPG)</p>
+                                    </div>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*"
+                                        className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                                        disabled={isUploading}
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) handleImageUpload(file);
+                                        }}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 

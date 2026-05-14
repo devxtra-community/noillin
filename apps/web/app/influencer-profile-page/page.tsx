@@ -12,12 +12,12 @@ import {
   Lock,
   Instagram,
   Youtube,
-  Twitter,
-  Linkedin,
   ArrowRight
 } from 'lucide-react';
 
 import api from "@/lib/axios.client";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 interface GigData {
   _id: string;
@@ -28,6 +28,8 @@ interface GigData {
     basePrice: number;
   };
   status?: string;
+  category?: string;
+  bannerUrl?: string;
 }
 
 interface ProfileData {
@@ -35,6 +37,7 @@ interface ProfileData {
   username?: string;
   bio?: string;
   profileImageUrl?: string;
+  profileImage?: string;
   isVerified?: boolean;
   categories?: string[];
   instagramUrl?: string;
@@ -71,53 +74,50 @@ function ProfileContent() {
   const { profile, gigs } = data;
   const name = profile.fullName || profile.username || "Unknown Influencer";
   const bio = profile.bio || "No bio available.";
-  const avatar = profile.profileImageUrl || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150";
+  const avatar = profile.profileImageUrl || profile.profileImage || null;
+
+  const categoryImages: Record<string, string> = {
+    "fashion": "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&q=80&w=600",
+    "tech": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600",
+    "fitness": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=600",
+    "lifestyle": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=600",
+    "beauty": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=600",
+    "food": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600",
+    "default": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=600"
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-slate-900 font-sans sm:px-0">
-      {/* Navigation */}
-      <nav className="bg-white border-b border-slate-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-12">
-            {/* Logo */}
-            <div className="flex items-center gap-2 cursor-pointer">
-              <Link href="/">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center text-white font-bold text-xl">
-                    N
-                  </div>
-                  <span className="text-xl font-bold tracking-tight text-slate-900">Noillin</span>
-                </div>
-              </Link>
-            </div>
-          </div>
-
-          {/* Links */}
-          <div className="hidden md:flex items-center  gap-8 text-sm font-medium">
-            <Link href="#" className="text-slate-500 hover:text-slate-900 transition-colors">About</Link>
-            <Link href="/gig-list" className="text-slate-500 hover:text-slate-900 transition-colors">Influencers</Link>
-            <div className="relative h-20 flex items-center">
-              <Link href="#" className="text-emerald-600 font-semibold">Gigs</Link>
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-600"></div>
-            </div>
-            <Link href="#" className="text-slate-500 hover:text-slate-900 transition-colors">Support</Link>
-          </div>
-
-
-          <div className="flex flex-row items-center gap-4 sm:gap-6 text-sm font-medium">
-            <Link href="/login" className="text-slate-600 hover:text-slate-900 hidden sm:block">Sign In</Link>
-            <Link href="/signup" className="px-4 py-2 sm:px-5 sm:py-2.5 text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg transition-colors font-semibold">Get Started</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
+      
+      <div className="pt-24 sm:pt-32">
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-8">
 
         {/* Profile Header Card */}
         <div className="bg-white rounded-3xl p-6 md:p-10 border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] flex flex-col md:flex-row items-center md:items-start gap-8 relative overflow-hidden">
           <div className="relative shrink-0">
-            <div className="w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden border-2 border-slate-100 shadow-sm relative">
-              <Image fill src={avatar} alt={name || "Influencer Avatar"} className="object-cover" />
+            <div className="w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden border-2 border-slate-100 shadow-sm relative bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-4xl">
+              {avatar ? (
+                <>
+                  <Image 
+                    fill 
+                    unoptimized
+                    src={avatar} 
+                    alt={name || "Influencer Avatar"} 
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'block';
+                    }}
+                  />
+                  <span className="hidden">{name.charAt(0).toUpperCase()}</span>
+                </>
+              ) : (
+                name.charAt(0).toUpperCase()
+              )}
             </div>
             {profile.isVerified && (
               <div className="absolute bottom-1 right-1 bg-emerald-500 text-white p-1 rounded-full border-4 border-white">
@@ -310,15 +310,29 @@ function ProfileContent() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {gigs?.map((gig: GigData, idx: number) => (
-              <div key={gig._id || idx} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] flex flex-col relative group hover:border-emerald-200 transition-colors cursor-pointer">
-                {gig.status === 'published' && <span className="absolute top-5 right-5 text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded">Active</span>}
-                <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500 mb-5">
-                  <Star className="w-5 h-5 fill-current" />
+              <div key={gig._id || idx} className="bg-white rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] flex flex-col relative group hover:border-emerald-200 transition-all cursor-pointer overflow-hidden">
+                <div className="h-48 w-full relative overflow-hidden bg-slate-100">
+                  <Image 
+                    fill 
+                    unoptimized
+                    src={gig.bannerUrl || categoryImages[gig.category?.toLowerCase() || "default"] || categoryImages["default"]} 
+                    alt={gig.title} 
+                    className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      const fallback = categoryImages[gig.category?.toLowerCase() || "default"] || categoryImages["default"];
+                      if (target.src !== fallback) {
+                        target.src = fallback;
+                      }
+                    }}
+                  />
+                  {gig.status === 'published' && <span className="absolute top-4 right-4 text-[10px] font-bold text-white bg-emerald-500/80 backdrop-blur-sm px-2.5 py-1 rounded-full uppercase tracking-wider">Active</span>}
                 </div>
-                <h3 className="font-bold text-slate-800 text-sm mb-2 line-clamp-2">{gig.title}</h3>
-                <p className="text-xs text-slate-500 leading-relaxed mb-6 flex-1 line-clamp-3">
-                  {gig.shortDescription || "Gig details currently unavailable."}
-                </p>
+                <div className="p-6 flex flex-col flex-1">
+                  <h3 className="font-bold text-slate-800 text-sm mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors">{gig.title}</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-6 flex-1 line-clamp-3">
+                    {gig.shortDescription || "Gig details currently unavailable."}
+                  </p>
                 <div className="pt-5 border-t border-slate-100">
                   <div className="flex items-end justify-between mb-4">
                     <div>
@@ -334,7 +348,8 @@ function ProfileContent() {
                   </Link>
                 </div>
               </div>
-            ))}
+            </div>
+          ))}
 
             {(!gigs || gigs.length === 0) && (
               <p className="text-sm font-medium text-slate-500 col-span-3">No active gigs available for this creator.</p>
@@ -351,7 +366,14 @@ function ProfileContent() {
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center font-bold text-sm text-slate-700">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center font-bold text-sm text-slate-700">
+                    <Image 
+                      fill 
+                      src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=100" 
+                      alt="Glow Cosmetics" 
+                      className="object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
                     G
                   </div>
                   <div>
@@ -372,7 +394,14 @@ function ProfileContent() {
             <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center font-bold text-sm text-slate-700">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center font-bold text-sm text-slate-700">
+                    <Image 
+                      fill 
+                      src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=100" 
+                      alt="Mode Fashion" 
+                      className="object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
                     M
                   </div>
                   <div>
@@ -414,61 +443,8 @@ function ProfileContent() {
         </div>
 
       </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-100 py-16 px-4 md:px-8 mt-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-12 mb-16">
-            <div className="lg:col-span-2 space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center text-white font-bold text-xl">
-                  N
-                </div>
-                <span className="text-xl font-bold tracking-tight text-slate-900">Noillin</span>
-              </div>
-              <p className="text-slate-500 text-sm max-w-sm leading-relaxed">
-                The professional marketplace for influencer-brand collaborations.
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-bold text-slate-900 text-sm">Platform</h4>
-              <ul className="space-y-3">
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Browse Influencers</Link></li>
-                <li><Link href="/gig-list" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Explore Gigs</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">How it Works</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-bold text-slate-900 text-sm">Company</h4>
-              <ul className="space-y-3">
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">About Us</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Careers</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Blog</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-4">
-              <h4 className="font-bold text-slate-900 text-sm">Support</h4>
-              <ul className="space-y-3">
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Help Center</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Terms of Service</Link></li>
-                <li><Link href="#" className="text-slate-500 hover:text-emerald-600 text-sm transition-colors">Privacy Policy</Link></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-slate-400 text-sm">© 2024 Noillin. All rights reserved.</p>
-            <div className="flex gap-4">
-              <Link href="#" className="text-slate-400 hover:text-slate-600 transition-colors"><Twitter className="w-5 h-5" /></Link>
-              <Link href="#" className="text-slate-400 hover:text-slate-600 transition-colors"><Instagram className="w-5 h-5" /></Link>
-              <Link href="#" className="text-slate-400 hover:text-slate-600 transition-colors"><Linkedin className="w-5 h-5" /></Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      </div>
+      <Footer />
     </div>
   );
 }

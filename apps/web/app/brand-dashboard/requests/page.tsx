@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Search, ChevronRight, ChevronLeft, ArrowUpRight, Activity } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 import api from "@/lib/axios.client";
 
@@ -108,7 +109,11 @@ export default function BrandRequestsPage() {
                                         <td className="py-5 px-8">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-[13px] font-black shrink-0 shadow-sm border border-slate-200 bg-slate-100 text-slate-600 relative overflow-hidden group-hover:border-emerald-200 transition-colors">
-                                                    {req.influencerId?.fullName?.charAt(0) || "I"}
+                                                    {req.influencerId?.profileImageUrl ? (
+                                                        <Image src={req.influencerId.profileImageUrl} alt={req.influencerId.fullName} fill className="object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                                    ) : (
+                                                        req.influencerId?.fullName?.charAt(0) || "I"
+                                                    )}
                                                 </div>
                                                 <span className={`text-[15px] font-bold ${selectedId === req._id ? "text-emerald-700" : "text-slate-900 group-hover:text-emerald-600"} transition-colors`}>{req.influencerId?.fullName}</span>
                                             </div>
@@ -160,8 +165,12 @@ export default function BrandRequestsPage() {
                                         <ChevronLeft className="w-5 h-5" />
                                     </button>
                                     <div className="relative mb-6">
-                                        <div className="w-28 h-28 rounded-[28px] flex items-center justify-center text-4xl font-black mb-4 shadow-xl shadow-emerald-500/20 bg-emerald-50 text-emerald-600 border-2 border-white ring-4 ring-slate-50">
-                                            {selectedRequest.influencerId?.fullName?.charAt(0) || "I"}
+                                        <div className="w-28 h-28 rounded-[28px] overflow-hidden flex items-center justify-center text-4xl font-black shadow-xl shadow-emerald-500/20 bg-emerald-50 text-emerald-600 border-2 border-white ring-4 ring-slate-50 relative">
+                                            {selectedRequest.influencerId?.profileImageUrl ? (
+                                                <Image src={selectedRequest.influencerId.profileImageUrl} alt={selectedRequest.influencerId.fullName} fill className="object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                            ) : (
+                                                selectedRequest.influencerId?.fullName?.charAt(0) || "I"
+                                            )}
                                         </div>
                                     </div>
                                     <h2 className="text-2xl font-black text-slate-900 tracking-tight">{selectedRequest.influencerId?.fullName}</h2>

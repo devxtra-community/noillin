@@ -16,8 +16,8 @@ import {
 import { ReportingModal } from "@/components/shared/ReportingModal";
 import api from "@/lib/axios.client";
 import { useAuthStore } from "@/store/auth.store";
-import DashboardHeader from "@/components/DashboardHeader";
-import NotificationBell from "@/components/NotificationBell";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 interface GigData {
     _id: string;
@@ -35,6 +35,7 @@ interface GigData {
         fullName: string;
         username: string;
         profileImageUrl?: string;
+        profileImage?: string;
         bio?: string;
         categories: string[];
         location?: string;
@@ -42,6 +43,7 @@ interface GigData {
         followersCount?: number;
     };
     category: string;
+    bannerUrl?: string;
     deliverables: Array<{
         contentType: string;
         quantity: number;
@@ -137,7 +139,19 @@ function GigDetailsContent() {
     );
 
     const influencer = gig.primaryInfluencerId;
-    const avatar = influencer.profileImageUrl || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150";
+    const avatar = influencer ? (influencer.profileImageUrl || influencer.profileImage || null) : null;
+    
+    const categoryHeroImages: Record<string, string> = {
+        "fashion": "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&q=80&w=1200",
+        "tech": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1200",
+        "fitness": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=1200",
+        "lifestyle": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=1200",
+        "beauty": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=1200",
+        "food": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=1200",
+        "default": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=1200"
+    };
+
+    const gigHeroImage = gig.bannerUrl || categoryHeroImages[gig.category?.toLowerCase() || "default"] || categoryHeroImages["default"];
 
     return (
         <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 relative flex flex-col">
@@ -160,51 +174,143 @@ function GigDetailsContent() {
             )}
 
             {/* Navbar */}
-            <DashboardHeader>
-                <div className="flex items-center gap-6">
-                    <NotificationBell />
-                </div>
-            </DashboardHeader>
+            <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 sm:pt-36 pb-12 flex-1 w-full">
                 {/* Breadcrumb */}
                 <div className="flex items-center text-sm text-gray-500 mb-8 font-medium">
                     <Link href="/" className="hover:text-gray-900">Home</Link>
                     <ChevronRight className="w-4 h-4 mx-2" />
                     <Link href="/gig-list" className="hover:text-gray-900">Gigs</Link>
                     <ChevronRight className="w-4 h-4 mx-2" />
-                    <span className="text-gray-900">{influencer.fullName}</span>
+                    <span className="text-gray-900">{influencer?.fullName || "Influencer"}</span>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-10 relative items-start">
                     {/* Main Left Column */}
                     <div className="w-full lg:w-[65%] xl:w-[70%] space-y-8">
-                        {/* Header */}
+                        {/* Gig Hero Image */}
+                        <div className="relative w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200/50 group">
+                            <Image
+                                src={gigHeroImage}
+                                alt={gig.title}
+                                fill
+                                unoptimized
+                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                priority
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    const fallback = categoryHeroImages[gig.category.toLowerCase()] || categoryHeroImages["default"];
+                                    if (target.src !== fallback) {
+                                        target.src = fallback;
+                                    }
+                                }}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+                            <div className="absolute bottom-8 left-8 right-8">
+                                <span className="bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/30 mb-4 inline-block">
+                                    {gig.category}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Content Wrapper */}
                         <div>
-                            <Link href={`/influencer-profile-page?id=${influencer._id}`} className="flex items-center gap-4 mb-5 hover:opacity-80 transition-opacity">
-                                <Image src={avatar} alt={influencer.fullName || "Influencer"} width={64} height={64} className="rounded-full object-cover border border-gray-100 shadow-sm" />
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h1 className="text-xl font-bold text-gray-900">{influencer.fullName}</h1>
-                                        {influencer.isVerified && (
-                                            <span className="bg-[#E6F6ED] text-[#0CAF60] text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
-                                                <CheckCircle2 className="w-3 h-3 fill-current" />
-                                                Verified
-                                            </span>
+                            {/* Header & Mobile Action */}
+                            <div className="flex flex-row items-stretch justify-between gap-3 sm:gap-4 mb-12 lg:hidden">
+                                <Link 
+                                    href={`/influencer-profile-page?id=${influencer?._id}`} 
+                                    className="flex items-center gap-2 sm:gap-4 hover:opacity-80 transition-opacity bg-white p-3 sm:p-5 rounded-[2rem] border border-slate-100 shadow-sm basis-0 grow min-w-0 group"
+                                >
+                                    <div className="relative w-10 h-10 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-base sm:text-xl shrink-0">
+                                        {avatar ? (
+                                            <>
+                                                <Image 
+                                                    src={avatar} 
+                                                    alt={influencer?.fullName || "Influencer"} 
+                                                    fill 
+                                                    unoptimized
+                                                    className="object-cover"
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        target.style.display = 'none';
+                                                        const fallback = target.nextElementSibling as HTMLElement;
+                                                        if (fallback) fallback.style.display = 'block';
+                                                    }}
+                                                />
+                                                <span className="hidden">{(influencer?.fullName || "I").charAt(0).toUpperCase()}</span>
+                                            </>
+                                        ) : (
+                                            (influencer?.fullName || "I").charAt(0).toUpperCase()
                                         )}
                                     </div>
-                                    <div className="text-sm text-gray-500 flex items-center gap-3 mt-1 font-medium">
-                                        <span>{influencer.categories.join(" & ")}</span>
-                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                        <span className="flex items-center text-gray-700">
-                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400 mr-1" />
-                                            <span className="font-bold mr-1">New Creator</span>
-                                        </span>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-1.5">
+                                            <h1 className="text-xs sm:text-lg font-black text-gray-900 truncate tracking-tight">{influencer?.fullName?.split(' ')[0] || "Creator"}</h1>
+                                            {influencer?.isVerified && (
+                                                <CheckCircle2 className="w-3 h-3 text-[#0CAF60] fill-current shrink-0" />
+                                            )}
+                                        </div>
+                                        <p className="text-[9px] sm:text-xs text-emerald-600 font-black uppercase tracking-wider truncate">Profile</p>
                                     </div>
-                                </div>
-                            </Link>
+                                </Link>
 
-                            <h2 className="text-3xl font-extrabold text-gray-900 leading-tight mb-5 pr-8">
+                                <div className="basis-0 grow min-w-0">
+                                    <button
+                                        onClick={() => {
+                                            if (!user) {
+                                                router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+                                                return;
+                                            }
+                                            setIsModalOpen(true);
+                                        }}
+                                        disabled={!isInitialized || alreadyRequested || isRequestSuccess}
+                                        className="w-full h-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none text-white px-3 sm:px-6 rounded-[2rem] font-bold text-[13px] sm:text-lg transition-all shadow-lg flex items-center justify-center gap-1 sm:gap-2 group"
+                                    >
+                                        <span className="truncate">
+                                            {alreadyRequested ? "Already Requested" : "Request Booking"}
+                                        </span>
+                                        {!alreadyRequested && <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform shrink-0" />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Desktop Header Only */}
+                            <div className="hidden lg:flex items-center gap-6 mb-8">
+                                <Link 
+                                    href={`/influencer-profile-page?id=${influencer?._id}`} 
+                                    className="flex items-center gap-4 hover:opacity-80 transition-opacity bg-white p-4 rounded-3xl border border-slate-100 shadow-sm group"
+                                >
+                                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-xl">
+                                        {avatar ? (
+                                            <Image src={avatar} alt={influencer?.fullName || "Influencer"} fill unoptimized className="object-cover" />
+                                        ) : (
+                                            (influencer?.fullName || "I").charAt(0).toUpperCase()
+                                        )}
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h1 className="text-xl font-bold text-gray-900">{influencer?.fullName || "Unknown Creator"}</h1>
+                                            {influencer?.isVerified && (
+                                                <span className="bg-[#E6F6ED] text-[#0CAF60] text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                    <CheckCircle2 className="w-3 h-3 fill-current" />
+                                                    Verified
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5 font-medium">
+                                            <span>{influencer.categories.join(" & ")}</span>
+                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                            <span className="flex items-center text-gray-700 font-bold">
+                                                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 mr-1" />
+                                                New
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            </div>
+
+                            <h2 className="text-4xl font-black text-gray-900 leading-tight mb-5 pr-8">
                                 {gig.title}
                             </h2>
 
@@ -290,6 +396,39 @@ function GigDetailsContent() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Reviews */}
+                        <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-100/50">
+                            <h3 className="text-xl font-bold text-gray-900 mb-6">Recent Brand Reviews</h3>
+                            <div className="space-y-6">
+                                <div className="p-6 bg-slate-50/50 rounded-3xl border border-gray-100 flex flex-col gap-4">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-slate-200 bg-white shadow-sm flex items-center justify-center font-bold text-slate-400">
+                                                <Image 
+                                                    fill 
+                                                    src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=100" 
+                                                    alt="Glow Cosmetics" 
+                                                    className="object-cover"
+                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                />
+                                                G
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-bold text-gray-900">Glow Cosmetics</h4>
+                                                <p className="text-[10px] font-bold text-gray-400">2 weeks ago</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-0.5">
+                                            {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />)}
+                                        </div>
+                                    </div>
+                                    <p className="text-sm font-medium text-gray-600 leading-relaxed italic">
+                                        &quot;Working with {influencer.fullName} was a breeze. The deliverables were top-notch and perfectly aligned with our brand voice.&quot;
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Right Sidebar (Sticky) */}
@@ -330,7 +469,7 @@ function GigDetailsContent() {
                                             setIsModalOpen(true);
                                         }}
                                         disabled={!isInitialized || alreadyRequested || isRequestSuccess}
-                                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none text-white py-5 rounded-2xl font-black text-lg transition-all shadow-lg flex items-center justify-center gap-3 group"
+                                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none text-white py-5 rounded-2xl font-bold text-lg xl:text-xl transition-all shadow-lg flex items-center justify-center gap-3 group"
                                     >
                                         {alreadyRequested ? "Already Requested" : "Request Booking"}
                                         {!alreadyRequested && <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />}
@@ -349,48 +488,6 @@ function GigDetailsContent() {
                     </div>
                 </div>
             </main>
-
-            {/* Footer */}
-            <footer className="bg-[#0F172A] pt-28 pb-16 text-slate-400 mt-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-12 pb-20 border-b border-white/5">
-                        <div className="flex items-center gap-3 group cursor-pointer">
-                            <div className="w-10 h-10 text-white bg-[#10B981] rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-white">
-                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                                </svg>
-                            </div>
-                            <span className="text-2xl font-black text-white tracking-tight ">Noillin</span>
-                        </div>
-
-                        <div className="flex gap-16 text-[13px] font-bold uppercase tracking-widest">
-                            {["About", "Support", "Privacy", "Terms"].map(l => (
-                                <a key={l} href="#" className="hover:text-emerald-500 transition-colors">{l}</a>
-                            ))}
-                        </div>
-
-                        <div className="flex items-center gap-8">
-                            {[
-                                { label: "SECURE PAYMENTS", icon: "🔒" },
-                                { label: "VERIFIED PROFILES", icon: "✔" }
-                            ].map((badge, i) => (
-                                <div key={i} className="flex items-center gap-3 text-[10px] font-black tracking-[.2em] opacity-80 group">
-                                    <span className="text-emerald-500 text-lg group-hover:scale-125 transition-transform">{badge.icon}</span>
-                                    <span className="text-slate-100">{badge.label}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] font-bold tracking-widest opacity-30">
-                        <p>&copy; 2026 NOILLIN INC. ALL RIGHTS RESERVED.</p>
-                        <p className="flex items-center gap-2">
-                            <Zap className="w-3 h-3 fill-white" />
-                            BUILT FOR THE FUTURE OF INFLUENCE
-                        </p>
-                    </div>
-                </div>
-            </footer>
 
             {/* Booking Modal */}
             {/* Booking Modal */}
@@ -469,6 +566,7 @@ function GigDetailsContent() {
                 entityId={gig._id}
                 entityType="GIG"
             />
+            <Footer />
         </div>
     );
 }

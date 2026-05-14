@@ -137,6 +137,10 @@ const GigSchema = new Schema<GigDocument>(
       type: Number,
       default: 0,
       index: true
+    },
+    bannerUrl: {
+      type: String,
+      default: ""
     }
   },
 

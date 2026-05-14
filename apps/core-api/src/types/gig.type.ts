@@ -74,6 +74,7 @@ export interface GigDocument {
   reports?: GigReport[];
   moderationLogs?: GigModerationLog[];
 
+  bannerUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }

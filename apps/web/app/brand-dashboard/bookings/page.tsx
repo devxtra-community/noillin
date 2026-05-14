@@ -222,13 +222,22 @@ function BrandBookingsContent() {
                                     >
                                         <td className="py-5 px-8">
                                             <div className="flex items-center gap-4">
-                                                {booking.influencerProfile?.profileImageUrl ? (
-                                                    <Image src={booking.influencerProfile.profileImageUrl} width={40} height={40} alt="" className="w-10 h-10 rounded-2xl object-cover shadow-sm bg-slate-100 border border-slate-200 group-hover:border-emerald-200 transition-colors" />
-                                                ) : (
-                                                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-[13px] font-black shrink-0 shadow-sm border border-slate-200 bg-slate-100 text-slate-600 relative overflow-hidden group-hover:border-emerald-200 transition-colors">
-                                                        {(booking.influencerProfile?.fullName || booking.influencerProfile?.username || "A").charAt(0).toUpperCase()}
-                                                    </div>
-                                                )}
+                                                <div className="relative w-10 h-10 rounded-2xl overflow-hidden shadow-sm bg-slate-100 border border-slate-200 group-hover:border-emerald-200 transition-colors">
+                                                    {booking.influencerProfile?.profileImageUrl ? (
+                                                        <Image 
+                                                            src={booking.influencerProfile.profileImageUrl} 
+                                                            width={40} 
+                                                            height={40} 
+                                                            alt="" 
+                                                            className="w-full h-full object-cover"
+                                                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-[13px] font-black text-slate-600">
+                                                            {(booking.influencerProfile?.fullName || booking.influencerProfile?.username || "A").charAt(0).toUpperCase()}
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <span className={`text-[15px] font-bold ${selectedId === booking._id ? "text-emerald-700" : "text-slate-900 group-hover:text-emerald-600"} transition-colors`}>{booking.influencerProfile?.fullName || booking.influencerProfile?.username || "Unknown Influencer"}</span>
                                             </div>
                                         </td>
@@ -275,13 +284,22 @@ function BrandBookingsContent() {
                                         <ChevronLeft className="w-5 h-5" />
                                     </button>
                                     <div className="relative mb-6">
-                                        {selectedBooking.influencerProfile?.profileImageUrl ? (
-                                            <Image src={selectedBooking.influencerProfile.profileImageUrl} width={112} height={112} alt="" className="w-28 h-28 rounded-[28px] object-cover shadow-xl shadow-slate-200/50 border-2 border-white ring-4 ring-slate-50" />
-                                        ) : (
-                                            <div className="w-28 h-28 rounded-[28px] flex items-center justify-center text-4xl font-black mb-4 shadow-xl shadow-emerald-500/20 bg-emerald-50 text-emerald-600 border-2 border-white ring-4 ring-slate-50">
-                                                {(selectedBooking.influencerProfile?.fullName || selectedBooking.influencerProfile?.username || "A").charAt(0).toUpperCase()}
-                                            </div>
-                                        )}
+                                        <div className="w-28 h-28 rounded-[28px] relative overflow-hidden flex items-center justify-center text-4xl font-black shadow-xl shadow-slate-200/50 border-2 border-white ring-4 ring-slate-50 bg-emerald-50 text-emerald-600">
+                                            {selectedBooking.influencerProfile?.profileImageUrl ? (
+                                                <Image 
+                                                    src={selectedBooking.influencerProfile.profileImageUrl} 
+                                                    width={112} 
+                                                    height={112} 
+                                                    alt="" 
+                                                    className="w-full h-full object-cover"
+                                                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    {(selectedBooking.influencerProfile?.fullName || selectedBooking.influencerProfile?.username || "A").charAt(0).toUpperCase()}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                     <h2 className="text-2xl font-black text-slate-900 tracking-tight">{selectedBooking.influencerProfile?.fullName || selectedBooking.influencerProfile?.username || "Unknown Influencer"}</h2>
                                     <span className={`mt-3 px-4 py-1 text-[10px] font-black rounded-full uppercase tracking-widest ${getStatusStyles(selectedBooking.status)}`}>

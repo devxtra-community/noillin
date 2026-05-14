@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 import RoleGuard from "@/components/rbac/RoleGuard";
-import NotificationBell from "@/components/NotificationBell";
 import DashboardHeader from "@/components/DashboardHeader";
 import { useDashboardStore } from "@/store/dashboard.store";
 
@@ -121,7 +120,6 @@ export default function InfluencerDashboardLayout({
                             >
                                 Create gig
                             </Link>
-                            <NotificationBell />
                         </div>
                     </DashboardHeader>
 

@@ -1,14 +1,16 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Zap, Check, ArrowRight, Calendar, Filter, X } from "lucide-react";
+import Image from "next/image";
+import { Check, ArrowRight, Calendar, Search, Zap, X, Filter, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import api from "@/lib/axios.client";
-import DashboardHeader from "@/components/DashboardHeader";
-import NotificationBell from "@/components/NotificationBell";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type ViewMode = "grid" | "list";
+
 type SortOption = "recommended" | "price_asc" | "price_desc" | "next_available";
 
 interface GigPricing {
@@ -25,9 +27,11 @@ interface Gig {
     _id: string;
     fullName: string;
     profileImageUrl?: string;
+    profileImage?: string;
     followersCount?: number;
     categories?: string[];
   };
+  bannerUrl?: string;
   shortDescription: string;
   createdAt: string;
 }
@@ -69,23 +73,18 @@ const sortOptions: { label: string; value: SortOption }[] = [
   { label: "Next Available", value: "next_available" },
 ];
 
-// Deterministic avatar color based on id string
-const avatarColor = (id: string) => {
-  const colors = [
-    "#e8736c", "#5b8dee", "#4db89e", "#f0a500", "#b57bee", "#e06060",
-  ];
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-};
 
-const initials = (name: string) =>
-  name
-    .split(" ")
+
+const initials = (name: string) => {
+  if (!name) return "";
+  return name
+    .trim()
+    .split(/\s+/)
     .slice(0, 2)
-    .map((w) => w[0])
+    .map((w) => w[0] || "")
     .join("")
     .toUpperCase();
+};
 
 const formatCurrency = (amount: number, currency = "INR") => {
   if (currency === "INR") return `₹${amount.toLocaleString("en-IN")}`;
@@ -127,105 +126,89 @@ function SkeletonCard() {
 
 // ─── Gig Card ─────────────────────────────────────────────────────────────────
 
-function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
+function GigCard({ gig }: { gig: Gig }) {
   const influencer = gig.primaryInfluencerId;
   const name = influencer?.fullName ?? "Unknown Creator";
   const niche = gig.category;
   const availableFrom = undefined;
-  const color = avatarColor(gig._id);
 
   const availableLabel = availableFrom
     ? new Date(availableFrom).toLocaleDateString("en-US", { month: "short", day: "numeric" })
     : "Available";
 
-  if (view === "list") {
-    return (
-      <Link
-        href={`/gig-details?id=${gig._id}`}
-        className="bg-white rounded-[1.5rem] border border-slate-50 shadow-2xl shadow-slate-100/30 hover:shadow-emerald-50/50 transition-all duration-500 overflow-hidden group flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8 px-5 sm:px-8 py-5 sm:py-6 hover:-translate-y-1 relative cursor-pointer"
-      >
-        <div className="flex items-center gap-4">
-          <div
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-inner shrink-0"
-            style={{ background: color }}
-          >
-            {initials(name)}
-          </div>
-          <div className="flex-1 min-w-0 sm:hidden">
-            <div className="flex items-center gap-1.5 mb-0.5">
-              <span className="font-bold text-slate-900 text-sm truncate">{name}</span>
-              <div className="bg-emerald-500 rounded-full p-0.5 shrink-0">
-                <Check className="w-2 h-2 text-white" />
-              </div>
-            </div>
-            <h3 className="text-sm font-extrabold text-slate-800 truncate mb-1 group-hover:text-emerald-600 transition-colors">{gig.title}</h3>
-          </div>
-        </div>
+  const categoryImages: Record<string, string> = {
+    "Fashion & Style": "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?auto=format&fit=crop&q=80&w=600",
+    "Tech & Gadgets": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600",
+    "Fitness & Health": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=600",
+    "Lifestyle & Vlog": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=600",
+    "Beauty & Cosmetics": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&q=80&w=600",
+    "Food & Beverage": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=600",
+    "default": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&q=80&w=600"
+  };
 
-        <div className="flex-1 min-w-0 hidden sm:block">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="font-bold text-slate-900 text-lg truncate">{name}</span>
-            <div className="bg-emerald-500 rounded-full p-0.5">
-              <Check className="w-2.5 h-2.5 text-white" />
-            </div>
-          </div>
-          <h3 className="text-lg font-extrabold text-slate-800 truncate mb-1 group-hover:text-emerald-600 transition-colors">{gig.title}</h3>
-          <p className="text-xs text-slate-400 truncate max-w-lg leading-relaxed">{gig.shortDescription}</p>
-        </div>
-
-        <div className="flex items-center justify-between sm:justify-end sm:px-8 sm:border-l border-slate-50 w-full sm:w-auto">
-          <div className="text-left sm:text-right shrink-0">
-            <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-0.5 sm:mb-1">Starting at</p>
-            <p className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              {formatCurrency(gig.pricing.basePrice, gig.pricing.currency)}
-            </p>
-          </div>
-
-          <div className="shrink-0 flex items-center gap-3 sm:gap-4 ml-4">
-            <div className="hidden sm:flex items-center gap-1.5 text-[9px] font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-colors">
-              <Calendar className="w-3 h-3" />
-              {availableLabel}
-            </div>
-            <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
-              <ArrowRight className="w-5 h-5" />
-            </div>
-          </div>
-        </div>
-      </Link>
-    );
-  }
+  const gigImage = gig.bannerUrl || categoryImages[gig.category] || categoryImages["default"];
 
   return (
     <Link
       href={`/gig-details?id=${gig._id}`}
       className="bg-white rounded-[1.5rem] lg:rounded-[2.5rem] border border-slate-50 shadow-2xl shadow-slate-100/30 hover:shadow-emerald-50/50 transition-all duration-500 hover:-translate-y-2 overflow-hidden group flex flex-col h-full cursor-pointer"
     >
-      <div className="p-6 sm:p-8 lg:p-10 flex flex-col flex-1">
-        <div className="flex items-center justify-between mb-6 sm:mb-8">
+      <div className="h-48 w-full relative overflow-hidden bg-slate-50">
+        <Image
+          fill
+          unoptimized
+          src={gigImage}
+          alt={gig.title}
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            const fallback = categoryImages[gig.category] || categoryImages["default"];
+            if (target.src !== fallback) {
+              target.src = fallback;
+            }
+          }}
+        />
+        <div className="absolute top-4 right-4 flex items-center gap-1.2 text-[9px] font-bold text-white bg-black/20 backdrop-blur-md px-2.5 py-1 rounded-full group-hover:bg-emerald-500/80 transition-colors">
+          <Calendar className="w-3 h-3" />
+          {availableLabel}
+        </div>
+      </div>
+      <div className="p-6 sm:p-8 flex flex-col flex-1">
+        <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-inner shrink-0"
-              style={{ background: color }}
-            >
-              {initials(name)}
+            <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-[10px]">
+              {(influencer?.profileImageUrl || influencer?.profileImage) ? (
+                <>
+                  <Image
+                    fill
+                    unoptimized
+                    src={influencer.profileImageUrl || influencer.profileImage || ""}
+                    alt={name}
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                  <span className="hidden w-full h-full items-center justify-center">{initials(name)}</span>
+                </>
+              ) : initials(name)}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-slate-900 text-sm">{name}</span>
                 <div className="bg-emerald-500 rounded-full p-0.5">
-                  <Check className="w-2 h-2 text-white" />
+                  <Check className="w-2.5 h-2.5 text-white" />
                 </div>
               </div>
               <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-0.5">{niche}</p>
             </div>
           </div>
-          <div className="flex items-center gap-1.2 text-[9px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-full group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-colors">
-            <Calendar className="w-3 h-3" />
-            {availableLabel}
-          </div>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-6">
           <h3 className="text-xl font-extrabold text-slate-900 mb-2 leading-tight group-hover:text-emerald-600 transition-colors line-clamp-2">
             {gig.title}
           </h3>
@@ -234,7 +217,7 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
           </p>
         </div>
 
-        <div className="mt-auto pt-8 border-t border-slate-50 flex items-center justify-between">
+        <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
           <div>
             <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1 leading-none">Starting at</p>
             <p className="text-2xl font-black text-slate-900 tracking-tight leading-none">
@@ -259,11 +242,10 @@ export default function ExploreGigs() {
   const [search, setSearch] = useState<string>("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activePlatform, setActivePlatform] = useState<string | null>(null);
-  const [view, setView] = useState<ViewMode>("grid");
+  const [availableOnly, setAvailableOnly] = useState<boolean>(false);
   const [sort, setSort] = useState<SortOption>("recommended");
   const [maxPrice, setMaxPrice] = useState<number>(MAX_PRICE_LIMIT);
   const [page, setPage] = useState<number>(1);
-  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState<boolean>(false);
 
   const [gigs, setGigs] = useState<Gig[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -275,6 +257,25 @@ export default function ExploreGigs() {
   // the user finishes typing (blur / Enter) or stops dragging the slider.
   const [committedSearch, setCommittedSearch] = useState<string>("");
   const [committedMaxPrice, setCommittedMaxPrice] = useState<number>(MAX_PRICE_LIMIT);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [isNavbarVisible, setIsNavbarVisible] = useState<boolean>(true);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 10) {
+        setIsNavbarVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setIsNavbarVisible(false);
+      } else {
+        setIsNavbarVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   const fetchGigs = useCallback(async (
     opts: {
@@ -351,11 +352,17 @@ export default function ExploreGigs() {
       setPage(1);
     }
   };
+
   const handleSearchBlur = () => {
     if (search !== committedSearch) {
       setCommittedSearch(search);
       setPage(1);
     }
+  };
+
+  const handleSearchClick = () => {
+    setCommittedSearch(search);
+    setPage(1);
   };
 
   const totalPages = pagination?.totalPages ?? 1;
@@ -375,11 +382,7 @@ export default function ExploreGigs() {
   return (
     <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-16 sm:pt-20">
       {/* Navbar */}
-      <DashboardHeader>
-        <div className="flex items-center gap-6">
-          <NotificationBell />
-        </div>
-      </DashboardHeader>
+      <Navbar />
 
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
         {/* Header Section */}
@@ -392,153 +395,258 @@ export default function ExploreGigs() {
               The world&apos;s most elite creators, verified and ready for your next campaign.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Grid/List Toggle */}
-            <div className="flex bg-white/50 backdrop-blur-sm border border-slate-200 rounded-2xl p-1 shadow-sm">
-              <button
-                onClick={() => setView("grid")}
-                className={`p-1.5 sm:p-2.5 rounded-xl transition-all ${view === "grid" ? "bg-white shadow-sm text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 16 16">
-                  <rect x="1" y="1" width="6" height="6" rx="1.5" />
-                  <rect x="9" y="1" width="6" height="6" rx="1.5" />
-                  <rect x="1" y="9" width="6" height="6" rx="1.5" />
-                  <rect x="9" y="9" width="6" height="6" rx="1.5" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setView("list")}
-                className={`p-1.5 sm:p-2.5 rounded-xl transition-all ${view === "list" ? "bg-white shadow-sm text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
         </div>
 
-        {/* Modern Filter System - Sticky Glassmorphism Header */}
-        <div className="sticky top-[64px] sm:top-20 z-30 -mx-4 px-4 py-3 sm:py-6 mb-4 sm:mb-10 bg-[#F1F5F9]/95 backdrop-blur-xl border-b border-slate-200/50 space-y-3 sm:space-y-6 shadow-sm sm:shadow-none">
-          {/* Category & Platform Pills */}
-          <div className="hidden sm:flex flex-col gap-2 sm:gap-4">
-            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1 sm:pb-2 scrollbar-none">
-              <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">Niche:</span>
-              <button
-                onClick={() => { setActiveCategory(null); setPage(1); }}
-                className={`shrink-0 px-3 py-1.5 sm:px-6 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-bold transition-all border ${!activeCategory ? "bg-slate-900 border-slate-900 text-white shadow-md sm:shadow-lg shadow-slate-900/20" : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"}`}
-              >
-                All Gigs
-              </button>
-              {categories.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => handleCategoryChange(c)}
-                  className={`shrink-0 px-3 py-1.5 sm:px-6 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-bold transition-all border ${activeCategory === c ? "bg-emerald-500 border-emerald-500 text-white shadow-md sm:shadow-lg shadow-emerald-500/20" : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"}`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-1 sm:pb-2 scrollbar-none">
-              <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">Platform:</span>
-              {platformList.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePlatformChange(p)}
-                  className={`shrink-0 px-3 py-1.5 sm:px-6 sm:py-2.5 rounded-full text-[10px] sm:text-xs font-bold transition-all border ${activePlatform === p ? "bg-emerald-500 border-emerald-500 text-white shadow-md sm:shadow-lg shadow-emerald-500/20" : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"}`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Utility Bar */}
-          <div className="flex flex-col lg:flex-row items-center gap-3 sm:gap-4 w-full">
-            <div className="relative flex-1 group w-full">
-              <div className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110 2.5a7.5 7.5 0 016.65 14.15z" />
-                </svg>
+        {/* Premium Minimal Filter System */}
+        <div className={`sticky z-40 mb-12 transition-all duration-500 ${!isNavbarVisible ? "top-6" : "top-32"}`}>
+          <div className="flex items-center gap-3 md:gap-4">
+            {/* Unified Search Bar */}
+            <div className="relative flex-1 group">
+              <div className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-all duration-300">
+                <Search className="w-4 h-4 md:w-5 md:h-5 stroke-[2.5]" />
               </div>
               <input
                 type="text"
-                placeholder="Search creators or keywords..."
+                placeholder="Search gigs..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
                 onBlur={handleSearchBlur}
-                className="w-full pl-10 pr-4 py-2 sm:pl-14 sm:pr-6 sm:py-4 bg-white border border-slate-200 rounded-full sm:rounded-[2rem] text-xs sm:text-sm font-medium focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm"
+                className="w-full pl-10 md:pl-14 pr-24 md:pr-32 py-3.5 md:py-5 bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl md:rounded-3xl text-xs md:text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500/20 transition-all placeholder:text-slate-400"
               />
-            </div>
-
-            <div className="hidden sm:flex flex-row flex-nowrap items-center gap-2 sm:gap-3 w-full lg:w-auto">
-              <div className="bg-white border border-slate-200 rounded-full sm:rounded-[2rem] px-3 sm:px-6 py-2 sm:py-3 flex items-center gap-2 sm:gap-4 flex-1 lg:flex-none">
-                <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0 hidden sm:inline">Budget:</span>
-                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest shrink-0 sm:hidden">Max:</span>
-                <input
-                  type="range"
-                  min={1000}
-                  max={MAX_PRICE_LIMIT}
-                  step={1000}
-                  value={maxPrice}
-                  onChange={handleMaxPriceChange}
-                  onMouseUp={handleMaxPriceCommit}
-                  onTouchEnd={handleMaxPriceCommit}
-                  className="w-full sm:w-32 accent-emerald-500 h-1 sm:h-1.5"
-                />
-                <span className="text-[10px] sm:text-xs font-bold text-slate-900 w-8 sm:w-12 text-right shrink-0">
-                  {maxPrice >= MAX_PRICE_LIMIT ? "50k+" : `${(maxPrice / 1000).toFixed(0)}k`}
-                </span>
+              <div className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 md:gap-2">
+                <AnimatePresence>
+                  {search && (
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      onClick={() => { setSearch(""); setCommittedSearch(""); setPage(1); }}
+                      className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[2.5]" />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+                <button
+                  onClick={handleSearchClick}
+                  className="bg-emerald-500 text-white px-3 md:px-5 py-1.5 md:py-2 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-bold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                >
+                  Search
+                </button>
               </div>
-
-              <select
-                value={sort}
-                onChange={handleSortChange}
-                className="bg-white border border-slate-200 rounded-full sm:rounded-[2rem] px-3 sm:px-6 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm flex-1 lg:flex-none appearance-none"
-                style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2.5\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.75rem center', backgroundSize: '0.8rem' }}
-              >
-                {sortOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
             </div>
+
+            {/* Filter Toggle Button */}
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className={`flex items-center gap-2 px-4 md:px-8 py-3.5 md:py-5 rounded-2xl md:rounded-3xl border transition-all shrink-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] justify-center ${
+                isFilterOpen 
+                ? "bg-emerald-500 border-emerald-500 text-white" 
+                : "bg-white/70 backdrop-blur-xl border-white text-slate-700 hover:border-emerald-500/20"
+              }`}
+            >
+              <Filter className={`w-4 h-4 md:w-5 md:h-5 ${isFilterOpen ? "fill-white" : "text-emerald-500"}`} />
+              <span className="text-xs md:text-sm font-bold hidden sm:inline">Filters</span>
+              <ChevronDown className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-300 ${isFilterOpen ? "rotate-180" : ""} hidden sm:inline`} />
+            </button>
           </div>
+
+          {/* Filter Dropdown */}
+          <AnimatePresence>
+            {isFilterOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                className="absolute top-full left-0 right-0 mt-4 p-8 bg-white/90 backdrop-blur-2xl border border-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] z-50 overflow-hidden"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                  {/* Column 1: Categories */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Niche & Categories</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => { setActiveCategory(null); setPage(1); }}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                          !activeCategory 
+                          ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20" 
+                          : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                        }`}
+                      >
+                        All Categories
+                      </button>
+                      {categories.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => handleCategoryChange(c)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                            activeCategory === c 
+                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" 
+                            : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Column 2: Platform & Status */}
+                  <div className="space-y-8">
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Platform Preference</span>
+                      </div>
+                      <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl w-fit">
+                        <button
+                          onClick={() => { setActivePlatform(null); setPage(1); }}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                            !activePlatform 
+                            ? "bg-white text-slate-900 shadow-sm" 
+                            : "text-slate-500 hover:text-slate-700"
+                          }`}
+                        >
+                          All
+                        </button>
+                        {platformList.map((p) => (
+                          <button
+                            key={p}
+                            onClick={() => handlePlatformChange(p)}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                              activePlatform === p 
+                              ? "bg-white text-slate-900 shadow-sm" 
+                              : "text-slate-500 hover:text-slate-700"
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Availability</span>
+                      </div>
+                      <button
+                        onClick={() => { setAvailableOnly(!availableOnly); setPage(1); }}
+                        className={`flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all ${
+                          availableOnly 
+                          ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20" 
+                          : "bg-white border-slate-200 text-slate-700 hover:border-emerald-500/30"
+                        }`}
+                      >
+                        <Zap className={`w-4 h-4 ${availableOnly ? "fill-white" : "text-emerald-500"}`} />
+                        <span className="text-xs font-bold">Show Live Gigs Only</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Column 3: Budget & Sorting */}
+                  <div className="space-y-8">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Max Budget</span>
+                        </div>
+                        <span className="text-xs font-black text-slate-900 tabular-nums bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md">
+                          {maxPrice >= MAX_PRICE_LIMIT ? "Any" : `₹${(maxPrice / 1000).toFixed(0)}k`}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={1000}
+                        max={MAX_PRICE_LIMIT}
+                        step={1000}
+                        value={maxPrice}
+                        onChange={handleMaxPriceChange}
+                        onMouseUp={handleMaxPriceCommit}
+                        onTouchEnd={handleMaxPriceCommit}
+                        className="w-full accent-emerald-500 h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sort Results By</span>
+                      </div>
+                      <div className="relative">
+                        <select
+                          value={sort}
+                          onChange={handleSortChange}
+                          className="w-full bg-white border border-slate-200 rounded-2xl pl-5 pr-12 py-3.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 hover:border-emerald-500/30 transition-all appearance-none cursor-pointer"
+                        >
+                          {sortOptions.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 pointer-events-none" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer of Dropdown */}
+                <div className="mt-12 pt-6 border-t border-slate-100 flex items-center justify-between">
+                   <p className="text-[10px] font-medium text-slate-400">
+                    Adjust filters to refine your search results
+                  </p>
+                  <button
+                    onClick={() => setIsFilterOpen(false)}
+                    className="text-xs font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors"
+                  >
+                    Apply & Close
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
+
+
         {/* Stats Context Bar */}
-        <div className="flex items-center justify-between mb-4 sm:mb-8 px-2 border-b border-slate-200 pb-3 sm:pb-4">
-          <div className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-wide uppercase">
+        <div className="flex items-center justify-between mb-10 px-4 py-3 bg-white/20 rounded-2xl border border-white/40 backdrop-blur-sm">
+          <div className="text-[10px] font-black text-slate-400 tracking-[0.15em] uppercase">
             {loading ? (
-              <span className="flex items-center gap-2">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 border-slate-200 border-t-emerald-500 animate-spin" />
-                Synchronizing...
+              <span className="flex items-center gap-3">
+                <div className="w-4 h-4 rounded-full border-2 border-slate-100 border-t-emerald-500 animate-spin" />
+                Updating Catalog...
               </span>
             ) : pagination ? (
-              <>Found <span className="text-slate-900">{pagination.total}</span> Matches</>
+              <>Found <span className="text-slate-900 font-black">{pagination.total}</span> Matching Opportunities</>
             ) : null}
           </div>
 
-          {(activeCategory || activePlatform || maxPrice < MAX_PRICE_LIMIT) && (
-            <button
+          {(activeCategory || activePlatform || maxPrice < MAX_PRICE_LIMIT || availableOnly || search) && (
+            <motion.button
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
               onClick={() => {
+                setSearch("");
+                setCommittedSearch("");
                 setActiveCategory(null);
                 setActivePlatform(null);
                 setMaxPrice(MAX_PRICE_LIMIT);
                 setCommittedMaxPrice(MAX_PRICE_LIMIT);
                 setPage(1);
               }}
-              className="flex items-center gap-1.5 sm:gap-2 text-[9px] sm:text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors"
+              className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors group"
             >
-              Reset Search
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+              Reset All Filters
+              <X className="w-3 h-3 group-hover:rotate-90 transition-transform duration-300" />
+            </motion.button>
           )}
         </div>
+
 
         {/* Error state */}
         {error && (
@@ -557,17 +665,12 @@ export default function ExploreGigs() {
         )}
 
         {/* Cards */}
-        <div
-          className={`grid gap-6 sm:gap-8 lg:gap-12 ${view === "grid"
-            ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
-            : "grid-cols-1"
-            }`}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-12">
           {loading
             ? Array.from({ length: LIMIT }).map((_, i) => <SkeletonCard key={i} />)
             : gigs.map((gig) => (
-              <GigCard key={gig._id} gig={gig} view={view} />
-            ))}
+                <GigCard key={gig._id} gig={gig} />
+              ))}
         </div>
 
         {/* Empty state */}
@@ -633,178 +736,7 @@ export default function ExploreGigs() {
         )}
       </div>
 
-      {/* Mobile Floating Filters Button */}
-      <button
-        onClick={() => setIsMobileFiltersOpen(true)}
-        className="sm:hidden fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3.5 rounded-full shadow-2xl flex items-center gap-2.5 hover:bg-slate-800 transition-all active:scale-95"
-      >
-        <Filter className="w-5 h-5" />
-        <span className="text-sm font-bold tracking-wide">Filters</span>
-        {(activeCategory || activePlatform || committedMaxPrice < MAX_PRICE_LIMIT || sort !== 'recommended') && (
-          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-slate-900"></span>
-        )}
-      </button>
-
-      {/* Mobile Filters Modal */}
-      {isMobileFiltersOpen && (
-        <div className="fixed inset-0 z-[100] sm:hidden flex flex-col justify-end">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsMobileFiltersOpen(false)} />
-          <div className="bg-white w-full rounded-t-[2rem] shadow-2xl relative z-10 flex flex-col max-h-[85vh] animate-in slide-in-from-bottom-full duration-300">
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
-              <h2 className="text-xl font-black text-slate-900">Filters</h2>
-              <button onClick={() => setIsMobileFiltersOpen(false)} className="p-2 bg-slate-50 text-slate-500 rounded-full hover:bg-slate-100 transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto flex-1 space-y-8">
-              {/* Category */}
-              <div>
-                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Niche</h3>
-                <div className="flex flex-wrap gap-2.5">
-                  <button
-                    onClick={() => { setActiveCategory(null); setPage(1); }}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all border ${!activeCategory ? "bg-slate-900 border-slate-900 text-white shadow-md shadow-slate-900/20" : "bg-white border-slate-200 text-slate-600"}`}
-                  >
-                    All Gigs
-                  </button>
-                  {categories.map((c) => (
-                    <button
-                      key={c}
-                      onClick={() => handleCategoryChange(c)}
-                      className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all border ${activeCategory === c ? "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-white border-slate-200 text-slate-600"}`}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Platform */}
-              <div>
-                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Platform</h3>
-                <div className="flex flex-wrap gap-2.5">
-                  {platformList.map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => handlePlatformChange(p)}
-                      className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all border ${activePlatform === p ? "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-white border-slate-200 text-slate-600"}`}
-                    >
-                      {p}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Budget */}
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Max Budget</h3>
-                  <span className="text-sm font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">
-                    {maxPrice >= MAX_PRICE_LIMIT ? "50k+" : `₹${(maxPrice / 1000).toFixed(0)}k`}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={1000}
-                  max={MAX_PRICE_LIMIT}
-                  step={1000}
-                  value={maxPrice}
-                  onChange={handleMaxPriceChange}
-                  onMouseUp={handleMaxPriceCommit}
-                  onTouchEnd={handleMaxPriceCommit}
-                  className="w-full accent-emerald-500 h-2 bg-slate-100 rounded-full appearance-none outline-none"
-                />
-              </div>
-
-              {/* Sort */}
-              <div>
-                <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3">Sort By</h3>
-                <div className="flex flex-col gap-2">
-                  {sortOptions.map((o) => (
-                    <label key={o.value} className={`flex items-center gap-3 p-3.5 rounded-xl border transition-all ${sort === o.value ? 'border-emerald-500 bg-emerald-50/50' : 'border-slate-100 bg-white'}`}>
-                      <input 
-                        type="radio" 
-                        name="sortMobile" 
-                        value={o.value} 
-                        checked={sort === o.value}
-                        onChange={(e) => handleSortChange(e)}
-                        className="accent-emerald-500 w-4 h-4"
-                      />
-                      <span className={`text-sm font-bold ${sort === o.value ? 'text-emerald-700' : 'text-slate-600'}`}>{o.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Apply & Reset Footer */}
-            <div className="p-5 border-t border-slate-100 flex gap-3 bg-white pb-8">
-              <button 
-                onClick={() => {
-                  setActiveCategory(null);
-                  setActivePlatform(null);
-                  setMaxPrice(MAX_PRICE_LIMIT);
-                  setCommittedMaxPrice(MAX_PRICE_LIMIT);
-                  setSort("recommended");
-                  setPage(1);
-                }}
-                className="flex-1 py-4 rounded-xl font-bold text-sm bg-slate-50 text-slate-600 hover:bg-slate-100 transition-colors"
-              >
-                Reset
-              </button>
-              <button 
-                onClick={() => setIsMobileFiltersOpen(false)}
-                className="flex-[2] py-4 rounded-xl font-bold text-sm bg-slate-900 text-white shadow-lg shadow-slate-900/20 active:scale-95 transition-all"
-              >
-                Show Results
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Footer */}
-      <footer className="bg-[#0F172A] pt-28 pb-16 text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-12 pb-20 border-b border-white/5">
-            <div className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 text-white bg-[#10B981] rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-white">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <span className="text-2xl font-black text-white tracking-tight ">Noillin</span>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-6 sm:gap-16 text-[13px] font-bold uppercase tracking-widest">
-              {["About", "Support", "Privacy", "Terms"].map(l => (
-                <a key={l} href="#" className="hover:text-emerald-500 transition-colors">{l}</a>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-8">
-              {[
-                { label: "SECURE PAYMENTS", icon: "🔒" },
-                { label: "VERIFIED PROFILES", icon: "✔" }
-              ].map((badge, i) => (
-                <div key={i} className="flex items-center gap-3 text-[10px] font-black tracking-[.2em] opacity-80 group">
-                  <span className="text-emerald-500 text-lg group-hover:scale-125 transition-transform">{badge.icon}</span>
-                  <span className="text-slate-100">{badge.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] font-bold tracking-widest opacity-30">
-            <p>&copy; 2026 NOILLIN INC. ALL RIGHTS RESERVED.</p>
-            <p className="flex items-center gap-2">
-              <Zap className="w-3 h-3 fill-white" />
-              BUILT FOR THE FUTURE OF INFLUENCE
-            </p>
-          </div>
-        </div>
-      </footer >
-    </div >
+      <Footer />
+    </div>
   );
 }

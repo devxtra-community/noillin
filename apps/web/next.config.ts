@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -13,9 +14,9 @@ const nextConfig: NextConfig = {
         hostname: "i.pravatar.cc",
       },
       {
-      protocol: "https",
-      hostname: "noillin-media.s3.eu-north-1.amazonaws.com"
-    }
+        protocol: "https",
+        hostname: "**.amazonaws.com",
+      }
     ],
   },
 };

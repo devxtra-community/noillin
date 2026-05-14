@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec tsx src/main.ts",
     "start": "tsx src/main.ts",
-    "build": "tsc --noEmit",
+    "build": "tsc",
+    "start:prod": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,10 +18,11 @@
   "devDependencies": {
     "@types/amqplib": "^0.10.8",
     "@types/node": "^25.0.10",
+    "@types/nodemailer": "^7.0.9",
+    "@types/web-push": "^3.6.4",
     "nodemon": "^3.1.11",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "@types/web-push": "^3.6.4"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "amqplib": "^0.10.9",
@@ -27,8 +30,9 @@
     "dotenv": "^17.2.3",
     "ioredis": "^5.10.1",
     "meilisearch": "^0.55.0",
-    "winston": "^3.19.0",
+    "mongoose": "^9.1.5",
+    "nodemailer": "^8.0.1",
     "web-push": "^3.6.7",
-    "mongoose": "^9.1.5"
+    "winston": "^3.19.0"
   }
 }

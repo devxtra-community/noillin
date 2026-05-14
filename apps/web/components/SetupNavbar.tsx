@@ -1,12 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { usePathname } from "next/navigation";
 
 import NoillinIcon from "./NoillinIcon";
-
-import { useAuthStore } from "@/store/auth.store";
-
 
 interface SetupNavbarProps {
   step?: 1 | 2 | 3;
@@ -30,9 +26,9 @@ export default function SetupNavbar({ step = 3, mode = "onboarding" }: SetupNavb
   const currentStep = steps.find((s) => s.id === step) || steps[2];
 
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50 bg-white/80 backdrop-blur-md border border-gray-100 rounded-3xl shadow-xl overflow-hidden">
+      <div className="mx-auto px-6 sm:px-10">
+        <div className="flex justify-between items-center h-14">
           {/* Logo Section */}
           <div className="flex items-center">
             <NoillinIcon />
@@ -41,7 +37,7 @@ export default function SetupNavbar({ step = 3, mode = "onboarding" }: SetupNavb
       </div>
 
       {/* Progress Bar */}
-      <div className="h-1.5 w-full bg-gray-100/50 overflow-hidden">
+      <div className="h-1.5 w-full bg-gray-100/50">
         <motion.div
           className="h-full bg-linear-to-r from-emerald-400 via-teal-500 to-[#10B981] animate-progress-flow"
           initial={{ width: 0 }}

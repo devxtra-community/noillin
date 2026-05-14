@@ -3,7 +3,6 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { motion, useInView, useSpring, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -12,7 +11,6 @@ import {
   Calendar,
   MessageCircle,
   ArrowRight,
-  CheckCircle2,
   Star,
   Search,
   CreditCard,
@@ -21,7 +19,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import NoillinIcon from "@/components/NoillinIcon";
+import Footer from "@/components/Footer";
+import Navbar from "@/components/Navbar";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -78,64 +77,78 @@ interface Testimonial {
 
 function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
   const [index, setIndex] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const [visibleCards, setVisibleCards] = useState(3);
+  const sliderRef = useRef(null);
 
-  // Triple the testimonials for a seamless loop effect
+  // Update visible cards on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setVisibleCards(window.innerWidth < 1024 ? (window.innerWidth < 640 ? 1 : 2) : 3);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Extended array for seamless loop
   const extendedTestimonials = [...testimonials, ...testimonials, ...testimonials];
 
+  // Auto-slide logic
   useEffect(() => {
     if (testimonials.length === 0) return;
     const timer = setInterval(() => {
-      setIndex((prev) => (prev + 1) % testimonials.length);
-    }, 4000);
+      setIndex((prev) => prev + 1);
+    }, 5000);
     return () => clearInterval(timer);
   }, [testimonials.length]);
 
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0.2, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8 }}
-      className="relative w-full overflow-hidden py-12"
+      ref={sliderRef}
+      initial={{ opacity: 1, y: 0 }}
+      className="relative w-full overflow-hidden py-4"
     >
       <motion.div
-        animate={{ x: `-${(index + testimonials.length) * (100 / extendedTestimonials.length)}%` }}
+        animate={{ x: `-${(index) * (100 / extendedTestimonials.length)}%` }}
         transition={{
           type: "spring",
-          stiffness: 80,
+          stiffness: 40,
           damping: 20,
           mass: 1
         }}
+        onUpdate={() => {
+          // If we've reached the end of the middle section, jump back seamlessly
+          // Note: index calculation for seamless loop can be complex, 
+          // but for simple auto-slide, just keeping it in bounds is enough.
+          if (index >= testimonials.length * 2) {
+             setIndex(testimonials.length);
+          }
+        }}
         className="flex"
-        style={{ width: `${(extendedTestimonials.length * 100) / 3}%` }}
+        style={{ width: `${(extendedTestimonials.length * 100) / visibleCards}%` }}
       >
         {extendedTestimonials.map((t, i) => (
           <div
             key={i}
-            className="flex-none px-4"
+            className="flex-none px-3 sm:px-4"
             style={{ width: `${100 / extendedTestimonials.length}%` }}
           >
-            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 relative overflow-hidden group h-full flex flex-col justify-between transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-100/50">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-50 rounded-full -mr-16 -mt-16 blur-2xl opacity-40 group-hover:scale-150 transition-transform duration-1000" />
-
-              <div className="relative z-10">
-                <div className="flex gap-1 text-emerald-400 mb-8">
-                  {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-5 h-5 fill-emerald-400" />)}
-                </div>
-                <p className="text-slate-600 text-xl font-medium leading-relaxed italic mb-10">
-                  &quot;{t.text}&quot;
-                </p>
+            <div className="bg-white p-8 sm:p-10 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-500 h-full flex flex-col">
+              <div className="flex gap-0.5 text-yellow-400 mb-6">
+                {[1, 2, 3, 4, 5].map(s => <Star key={s} className="w-4 h-4 fill-current" />)}
               </div>
+              
+              <p className="text-slate-600 text-lg sm:text-xl font-medium leading-relaxed mb-8 flex-1">
+                &quot;{t.text}&quot;
+              </p>
 
-              <div className="flex items-center gap-5 mt-auto relative z-10 pt-6 border-t border-slate-50">
-                <div className="w-14 h-14 rounded-full overflow-hidden relative border-4 border-white shadow-lg">
-                  <Image fill src={`https://i.pravatar.cc/150?img=${t.img}`} alt={t.name || "Testimonial Avatar"} className="object-cover" />
+              <div className="flex items-center gap-4 pt-6 border-t border-slate-50">
+                <div className="w-12 h-12 rounded-full overflow-hidden relative shadow-sm">
+                  <Image fill src={`https://i.pravatar.cc/150?img=${t.img}`} alt={t.name} className="object-cover" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-slate-900 text-base">{t.name}</h4>
-                  <p className="text-[11px] font-black text-emerald-500 tracking-[0.2em] uppercase">{t.role}</p>
+                  <h4 className="font-bold text-slate-900 text-sm">{t.name}</h4>
+                  <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">{t.role}</p>
                 </div>
               </div>
             </div>
@@ -143,18 +156,18 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
         ))}
       </motion.div>
 
-      {/* Glassy Shadow Fades for Premium Look */}
-      <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-gray-200 to-transparent pointer-events-none z-10" />
-      <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-gray-200 to-transparent pointer-events-none z-10" />
-
       {/* Navigation Indicators */}
-      <div className="flex justify-center gap-2 mt-12">
+      <div className="flex justify-center gap-1.5 mt-10">
         {testimonials.map((_, i) => (
           <button
             key={i}
-            onClick={() => setIndex(i)}
-            className={`h-1.5 rounded-full transition-all duration-500 ${i === index ? "bg-emerald-500 w-8" : "bg-slate-300 w-2 hover:bg-slate-400"
-              }`}
+            onClick={() => {
+              const baseIndex = Math.floor(index / testimonials.length) * testimonials.length;
+              setIndex(baseIndex + i);
+            }}
+            className={`h-1 rounded-full transition-all duration-500 ${
+              (index % testimonials.length) === i ? "bg-emerald-500 w-6" : "bg-slate-200 w-1.5 hover:bg-slate-300"
+            }`}
           />
         ))}
       </div>
@@ -163,328 +176,245 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
 }
 
 export default function HomePage() {
-  const pathname = usePathname();
   return (
-    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6 py-4 flex items-center justify-between">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            <NoillinIcon />
-          </motion.div>
-
-          <div className="hidden md:flex items-center gap-10 text-[13px] font-semibold text-slate-500 uppercase tracking-wider">
-            {[
-              { name: "Home", href: "/" },
-              { name: "About", href: "#" },
-              { name: "Influencers", href: "#" },
-              { name: "Gigs", href: "/gig-list" },
-              { name: "Support", href: "#" }
-            ].map((item) => {
-              const isActive = item.href !== "#" && pathname === item.href;
-              return (
-                <Link key={item.name} href={item.href} className={`transition-colors relative group ${isActive ? "text-emerald-600" : "hover:text-emerald-600"}`}>
-                  {item.name}
-                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-emerald-500 transition-all ${isActive ? "w-full" : "w-0 group-hover:w-full"}`} />
-                </Link>
-              );
-            })}
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4"
-          >
-            <Link href="/login">
-              <Button variant="ghost" className="text-slate-600 font-semibold hover:text-emerald-600 hover:bg-emerald-50 transition-all px-6">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 shadow-lg shadow-emerald-200 rounded-lg">
-                Get Started
-              </Button>
-            </Link>
-          </motion.div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+      <Navbar />
 
       <main>
-        {/* Hero Section */}
-        <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6 py-16 md:py-28 grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-12 items-center overflow-hidden">
+        {/* Modern Minimal Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-32">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="/hero-bg-v2.png"
+              alt="Influencer & Brand Collaboration"
+              fill
+              className="object-cover scale-105"
+              priority
+            />
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-[1px]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-900/40 via-transparent to-[#F1F5F9]" />
+          </div>
+
           <motion.div
             initial="initial"
             animate="animate"
             variants={staggerContainer}
-            className="relative z-10"
+            className="relative z-10 max-w-4xl mx-auto px-6 text-center"
           >
+            <motion.div
+              variants={fadeInUp}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-[11px] font-bold uppercase tracking-[0.2em] mb-10 shadow-2xl"
+            >
+              <Zap className="w-4 h-4 text-emerald-400 fill-emerald-400" />
+              The Future of Influence
+            </motion.div>
+
             <motion.h1
               variants={fadeInUp}
-              className="text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.05] mb-8 text-slate-900"
+              className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-[1.1] mb-8 text-white drop-shadow-2xl"
             >
               Book Trusted Influencers.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">
                 Pay Securely.
               </span>
             </motion.h1>
+
             <motion.p
               variants={fadeInUp}
-              className="text-lg text-slate-500 mb-10 max-w-lg leading-relaxed"
+              className="text-lg sm:text-xl md:text-2xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed font-medium"
             >
-              Discover, schedule, and collaborate with verified creators — all in one place.
+              Discover, schedule, and collaborate with verified creators — all in one seamless, high-performance ecosystem.
             </motion.p>
 
             <motion.div
               variants={fadeInUp}
-              className="flex flex-wrap items-center gap-5 mb-12"
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-16"
             >
-              <Link href="/gig-list">
-                <Button className="h-14 px-8 text-base font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-xl shadow-xl shadow-emerald-200 group transition-all">
+              <Link href="/gig-list" className="w-full sm:w-auto">
+                <Button className="h-14 sm:h-16 w-full sm:px-10 text-base sm:text-lg font-bold text-white bg-emerald-500 hover:bg-emerald-600 rounded-2xl shadow-[0_20px_50px_rgba(16,185,129,0.3)] group transition-all">
                   Explore Gigs
-                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="ml-2 w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              <Link href="/signup?role=INFLUENCER">
-                <Button variant="outline" className="h-14 px-8 text-base font-bold text-slate-700 bg-white border-slate-200 hover:bg-slate-50 rounded-xl transition-all">
-                  Become an Influencer
+              <Link href="/signup?role=INFLUENCER" className="w-full sm:w-auto">
+                <Button variant="outline" className="h-14 sm:h-16 w-full sm:px-10 text-base sm:text-lg font-bold text-white bg-white/10 backdrop-blur-md border-white/30 hover:bg-white/20 rounded-2xl transition-all">
+                  Join as Creator
                 </Button>
               </Link>
             </motion.div>
 
             <motion.div
               variants={fadeInUp}
-              className="flex items-center gap-4"
+              className="flex items-center justify-center gap-6 p-4 rounded-3xl bg-white/5 backdrop-blur-sm border border-white/10 w-fit mx-auto"
             >
               <div className="flex -space-x-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-slate-100 overflow-hidden relative shadow-sm">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="w-10 h-10 rounded-full border-2 border-emerald-500/30 bg-slate-800 overflow-hidden relative shadow-lg">
                     <Image fill src={`https://i.pravatar.cc/100?img=${i + 20}`} alt="user" className="object-cover" />
                   </div>
                 ))}
               </div>
-              <p className="text-[13px] text-slate-400 font-semibold tracking-wide">
-                Join <span className="text-emerald-600">2,000+</span> creators building today
+              <p className="text-sm text-white/70 font-semibold tracking-wide">
+                Join <span className="text-emerald-400">2,000+</span> creators building the future
               </p>
             </motion.div>
           </motion.div>
 
-          {/* Hero Mockup */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, rotate: 0 }}
-            animate={{ opacity: 1, scale: 1, rotate: 2 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
-          >
-            {/* Background Accent */}
-            <div className="absolute -inset-10 bg-gradient-to-tr from-emerald-100 to-teal-50 rounded-[3rem] -z-10 blur-3xl opacity-60 animate-pulse" />
-
-            <div className="bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] border border-slate-100 p-8 relative overflow-hidden group">
-              {/* Header Bar */}
-              <div className="h-1 bg-slate-50 w-24 rounded-full mx-auto mb-8" />
-
-              {/* Profile Card Overlay */}
-              <div className="flex items-center gap-5 mb-10">
-                <div className="w-20 h-20 rounded-2xl overflow-hidden bg-emerald-50 relative border-4 border-white shadow-md">
-                  <Image fill src="https://i.pravatar.cc/150?img=5" alt="Sarah" className="object-cover" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-xl flex items-center gap-2">
-                    Sarah Jenkins
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-50" />
-                  </h3>
-                  <p className="text-sm text-slate-400 font-medium mb-3 tracking-wide">Lifestyle & Beauty</p>
-                  <div className="flex gap-2">
-                    <span className="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase rounded-lg tracking-wider">Instagram</span>
-                    <span className="px-3 py-1 bg-rose-50 text-rose-600 text-[10px] font-bold uppercase rounded-lg tracking-wider">TikTok</span>
-                  </div>
-                </div>
-                <div className="ml-auto w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
-                  <ShieldCheck className="w-5 h-5 text-emerald-500" />
-                </div>
-              </div>
-
-              {/* Mini Calendar mockup with scroll animations */}
-              <motion.div
-                whileInView={{ opacity: 1, scale: 1 }}
-                initial={{ opacity: 0, scale: 0.9 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="mb-10 p-6 bg-slate-50/50 rounded-3xl border border-slate-50 shadow-inner"
-              >
-                <div className="flex justify-between items-center mb-6">
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Availability</p>
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 4, repeat: Infinity }}
-                  >
-                    <Calendar className="w-4 h-4 text-emerald-500" />
-                  </motion.div>
-                </div>
-                <div className="grid grid-cols-7 gap-2">
-                  {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
-                    <div key={i} className="text-[10px] text-slate-400 font-bold text-center">{d}</div>
-                  ))}
-                  {[1, 2, 3].map(d => (
-                    <motion.div
-                      key={d}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      initial={{ opacity: 0, y: 10 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: d * 0.05 }}
-                      className="h-10 text-[11px] flex items-center justify-center text-slate-300"
-                    >
-                      {d}
-                    </motion.div>
-                  ))}
-                  <motion.div
-                    whileInView={{ scale: [1, 1.2, 1] }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.5, duration: 0.5 }}
-                    className="h-10 w-full bg-emerald-500 text-white text-[11px] font-bold flex items-center justify-center rounded-xl shadow-lg shadow-emerald-200"
-                  >
-                    4
-                  </motion.div>
-                  {[5, 6, 7].map(d => (
-                    <motion.div
-                      key={d}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      initial={{ opacity: 0, y: 10 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: d * 0.05 }}
-                      className="h-10 text-[11px] flex items-center justify-center text-slate-400 font-medium"
-                    >
-                      {d}
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Price Details */}
-              <div className="space-y-4 mb-8 px-2">
-                <div className="flex justify-between items-center border-b border-slate-50 pb-4">
-                  <span className="text-sm font-medium text-slate-400">Service Fee</span>
-                  <span className="text-sm font-bold text-slate-900">$150.00</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-slate-900">Total</span>
-                  <span className="text-2xl font-black text-emerald-500 tracking-tight">$150.00</span>
-                </div>
-              </div>
-
-              <Button className="w-full h-14 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-2xl transition-all shadow-xl shadow-emerald-100">
-                Confirm & Pay
-              </Button>
-            </div>
-          </motion.div>
+          {/* Floating Glassmorphic Elements for Modern Feel */}
+          <div className="absolute top-1/4 -left-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-[100px] animate-pulse" />
+          <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-teal-500/20 rounded-full blur-[120px] animate-pulse delay-700" />
         </section>
 
         {/* Stats Section */}
-        <section className="bg-[#F1F5F9]/50 py-20 border-y border-slate-100">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6">
-            <p className="text-center text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em] mb-16">Trusted by brand & creators</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:divide-x divide-slate-200">
+        <section className="bg-slate-900 py-24 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10">
+            <div className="absolute top-0 left-0 w-64 h-64 bg-emerald-500 rounded-full blur-[100px]" />
+            <div className="absolute bottom-0 right-0 w-80 h-80 bg-teal-500 rounded-full blur-[120px]" />
+          </div>
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 relative z-10">
+            <p className="text-center text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] mb-16 opacity-80">Empowering the Future Economy</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 divide-y md:divide-y-0 md:divide-x divide-slate-800">
               {[
-                { label: "Influencers", value: "1,000+" },
-                { label: "Processed", value: "$2M+" },
-                { label: "Secure", value: "100%" }
+                { label: "Active Creators", value: "1,000+" },
+                { label: "Brand Partnerships", value: "$2M+" },
+                { label: "Success Rate", value: "99.9%" }
               ].map((stat, idx) => (
                 <motion.div
                   key={idx}
                   whileInView={{ opacity: 1, y: 0 }}
                   initial={{ opacity: 0, y: 30 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.8, delay: idx * 0.2 }}
-                  className="text-center px-8"
+                  transition={{ duration: 0.8, delay: idx * 0.1 }}
+                  className="text-center px-10 py-8 md:py-0"
                 >
-                  <h2 className="text-6xl font-black text-slate-900 mb-2">
+                  <h2 className="text-5xl md:text-7xl font-black text-white mb-4 tracking-tighter">
                     <CountingNumber value={stat.value} suffix={stat.value.includes('+') ? '+' : stat.value.includes('%') ? '%' : ''} />
                   </h2>
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest leading-loose">{stat.label}</p>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* How it Works */}
-        <section className="py-28 relative overflow-hidden bg-[#F1F5F9]">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6 relative z-10">
-            <div className="text-center max-w-2xl mx-auto mb-20">
-              <h2 className="text-4xl font-extrabold text-slate-900 mb-6">How Noillin Works</h2>
-              <p className="text-slate-500 font-medium text-lg leading-relaxed">
-                Connect brands with elite creators in three simple, secure steps.
+        {/* How it Works - Redesigned for Premium Minimal Look */}
+        <section className="py-24 sm:py-40 relative overflow-hidden bg-white">
+          {/* Subtle Background Pattern */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+          
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 relative z-10">
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-20 gap-8">
+              <div className="max-w-2xl">
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="flex items-center gap-3 mb-6"
+                >
+                  <div className="w-10 h-[2px] bg-emerald-500" />
+                  <span className="text-emerald-600 font-bold text-xs uppercase tracking-[0.3em]">Execution Strategy</span>
+                </motion.div>
+                <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-[0.9]">
+                  The Path to <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Perfect Synergy</span>
+                </h2>
+              </div>
+              <p className="text-slate-500 font-medium text-lg max-w-md leading-relaxed border-l-2 border-slate-100 pl-8">
+                We&apos;ve distilled months of collaboration overhead into three high-velocity steps.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+              {/* Connecting Line for Desktop */}
+              <div className="hidden md:block absolute top-1/4 left-0 w-full h-[1px] bg-slate-100 z-0" />
+              
               {[
                 {
-                  title: "Discover",
-                  desc: "Browse verified influencer gigs based on your niche and budget.",
-                  icon: <Search className="w-8 h-8" />,
-                  color: "bg-blue-50 text-blue-500"
+                  title: "Discovery",
+                  desc: "Our AI-driven engine filters through thousands to find your perfect niche matches.",
+                  icon: <Search className="w-6 h-6" />,
+                  gradient: "from-blue-600 to-indigo-600"
                 },
                 {
-                  title: "Book",
-                  desc: "Select availability and packages that fit your campaign needs.",
-                  icon: <Calendar className="w-8 h-8" />,
-                  color: "bg-emerald-50 text-emerald-500"
+                  title: "Activation",
+                  desc: "One-click contracts and instant calendar syncing to launch your campaign at light speed.",
+                  icon: <Zap className="w-6 h-6" />,
+                  gradient: "from-emerald-500 to-teal-500"
                 },
                 {
-                  title: "Pay Securely",
-                  desc: "Funds are held securely until deliverables are confirmed.",
-                  icon: <CreditCard className="w-8 h-8" />,
-                  color: "bg-indigo-50 text-indigo-500"
+                  title: "Growth",
+                  desc: "Funds released on satisfaction, backed by real-time analytics and escrow protection.",
+                  icon: <CreditCard className="w-6 h-6" />,
+                  gradient: "from-slate-800 to-slate-900"
                 }
               ].map((step, i) => (
                 <motion.div
                   key={i}
-                  whileHover={{ y: -10 }}
-                  className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-xl shadow-slate-100/50 flex flex-col items-center text-center group transition-all"
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.2, duration: 0.8 }}
+                  className="relative group"
                 >
-                  <div className={`p-6 rounded-2xl mb-8 group-hover:scale-110 transition-transform ${step.color}`}>
-                    {step.icon}
+                  <div className="relative z-10">
+                    <div className="mb-12 relative inline-block">
+                      <div className={`w-20 h-20 rounded-[2rem] bg-gradient-to-br ${step.gradient} flex items-center justify-center text-white shadow-2xl shadow-emerald-200/20 group-hover:scale-110 transition-transform duration-500`}>
+                        {step.icon}
+                      </div>
+                      <div className="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-xs font-black text-slate-900 shadow-sm">
+                        0{i + 1}
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-3xl font-black text-slate-900 mb-6 tracking-tight group-hover:text-emerald-600 transition-colors">
+                      {step.title}
+                    </h3>
+                    <p className="text-slate-500 font-medium leading-relaxed mb-8 group-hover:text-slate-700 transition-colors">
+                      {step.desc}
+                    </p>
+                    
+                    <div className="w-0 group-hover:w-full h-[2px] bg-emerald-500 transition-all duration-500" />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-4">{step.title}</h3>
-                  <p className="text-slate-400 text-sm font-medium leading-[1.6]">{step.desc}</p>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Platform Features */}
-        <section className="py-28 bg-[#F1F5F9] overflow-hidden">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6">
+        {/* Platform Features - Updated for Color Theme */}
+        <section className="py-24 sm:py-40 bg-slate-900 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] -mr-64 -mt-64" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -ml-64 -mb-64" />
+          
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 relative z-10">
             <div className="text-center mb-24">
-              <h2 className="text-4xl font-extrabold text-slate-900">Platform Features</h2>
+              <span className="text-emerald-400 font-bold text-[10px] uppercase tracking-[0.4em] mb-6 inline-block">System Architecture</span>
+              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter">The Noillin Edge</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { title: "Availability Booking", desc: "See real-time calendar slots before you book. No more back-and-forth emails.", icon: <Calendar className="w-5 h-5" /> },
-                { title: "Secure Payments", desc: "Escrow-style protection ensures your money is safe until the job is done.", icon: <ShieldCheck className="w-5 h-5" /> },
-                { title: "Direct Chat", desc: "Communicate directly with influencers or brands via our secure platform.", icon: <MessageCircle className="w-5 h-5" /> },
-                { title: "Transparent Pricing", desc: "No hidden fees. What you see is exactly what you pay.", icon: <Star className="w-5 h-5" /> },
-                { title: "Group Collabs", desc: "Book multiple influencers for the same campaign effortlessly.", icon: <Users className="w-5 h-5" /> },
-                { title: "Fast Turnaround", desc: "Get confirmed bookings in minutes, not days.", icon: <Zap className="w-5 h-5" /> },
+                { title: "Live Booking", desc: "Real-time creator calendars integrated directly into the platform.", icon: <Calendar className="w-5 h-5" /> },
+                { title: "Escrow Security", desc: "Your capital is safe in our automated escrow system until delivery.", icon: <ShieldCheck className="w-5 h-5" /> },
+                { title: "Unified Messaging", desc: "No more Discord or Telegram leaks. Keep everything professional.", icon: <MessageCircle className="w-5 h-5" /> },
+                { title: "Smart Contracts", desc: "Automated agreements that protect both brand and creator.", icon: <Star className="w-5 h-5" /> },
+                { title: "Mass Outreach", desc: "Invite 50+ influencers to your campaign with a single click.", icon: <Users className="w-5 h-5" /> },
+                { title: "Instant Payouts", desc: "Creators get paid the moment work is approved. Zero friction.", icon: <Zap className="w-5 h-5" /> },
               ].map((feature, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className="p-8 bg-gray-200 hover:bg-gray rounded-3xl border border-transparent hover:border-black hover hover:shadow-2xl hover:shadow-emerald-50! transition-all relative group"
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="p-10 bg-white/5 backdrop-blur-sm border border-white/10 rounded-[2.5rem] hover:bg-white/10 hover:border-emerald-500/50 transition-all duration-300 group"
                 >
-                  <div className="w-12 h-12 bg-white text-emerald-500 rounded-xl flex items-center justify-center mb-8 shadow-sm group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 mb-8">
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">{feature.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed font-medium">{feature.desc}</p>
+                  <h3 className="text-xl font-bold text-white mb-4 group-hover:text-emerald-400 transition-colors">{feature.title}</h3>
+                  <p className="text-slate-400 text-sm font-medium leading-relaxed">{feature.desc}</p>
                 </motion.div>
               ))}
             </div>
@@ -492,65 +422,66 @@ export default function HomePage() {
         </section>
 
         {/* Brand vs Creator */}
-        <section className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <section className="max-w-[1440px] mx-auto px-4 sm:px-6 py-24 sm:py-32 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
           {/* Brand Card */}
           <motion.div
-            whileHover={{ scale: 1.01 }}
-            className="bg-slate-900 p-12 rounded-[3.5rem] relative overflow-hidden group shadow-2xl shadow-slate-200"
+            whileHover={{ y: -5 }}
+            className="bg-slate-900 p-8 sm:p-14 rounded-[2.5rem] sm:rounded-[3.5rem] relative overflow-hidden group shadow-[0_30px_60px_-15px_rgba(15,23,42,0.3)]"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-slate-800 rounded-full -mr-32 -mt-32 blur-3xl opacity-20 transition-all group-hover:opacity-40" />
-            <h2 className="text-3xl font-black text-white mb-10 leading-tight">Built for<br />Brands</h2>
-            <ul className="space-y-6 mb-12">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full -mr-20 -mt-20 blur-[100px] transition-all group-hover:bg-emerald-500/20" />
+            <h2 className="text-4xl font-black text-white mb-8 leading-tight">Scale Your<br /><span className="text-emerald-500">Brand Reach</span></h2>
+            <ul className="space-y-6 mb-14">
               {[
-                "Filter influencers by niche and platform",
-                "Clear deliverables and transparent pricing packages",
-                "Escrow-style payments protect your budget"
+                "Advanced creator discovery engine",
+                "Automated campaign management",
+                "Full escrow budget protection"
               ].map((item, i) => (
-                <li key={i} className="flex items-center gap-4 text-slate-300 font-medium">
-                  <div className="w-6 h-6 bg-slate-800 text-emerald-400 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3 h-3 font-black" />
+                <li key={i} className="flex items-center gap-4 text-slate-400 font-medium text-sm">
+                  <div className="w-6 h-6 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check className="w-3 h-3 font-bold" />
                   </div>
                   {item}
                 </li>
               ))}
             </ul>
             <Button className="h-16 w-full text-base font-bold bg-white text-slate-900 border-none hover:bg-slate-100 rounded-2xl shadow-xl transition-all">
-              Explore Influencers
+              Launch Brand Campaign
             </Button>
           </motion.div>
 
           {/* Creator Card */}
           <motion.div
-            whileHover={{ scale: 1.01 }}
-            className="bg-white p-12 rounded-[3.5rem] border border-slate-100 relative overflow-hidden group shadow-2xl shadow-slate-200"
+            whileHover={{ y: -5 }}
+            className="bg-white p-8 sm:p-14 rounded-[2.5rem] sm:rounded-[3.5rem] border border-slate-100 relative overflow-hidden group shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-40 transition-all group-hover:opacity-60" />
-            <h2 className="text-3xl font-black text-slate-900 mb-10 leading-tight">Built for<br />Creators</h2>
-            <ul className="space-y-6 mb-12">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full -mr-20 -mt-20 blur-[100px] transition-all group-hover:bg-emerald-500/10" />
+            <h2 className="text-4xl font-black text-slate-900 mb-8 leading-tight">Monetize Your<br /><span className="text-emerald-600">Influence</span></h2>
+            <ul className="space-y-6 mb-14">
               {[
-                "Create single or group gigs easily",
-                "Manage availability like a pro",
-                "Get paid instantly once job is confirmed"
+                "Professional gig creation suite",
+                "Smart availability management",
+                "Instant, verified payouts"
               ].map((item, i) => (
-                <li key={i} className="flex items-center gap-4 text-slate-500 font-medium">
+                <li key={i} className="flex items-center gap-4 text-slate-500 font-medium text-sm">
                   <div className="w-6 h-6 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Check className="w-3 h-3 font-black" />
+                    <Check className="w-3 h-3 font-bold" />
                   </div>
                   {item}
                 </li>
               ))}
             </ul>
-            <Button className="h-16 w-full text-base font-bold bg-emerald-500 text-white hover:bg-emerald-600 rounded-2xl shadow-xl shadow-emerald-100 transition-all">
-              Create a Gig
+            <Button className="h-16 w-full text-base font-bold bg-emerald-500 text-white hover:bg-emerald-600 border-none rounded-2xl shadow-xl shadow-emerald-500/20 transition-all">
+              Become a Noillin Creator
             </Button>
           </motion.div>
         </section>
 
-        {/* Testimonials */}
-        <section className="py-28 bg-[#F1F5F9]">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6">
+        {/* Testimonials - Updated for Color Theme */}
+        <section className="py-24 sm:py-40 bg-white relative">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
             <div className="text-center mb-24">
-              <h2 className="text-4xl font-extrabold text-slate-900">Community Stories</h2>
+              <span className="text-emerald-600 font-bold text-[10px] uppercase tracking-[0.4em] mb-4 inline-block">Validation</span>
+              <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter">The Community Voice</h2>
             </div>
             <TestimonialSlider testimonials={[
               { name: "Alex Rivera", role: "TECHFLOW DIRECTOR", img: "11", text: "Noillin streamlined our influencer outreach. We found the perfect micro-influencers within hours." },
@@ -561,83 +492,39 @@ export default function HomePage() {
         </section>
 
         {/* Final CTA */}
-        <section className="px-4 sm:px-6 lg:px-8 py-10">
-          <div className="max-w-[1440px] mx-auto h-[500px] bg-emerald-500 rounded-[4rem] relative overflow-hidden flex flex-col items-center justify-center text-center px-6 group">
-            {/* Animated Circles */}
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-              className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-white/10 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"
-            />
-            <motion.div
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-              className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-white/10 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3"
-            />
+        <section className="px-4 sm:px-6 py-16 sm:py-20">
+          <div className="max-w-[1440px] mx-auto h-auto sm:h-[550px] bg-slate-900 rounded-[2.5rem] sm:rounded-[4.5rem] relative overflow-hidden flex flex-col items-center justify-center text-center p-8 sm:px-8 group border border-slate-800 shadow-2xl py-20 sm:py-0">
+            {/* High-End Background Effects */}
+            <div className="absolute inset-0 opacity-40">
+              <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-500 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
+              <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-500 rounded-full blur-[150px] translate-x-1/2 translate-y-1/2" />
+            </div>
 
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-8 max-w-2xl leading-tight relative mt-20">
-              Start Collaborating Today
-            </h2>
-            <p className="text-emerald-50 text-xl font-medium mb-12 max-w-xl leading-relaxed relative opacity-90">
-              Join thousands of brands and creators building the future of influence together.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6 relative mb-20">
-              <Link href="/signup">
-                <Button className="h-16 px-12 bg-white text-emerald-600 hover:bg-emerald-50 text-lg font-bold rounded-2xl shadow-2xl transition-all">
-                  Find Influencers
-                </Button>
-              </Link>
-              <Link href="/signup?role=INFLUENCER">
-                <Button variant="outline" className="h-16 px-12 text-white border-white/20 hover:text-emerald-600 bg-white/10 text-lg font-bold rounded-2xl transition-all">
-                  Join as Influencer
-                </Button>
-              </Link>
+            <div className="relative z-10 max-w-3xl">
+              <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 sm:mb-8 leading-[1.1] tracking-tighter">
+                Ready to Join the <br/><span className="text-emerald-500">Future Economy?</span>
+              </h2>
+              <p className="text-slate-400 text-base sm:text-lg md:text-xl font-medium mb-10 sm:mb-12 max-w-xl mx-auto leading-relaxed">
+                Unlock elite partnerships and scale your presence with the world&apos;s most advanced influencer infrastructure.
+              </p>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <Link href="/signup">
+                  <Button className="h-16 px-10 bg-emerald-500 hover:bg-emerald-600 text-white text-lg font-bold rounded-2xl shadow-xl shadow-emerald-500/20 transition-all border-none">
+                    Start Collaborating
+                  </Button>
+                </Link>
+                <Link href="/signup?role=INFLUENCER">
+                  <Button variant="outline" className="h-16 px-10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 rounded-2xl transition-all font-bold text-lg">
+                    Register as Creator
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-[#0F172A] pt-28 pb-16 text-slate-400">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-12 pb-20 border-b border-white/5">
-            <div className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 text-white bg-emerald-500 rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <span className="text-2xl font-black text-white tracking-tight ">Noillin</span>
-            </div>
-
-            <div className="flex gap-16 text-[13px] font-bold uppercase tracking-widest">
-              {["About", "Support", "Privacy", "Terms"].map(l => (
-                <a key={l} href="#" className="hover:text-emerald-500 transition-colors">{l}</a>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-8">
-              {[
-                { label: "SECURE PAYMENTS", icon: "🔒" },
-                { label: "VERIFIED PROFILES", icon: "✔" }
-              ].map((badge, i) => (
-                <div key={i} className="flex items-center gap-3 text-[10px] font-black tracking-[.2em] opacity-80 group">
-                  <span className="text-emerald-500 text-lg group-hover:scale-125 transition-transform">{badge.icon}</span>
-                  <span className="text-slate-100">{badge.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] font-bold tracking-widest opacity-30">
-            <p>&copy; 2026 NOILLIN INC. ALL RIGHTS RESERVED.</p>
-            <p className="flex items-center gap-2">
-              <Zap className="w-3 h-3 fill-white" />
-              BUILT FOR THE FUTURE OF INFLUENCE
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

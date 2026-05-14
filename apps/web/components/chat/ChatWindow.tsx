@@ -171,7 +171,8 @@ export function ChatWindow({
   useEffect(() => {
     if (!currentUserId) return;
 
-    const socketInstance = io("http://localhost:6001", {
+    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL!, {
+      path: "/socket.io",
       auth: { userId: currentUserId },
       transports: ["websocket"],
       reconnection: true,
@@ -421,10 +422,27 @@ export function ChatWindow({
           <div className="relative">
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center ring-2 ring-white shadow-sm relative">
               {receiverImage ? (
-                <Image src={receiverImage} alt={receiverName || "profile"} fill className="object-cover" unoptimized />
+                <>
+                  <Image 
+                    src={receiverImage} 
+                    alt={receiverName || "profile"} 
+                    fill 
+                    className="object-cover" 
+                    unoptimized 
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                  <span className="hidden w-full h-full items-center justify-center text-[16px] font-semibold text-gray-500">
+                    {(receiverName || "U").substring(0, 2).toUpperCase()}
+                  </span>
+                </>
               ) : (
                 <span className="text-[16px] font-semibold text-gray-500">
-                  {receiverName?.substring(0, 2).toUpperCase()}
+                  {(receiverName || "U").substring(0, 2).toUpperCase()}
                 </span>
               )}
             </div>
