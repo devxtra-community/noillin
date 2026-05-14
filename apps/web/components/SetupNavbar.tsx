@@ -1,9 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
 
 import NoillinIcon from "./NoillinIcon";
+
+import { useAuthStore } from "@/store/auth.store";
+
 
 interface SetupNavbarProps {
   step?: 1 | 2 | 3;

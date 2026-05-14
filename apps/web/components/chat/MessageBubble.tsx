@@ -56,20 +56,20 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
   return (
     <div
       className={cn(
-        "flex w-full mb-4",
-        isSystem || isOrderCompleted ? "justify-center" : isMine ? "justify-end" : "justify-start"
+        "flex w-full mb-1",
+        isSystem || isOrderCompleted ? "justify-center mt-2" : isMine ? "justify-end" : "justify-start"
       )}
     >
       <div
         className={cn(
           "relative shadow-sm transition-all overflow-hidden",
           isSystem || isProposal || isDeliverable || isOrderCompleted
-            ? "w-full max-w-sm bg-white border border-gray-100 rounded-[24px]"
+            ? "w-full max-w-sm bg-white border border-gray-100 rounded-[24px] shadow-sm"
             : cn(
-              "px-5 py-3 max-w-[75%] sm:max-w-md text-[15px] leading-relaxed",
+              "px-3 py-1.5 max-w-[85%] sm:max-w-md text-[13px] sm:text-[14px] leading-relaxed relative",
               isMine
-                ? "bg-gradient-to-br from-[#20B271] to-[#18965f] text-white rounded-[20px] rounded-br-sm"
-                : "bg-white text-gray-800 border border-gray-100 rounded-[20px] rounded-bl-sm"
+                ? "bg-emerald-500 text-white rounded-[14px] rounded-br-sm shadow-sm"
+                : "bg-white text-gray-800 border border-gray-100 rounded-[14px] rounded-bl-sm shadow-sm"
             )
         )}
       >
@@ -155,7 +155,7 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
 
           return (
             <div className="flex flex-col w-full text-left">
-              <div className={`p-5 bg-gradient-to-br ${gradients[colorClass]}`}>
+              <div className={`p-3 bg-gradient-to-br ${gradients[colorClass]}`}>
                 <div className="flex items-center justify-between mb-4">
                   <span className={`text-[11px] font-black uppercase tracking-widest ${textTitles[colorClass]}`}>{title}</span>
                   <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-white shadow-sm ${textBadges[colorClass]}`}>
@@ -181,7 +181,7 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
           );
         })() : isProposal && pData ? (
           <div className="flex flex-col">
-            <div className="p-5 bg-gradient-to-br from-gray-50 to-gray-100/50">
+            <div className="p-3 bg-gradient-to-br from-gray-50 to-gray-100/50">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[11px] font-black uppercase tracking-widest text-gray-400">Collaboration Proposal</span>
                 <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold border", getProposalStatusColor(pData.status))}>
@@ -256,7 +256,7 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
           </div>
         ) : isDeliverable && dData ? (
           <div className="flex flex-col">
-            <div className="p-5 bg-gradient-to-br from-gray-50 to-white">
+            <div className="p-3 bg-gradient-to-br from-gray-50 to-white">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-[11px] font-black uppercase tracking-widest text-emerald-600">Final Deliverable</span>
                 <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold border capitalize",
@@ -323,19 +323,18 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
         {!isSystem && (
           <div
             className={cn(
-              "flex items-center justify-end gap-1 px-5 pb-3 pointer-events-none",
-              isProposal ? "mt-0" : "mt-1.5",
-              isMine && !isProposal ? "text-green-100" : "text-gray-400"
+              "flex items-center justify-end gap-1 px-1 pt-0.5 pointer-events-none float-right clear-both ml-3 mt-1",
+              isMine && !isProposal ? "text-emerald-100" : "text-gray-400"
             )}
           >
-            <span className="text-[10px] uppercase tracking-wider">
+            <span className="text-[9px] sm:text-[10px] tracking-wider leading-none">
               {new Date(message.createdAt).toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
             </span>
             {isMine && (
-              <span className="text-[12px] ml-0.5 flex gap-[1px]">
+              <span className="text-[11px] sm:text-[12px] ml-0.5 flex gap-[1px] leading-none">
                 {message.status === "SENT" && "✓"}
                 {message.status === "DELIVERED" && "✓✓"}
                 {message.status === "READ" && (

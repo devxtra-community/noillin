@@ -10,7 +10,6 @@ import NoillinIcon from "./NoillinIcon";
 
 import { useAuthStore } from "@/store/auth.store";
 import api from "@/lib/axios.client";
-import Logo from "@/components/shared/Logo";
 
 interface DashboardHeaderProps {
     showSidebarToggle?: boolean;

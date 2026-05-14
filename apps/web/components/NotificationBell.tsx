@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { useNotificationStore, Notification } from "@/store/notification.store";
@@ -121,57 +121,71 @@ useEffect(() => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in-0 duration-200">
-          <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-            <h3 className="font-semibold text-gray-900 text-sm">Notifications</h3>
-            {unreadCount > 0 && (
-              <span className="text-xs font-medium bg-green-100 text-[#059669] px-2 py-0.5 rounded-full">
-                {unreadCount} new
-              </span>
-            )}
-          </div>
+        <>
+          {/* Mobile backdrop */}
+          <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-[90] sm:hidden" onClick={() => setIsOpen(false)} />
+          
+          <div className="fixed sm:absolute inset-0 sm:inset-auto sm:right-0 sm:mt-3 sm:w-[400px] bg-white sm:rounded-[24px] shadow-2xl sm:border border-slate-100 overflow-hidden z-[100] animate-in slide-in-from-bottom-4 sm:slide-in-from-top-2 fade-in-0 duration-300 flex flex-col h-[100dvh] sm:h-auto sm:max-h-[85vh]">
+            <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
+              <h3 className="font-black text-slate-900 text-lg sm:text-base tracking-tight">Notifications</h3>
+              <div className="flex items-center gap-3">
+                {unreadCount > 0 && (
+                  <span className="text-[10px] font-black bg-emerald-500 text-white px-2.5 py-1 rounded-full uppercase tracking-widest shadow-sm shadow-emerald-500/20">
+                    {unreadCount} new
+                  </span>
+                )}
+                <button onClick={() => setIsOpen(false)} className="p-1.5 rounded-full bg-slate-50 text-slate-400 sm:hidden hover:bg-slate-100">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
 
-          <div className="max-h-96 overflow-y-auto">
-            {loading && notifications.length === 0 ? (
-              <div className="p-6 flex justify-center">
-                <div className="w-5 h-5 border-2 border-[#059669] border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="p-8 flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                  <Bell className="w-6 h-6 text-gray-300" />
+            <div className="flex-1 overflow-y-auto sm:max-h-[420px] custom-scrollbar bg-slate-50/50">
+              {loading && notifications.length === 0 ? (
+                <div className="p-10 flex justify-center">
+                  <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
-                <p className="text-sm text-gray-500 font-medium">No notifications yet</p>
-                <p className="text-xs text-gray-400 mt-1">We&apos;ll let you know when something happens.</p>
-              </div>
-            ) : (
-              <ul className="divide-y divide-gray-50">
-                {notifications.map((notification) => (
-                  <li
-                    key={notification._id}
-                    onClick={() => handleNotificationClick(notification)}
-                    className={`p-4 transition-colors cursor-pointer group ${!notification.read ? "bg-green-50/30 hover:bg-green-50/50" : "hover:bg-gray-50"
-                      }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      {!notification.read && (
-                        <div className="mt-1.5 shrink-0 w-2 h-2 bg-[#059669] rounded-full"></div>
-                      )}
-                      <div className={`flex-1 ${!notification.read ? "ml-0" : "ml-5"}`}>
-                        <p className={`text-sm leading-snug ${!notification.read ? "text-gray-900 font-medium" : "text-gray-600"}`}>
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1.5 font-medium">
-                          {formatTime(notification.createdAt)}
-                        </p>
+              ) : notifications.length === 0 ? (
+                <div className="p-10 flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 bg-white shadow-sm border border-slate-100 rounded-full flex items-center justify-center mb-4">
+                    <Bell className="w-6 h-6 text-slate-300" />
+                  </div>
+                  <p className="text-sm text-slate-900 font-bold mb-1">No notifications yet</p>
+                  <p className="text-xs text-slate-400">We&apos;ll let you know when something happens.</p>
+                </div>
+              ) : (
+                <ul className="divide-y divide-slate-100/50">
+                  {notifications.map((notification) => (
+                    <li
+                      key={notification._id}
+                      onClick={() => handleNotificationClick(notification)}
+                      className={`p-5 transition-all cursor-pointer group ${!notification.read ? "bg-white hover:bg-emerald-50/30" : "bg-transparent hover:bg-white"
+                        }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="mt-1.5 shrink-0">
+                          {notification.read ? (
+                            <div className="w-2 h-2 bg-slate-200 rounded-full"></div>
+                          ) : (
+                            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-sm shadow-emerald-500/50 ring-4 ring-emerald-50"></div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`text-[13px] leading-relaxed ${!notification.read ? "text-slate-900 font-bold" : "text-slate-600 font-medium"}`}>
+                            {notification.message}
+                          </p>
+                          <p className="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest">
+                            {formatTime(notification.createdAt)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
