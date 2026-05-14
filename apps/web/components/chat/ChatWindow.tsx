@@ -511,7 +511,7 @@ export function ChatWindow({
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 pb-2">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 pb-2" data-lenis-prevent>
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4"><span className="text-2xl">👋</span></div>

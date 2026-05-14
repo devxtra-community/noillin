@@ -122,11 +122,12 @@ export default function BrandDashboardLayout({
                         </div>
                     </DashboardHeader>
 
-                    <div className="flex-1 w-full relative">
-                        <div className="absolute inset-0 overflow-y-auto">
-                            <div className="min-h-full pb-6">
-                                {children}
-                            </div>
+                    <div 
+                        className="flex-1 w-full overflow-y-auto custom-scrollbar"
+                        data-lenis-prevent
+                    >
+                        <div className="min-h-full pb-6">
+                            {children}
                         </div>
                     </div>
                 </main>

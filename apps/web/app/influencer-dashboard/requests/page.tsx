@@ -97,7 +97,7 @@ export default function RequestsPage() {
     }
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1500px] mx-auto w-full h-full flex flex-col overflow-hidden">
+        <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1500px] mx-auto w-full flex flex-col">
             {/* Header Area */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
@@ -138,7 +138,7 @@ export default function RequestsPage() {
             </div>
 
             {/* Content Container (2-Column Grid) */}
-            <div className="flex flex-col xl:flex-row gap-6 flex-1 min-h-0 h-full">
+            <div className="flex flex-col xl:flex-row gap-6 flex-1">
                 {/* Table Card (Left Column) */}
                 <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex-1 overflow-hidden flex flex-col">
                     <div className="overflow-x-auto overflow-y-auto flex-1">
@@ -194,14 +194,14 @@ export default function RequestsPage() {
                 </div>
 
                 {/* Details Card (Right Column) */}
-                <div className="xl:w-[400px] shrink-0 h-full">
-                    <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex flex-col h-full sticky top-0">
+                <div className="xl:w-[400px] shrink-0">
+                    <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex flex-col">
                         <div className="p-6 flex flex-col h-full">
                             <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-6">Request Details</h2>
 
                             {selectedRequest ? (
                                 <div className="flex flex-col h-full min-h-0">
-                                    <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
+                                    <div className="flex-1 pr-2 scrollbar-hide">
                                         {/* Brand Profile */}
                                         <div className="flex flex-col items-center text-center mb-8">
                                             <div className="w-16 h-16 rounded-[20px] overflow-hidden flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600 relative">

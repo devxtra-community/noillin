@@ -140,7 +140,10 @@ useEffect(() => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto sm:max-h-[420px] custom-scrollbar bg-slate-50/50">
+            <div 
+              className="flex-1 overflow-y-auto sm:max-h-[420px] custom-scrollbar bg-slate-50/50"
+              data-lenis-prevent
+            >
               {loading && notifications.length === 0 ? (
                 <div className="p-10 flex justify-center">
                   <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>

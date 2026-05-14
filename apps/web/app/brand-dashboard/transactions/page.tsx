@@ -61,7 +61,7 @@ export default function BrandTransactionsPage() {
     }
 
     return (
-        <div className="px-4 sm:px-8 lg:px-10 py-8 h-full flex flex-col gap-8 bg-transparent max-w-[1600px] mx-auto w-full">
+        <div className="px-4 sm:px-8 lg:px-10 py-8 flex flex-col gap-8 bg-transparent max-w-[1600px] mx-auto w-full">
             <div className="mb-2">
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Transactions</h1>
                 <p className="text-sm text-slate-500 mt-1.5 font-medium">Manage your platform credits and transaction history.</p>
@@ -128,9 +128,9 @@ export default function BrandTransactionsPage() {
                 </div>
             </div>
 
-            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 flex-1 lg:overflow-hidden overflow-visible">
+            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 flex-1">
                 {/* Left Column: Recent Transactions List */}
-                <div className={`lg:col-span-8 bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 overflow-hidden flex-col lg:min-h-0 ${selectedId ? "hidden lg:flex" : "flex"}`}>
+                <div className={`lg:col-span-8 bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 overflow-hidden flex-col ${selectedId ? "hidden lg:flex" : "flex"}`}>
                     <div className="p-8 pb-4">
                         <h2 className="text-xl font-black text-slate-900">Recent Transactions</h2>
                     </div>
@@ -199,9 +199,9 @@ export default function BrandTransactionsPage() {
                 </div>
 
                 {/* Right Column: Transaction Details */}
-                <div className={`lg:col-span-4 flex-col lg:min-h-0 ${selectedId ? "flex" : "hidden lg:flex"}`}>
+                <div className={`lg:col-span-4 flex-col ${selectedId ? "flex" : "hidden lg:flex"}`}>
                     {selectedTransaction ? (
-                        <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 p-8 flex flex-col lg:h-full relative lg:overflow-hidden overflow-visible lg:overflow-y-auto min-h-0 custom-scrollbar">
+                        <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 p-8 flex flex-col relative min-h-0">
                             <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-orange-100/40 to-transparent rounded-bl-full pointer-events-none"></div>
 
                             <button 

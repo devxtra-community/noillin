@@ -109,7 +109,7 @@ function MessagesContent() {
     };
 
     return (
-        <div className="px-2 sm:px-4 py-4 w-full h-[calc(100vh-80px)] lg:h-[calc(100vh-100px)] flex flex-col overflow-hidden">
+        <div className="px-2 sm:px-4 py-4 w-full min-h-[calc(100vh-100px)] flex flex-col">
             <div className="flex bg-white rounded-[24px] lg:rounded-[32px] shadow-xl shadow-gray-100/50 border border-gray-100 flex-1 overflow-hidden">
 
                 {/* Sidebar */}
@@ -130,7 +130,7 @@ function MessagesContent() {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
+                    <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2" data-lenis-prevent>
                         {loadingConvs ? (
                             <div className="flex items-center justify-center py-20">
                                 <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />
