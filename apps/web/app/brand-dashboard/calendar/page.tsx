@@ -114,14 +114,14 @@ export default function BrandCalendarPage() {
     }
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-8 h-full flex flex-col min-h-0 bg-[#f8fafc]">
-            <div className="flex flex-col lg:flex-row gap-8 flex-1 overflow-hidden">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-8 h-full flex flex-col min-h-0 bg-[#f8fafc]">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 flex-1 overflow-y-auto lg:overflow-hidden pb-20 lg:pb-0">
                 {/* Left Column: Calendar Grid */}
-                <div className="flex-1 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-10 flex flex-col items-center">
+                <div className="flex-1 bg-white rounded-[1.5rem] lg:rounded-[2.5rem] border border-gray-100 shadow-sm p-5 sm:p-8 lg:p-10 flex flex-col items-center lg:overflow-y-auto">
                     <div className="w-full max-w-2xl">
-                        <div className="flex items-center justify-between mb-12">
-                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Select Date</h1>
-                            <div className="flex items-center gap-6">
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 sm:mb-12">
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Select Date</h1>
+                            <div className="flex items-center gap-4 sm:gap-6">
                                 <button
                                     onClick={() => handleMonthChange(-1)}
                                     className="p-2 hover:bg-gray-50 rounded-full transition-all text-gray-400"
@@ -146,16 +146,16 @@ export default function BrandCalendarPage() {
                             ))}
                         </div>
 
-                        <div className="grid grid-cols-7 gap-y-10 gap-x-4 mb-16 w-full">
+                        <div className="grid grid-cols-7 gap-y-6 sm:gap-y-10 gap-x-2 sm:gap-x-4 mb-10 sm:mb-16 w-full">
                             {Array.from({ length: firstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth()) }).map((_, i) => (
-                                <div key={`empty-${i}`} className="h-14"></div>
+                                <div key={`empty-${i}`} className="h-10 sm:h-14"></div>
                             ))}
 
                             {days.map((date) => (
-                                <div key={date.day} className="h-14 flex flex-col items-center justify-center relative">
+                                <div key={date.day} className="h-10 sm:h-14 flex flex-col items-center justify-center relative">
                                     <button
                                         onClick={() => setSelectedDate(date.day)}
-                                        className={`w-14 h-14 rounded-full flex items-center justify-center text-[15px] font-bold transition-all relative z-10 ${selectedDate === date.day
+                                        className={`w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-[13px] sm:text-[15px] font-bold transition-all relative z-10 ${selectedDate === date.day
                                             ? "bg-emerald-500 text-white shadow-xl shadow-emerald-200 scale-110"
                                             : "text-gray-900 hover:bg-gray-50"
                                             }`}
@@ -181,10 +181,10 @@ export default function BrandCalendarPage() {
                 </div>
 
                 {/* Right Column: Day Schedule */}
-                <div className="lg:w-[450px] flex flex-col">
-                    <div className="mb-6 pl-2">
-                        <span className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.2em]">Expected Delivery</span>
-                        <h2 className="text-3xl font-black text-gray-900 mt-2">{monthNames[currentDate.getMonth()]} {selectedDate}, {currentDate.getFullYear()}</h2>
+                <div className="lg:w-[450px] flex flex-col shrink-0 lg:overflow-y-hidden">
+                    <div className="mb-4 sm:mb-6 pl-2 text-center lg:text-left mt-4 lg:mt-0">
+                        <span className="text-[10px] sm:text-[11px] font-black text-emerald-500 uppercase tracking-[0.2em]">Expected Delivery</span>
+                        <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mt-1 sm:mt-2">{monthNames[currentDate.getMonth()]} {selectedDate}, {currentDate.getFullYear()}</h2>
                     </div>
 
                     <div className="space-y-4 overflow-y-auto pr-2 pb-8 flex-1">

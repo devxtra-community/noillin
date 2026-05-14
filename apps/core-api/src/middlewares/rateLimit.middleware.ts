@@ -1,4 +1,5 @@
-import { rateLimit } from 'express-rate-limit';
+import { Request, Response, NextFunction } from 'express';
+import { rateLimit, Options } from 'express-rate-limit';
 
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -9,7 +10,7 @@ export const authLimiter = rateLimit({
     success: false,
     message: "Too many authentication attempts. Please try again later.",
   },
-  handler: (req, res, next, options) => {
+  handler: (req: Request, res: Response, next: NextFunction, options: Options) => {
     res.status(429).json(options.message);
   },
 });

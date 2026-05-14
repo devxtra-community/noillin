@@ -46,6 +46,7 @@ interface ChatWindowProps {
   receiverName?: string;
   receiverImage?: string;
   disabled?: boolean;
+  onBack?: () => void;
 }
 
 interface Order {
@@ -62,6 +63,7 @@ export function ChatWindow({
   receiverId,
   receiverName,
   receiverImage,
+  onBack,
 }: ChatWindowProps) {
   const searchParams = useSearchParams();
   const urlGigId = searchParams.get("gigId") || searchParams.get("gig");
@@ -408,12 +410,17 @@ export function ChatWindow({
   }, [gigRequestId, accessToken, fetchCounts]);
 
   return (
-    <div className="flex flex-col h-full bg-[#f8f9fa] shadow-2xl relative w-full overflow-hidden">
+    <div className="flex flex-col h-full bg-transparent shadow-none relative w-full overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white/95 backdrop-blur-xl sticky top-0 z-20">
-        <div className="flex items-center space-x-4">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-gray-100 bg-white/95 backdrop-blur-xl sticky top-0 z-20">
+        <div className="flex items-center space-x-3">
+          {onBack && (
+            <button onClick={onBack} className="p-1.5 -ml-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg lg:hidden">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
           <div className="relative">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center ring-2 ring-white shadow-sm relative">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center ring-2 ring-white shadow-sm relative">
               {receiverImage ? (
                 <>
                   <Image 
@@ -439,16 +446,16 @@ export function ChatWindow({
                 </span>
               )}
             </div>
-            <div className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-[#20B271] rounded-full border-2 border-white"></div>
+            <div className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></div>
           </div>
           <div>
-            <h2 className="text-[17px] font-bold text-gray-900 tracking-tight leading-tight">{receiverName || "Loading..."}</h2>
-            <p className="text-[13px] text-[#20B271] font-medium mt-0.5">Online</p>
+            <h2 className="text-[15px] sm:text-base font-bold text-gray-900 tracking-tight leading-none">{receiverName || "Loading..."}</h2>
+            <p className="text-[11px] sm:text-xs text-emerald-500 font-medium mt-0.5">Online</p>
           </div>
         </div>
         <div className="relative">
-          <button onClick={() => setIsOptionsOpen(!isOptionsOpen)} className="p-2.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100/80 rounded-full transition-all">
-            <MoreVertical className="w-5 h-5" />
+          <button onClick={() => setIsOptionsOpen(!isOptionsOpen)} className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100/80 rounded-full transition-all">
+            <MoreVertical className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           {isOptionsOpen && (
@@ -482,8 +489,8 @@ export function ChatWindow({
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center"><MessageSquare className="w-4 h-4" /></div>
             <div>
-              <p className="text-sm font-bold text-emerald-900 leading-none">New Booking Request</p>
-              <p className="text-xs text-emerald-600 mt-1 font-medium">Review to enable chat</p>
+              <p className="text-xs sm:text-sm font-bold text-emerald-900 leading-none">New Booking Request</p>
+              <p className="text-[10px] sm:text-xs text-emerald-600 mt-1 font-medium">Review to enable chat</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -504,7 +511,7 @@ export function ChatWindow({
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-6 pb-2">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 pb-2">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4"><span className="text-2xl">👋</span></div>

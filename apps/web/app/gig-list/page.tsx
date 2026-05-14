@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Check, ArrowRight, Calendar, Search, Zap, X, Filter, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-
 import api from "@/lib/axios.client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -96,9 +95,9 @@ const formatCurrency = (amount: number, currency = "INR") => {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden animate-pulse">
+    <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden animate-pulse">
       <div className="h-1 bg-slate-200 w-full" />
-      <div className="p-8 flex flex-col gap-4">
+      <div className="p-6 sm:p-8 flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full bg-gray-200 shrink-0" />
           <div className="flex-1 space-y-1.5">
@@ -149,11 +148,10 @@ function GigCard({ gig }: { gig: Gig }) {
 
   const gigImage = gig.bannerUrl || categoryImages[gig.category] || categoryImages["default"];
 
-
   return (
     <Link
       href={`/gig-details?id=${gig._id}`}
-      className="bg-white rounded-[2.5rem] border border-slate-50 shadow-2xl shadow-slate-100/30 hover:shadow-emerald-50/50 transition-all duration-500 hover:-translate-y-2 overflow-hidden group flex flex-col h-full cursor-pointer"
+      className="bg-white rounded-[1.5rem] lg:rounded-[2.5rem] border border-slate-50 shadow-2xl shadow-slate-100/30 hover:shadow-emerald-50/50 transition-all duration-500 hover:-translate-y-2 overflow-hidden group flex flex-col h-full cursor-pointer"
     >
       <div className="h-48 w-full relative overflow-hidden bg-slate-50">
         <Image
@@ -175,7 +173,7 @@ function GigCard({ gig }: { gig: Gig }) {
           {availableLabel}
         </div>
       </div>
-      <div className="p-8 flex flex-col flex-1">
+      <div className="p-6 sm:p-8 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-[10px]">
@@ -333,7 +331,7 @@ export default function ExploreGigs() {
     setPage(1);
   };
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     setSort(e.target.value as SortOption);
     setPage(1);
   };
@@ -382,18 +380,18 @@ export default function ExploreGigs() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-20">
+    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-16 sm:pt-20">
       {/* Navbar */}
       <Navbar />
 
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-4 sm:mb-12">
           <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-none mb-4">
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none mb-2 sm:mb-4">
               Explore Influencer Gigs
             </h1>
-            <p className="text-slate-500 text-base max-w-md">
+            <p className="text-slate-500 text-xs sm:text-base max-w-md">
               The world&apos;s most elite creators, verified and ready for your next campaign.
             </p>
           </div>
@@ -639,7 +637,6 @@ export default function ExploreGigs() {
                 setActivePlatform(null);
                 setMaxPrice(MAX_PRICE_LIMIT);
                 setCommittedMaxPrice(MAX_PRICE_LIMIT);
-                setAvailableOnly(false);
                 setPage(1);
               }}
               className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors group"
