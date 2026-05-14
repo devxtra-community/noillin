@@ -78,13 +78,12 @@ interface Testimonial {
 function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
   const [index, setIndex] = useState(0);
   const [visibleCards, setVisibleCards] = useState(3);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.1 });
+  const sliderRef = useRef(null);
 
   // Update visible cards on resize
   useEffect(() => {
     const handleResize = () => {
-      setVisibleCards(window.innerWidth < 768 ? 1 : 3);
+      setVisibleCards(window.innerWidth < 1024 ? (window.innerWidth < 640 ? 1 : 2) : 3);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -105,19 +104,25 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
 
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8 }}
-      className="relative w-full overflow-hidden"
+      ref={sliderRef}
+      initial={{ opacity: 1, y: 0 }}
+      className="relative w-full overflow-hidden py-4"
     >
       <motion.div
         animate={{ x: `-${(index) * (100 / extendedTestimonials.length)}%` }}
         transition={{
           type: "spring",
-          stiffness: 50,
+          stiffness: 40,
           damping: 20,
           mass: 1
+        }}
+        onUpdate={() => {
+          // If we've reached the end of the middle section, jump back seamlessly
+          // Note: index calculation for seamless loop can be complex, 
+          // but for simple auto-slide, just keeping it in bounds is enough.
+          if (index >= testimonials.length * 2) {
+             setIndex(testimonials.length);
+          }
         }}
         className="flex"
         style={{ width: `${(extendedTestimonials.length * 100) / visibleCards}%` }}
@@ -172,7 +177,7 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       <Navbar />
 
       <main>
@@ -293,64 +298,99 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* How it Works */}
-        <section className="py-24 sm:py-32 relative overflow-hidden bg-white">
+        {/* How it Works - Redesigned for Premium Minimal Look */}
+        <section className="py-24 sm:py-40 relative overflow-hidden bg-white">
+          {/* Subtle Background Pattern */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#10b981 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+          
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 relative z-10">
-            <div className="text-center max-w-2xl mx-auto mb-24">
-              <span className="text-emerald-600 font-bold text-xs uppercase tracking-widest mb-4 inline-block">Simple Workflow</span>
-              <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">The Path to Success</h2>
-              <p className="text-slate-500 font-medium text-lg leading-relaxed">
-                Experience a streamlined collaboration process designed for elite speed.
+            <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-20 gap-8">
+              <div className="max-w-2xl">
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="flex items-center gap-3 mb-6"
+                >
+                  <div className="w-10 h-[2px] bg-emerald-500" />
+                  <span className="text-emerald-600 font-bold text-xs uppercase tracking-[0.3em]">Execution Strategy</span>
+                </motion.div>
+                <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-[0.9]">
+                  The Path to <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500">Perfect Synergy</span>
+                </h2>
+              </div>
+              <p className="text-slate-500 font-medium text-lg max-w-md leading-relaxed border-l-2 border-slate-100 pl-8">
+                We&apos;ve distilled months of collaboration overhead into three high-velocity steps.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+              {/* Connecting Line for Desktop */}
+              <div className="hidden md:block absolute top-1/4 left-0 w-full h-[1px] bg-slate-100 z-0" />
+              
               {[
                 {
-                  title: "Discover Talent",
-                  desc: "Browse a curated list of verified creators across every niche imaginable.",
+                  title: "Discovery",
+                  desc: "Our AI-driven engine filters through thousands to find your perfect niche matches.",
                   icon: <Search className="w-6 h-6" />,
-                  color: "bg-blue-500"
+                  gradient: "from-blue-600 to-indigo-600"
                 },
                 {
-                  title: "Instant Booking",
-                  desc: "Check real-time availability and lock in your campaign with one click.",
-                  icon: <Calendar className="w-6 h-6" />,
-                  color: "bg-emerald-500"
+                  title: "Activation",
+                  desc: "One-click contracts and instant calendar syncing to launch your campaign at light speed.",
+                  icon: <Zap className="w-6 h-6" />,
+                  gradient: "from-emerald-500 to-teal-500"
                 },
                 {
-                  title: "Secure Delivery",
-                  desc: "Funds are released only when you're 100% satisfied with the results.",
+                  title: "Growth",
+                  desc: "Funds released on satisfaction, backed by real-time analytics and escrow protection.",
                   icon: <CreditCard className="w-6 h-6" />,
-                  color: "bg-indigo-500"
+                  gradient: "from-slate-800 to-slate-900"
                 }
               ].map((step, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ delay: i * 0.2 }}
-                  className="relative p-8 sm:p-10 rounded-3xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-[0_20px_50px_-20px_rgba(0,0,0,0.1)] transition-all duration-500 group"
+                  transition={{ delay: i * 0.2, duration: 0.8 }}
+                  className="relative group"
                 >
-                  <div className="absolute top-10 right-10 text-6xl font-black text-slate-200/50 group-hover:text-emerald-500/10 transition-colors">0{i + 1}</div>
-                  <div className={`w-14 h-14 rounded-2xl mb-8 flex items-center justify-center text-white shadow-lg ${step.color}`}>
-                    {step.icon}
+                  <div className="relative z-10">
+                    <div className="mb-12 relative inline-block">
+                      <div className={`w-20 h-20 rounded-[2rem] bg-gradient-to-br ${step.gradient} flex items-center justify-center text-white shadow-2xl shadow-emerald-200/20 group-hover:scale-110 transition-transform duration-500`}>
+                        {step.icon}
+                      </div>
+                      <div className="absolute -top-4 -right-4 w-10 h-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-xs font-black text-slate-900 shadow-sm">
+                        0{i + 1}
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-3xl font-black text-slate-900 mb-6 tracking-tight group-hover:text-emerald-600 transition-colors">
+                      {step.title}
+                    </h3>
+                    <p className="text-slate-500 font-medium leading-relaxed mb-8 group-hover:text-slate-700 transition-colors">
+                      {step.desc}
+                    </p>
+                    
+                    <div className="w-0 group-hover:w-full h-[2px] bg-emerald-500 transition-all duration-500" />
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-4">{step.title}</h3>
-                  <p className="text-slate-500 text-sm font-medium leading-relaxed">{step.desc}</p>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Platform Features */}
-        <section className="py-24 sm:py-32 bg-slate-50 relative">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
+        {/* Platform Features - Updated for Color Theme */}
+        <section className="py-24 sm:py-40 bg-slate-900 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] -mr-64 -mt-64" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -ml-64 -mb-64" />
+          
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 relative z-10">
             <div className="text-center mb-24">
-              <span className="bg-emerald-100 text-emerald-700 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 inline-block">Cutting Edge</span>
-              <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">The Noillin Edge</h2>
+              <span className="text-emerald-400 font-bold text-[10px] uppercase tracking-[0.4em] mb-6 inline-block">System Architecture</span>
+              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter">The Noillin Edge</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -368,13 +408,13 @@ export default function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05 }}
-                  className="p-8 bg-white border border-slate-200/60 rounded-[2.5rem] hover:border-emerald-500/30 hover:shadow-[0_20px_50px_-20px_rgba(16,185,129,0.15)] transition-all duration-300 group"
+                  className="p-10 bg-white/5 backdrop-blur-sm border border-white/10 rounded-[2.5rem] hover:bg-white/10 hover:border-emerald-500/50 transition-all duration-300 group"
                 >
-                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 mb-8">
                     {feature.icon}
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-3 group-hover:text-emerald-600 transition-colors">{feature.title}</h3>
-                  <p className="text-slate-500 text-sm font-medium leading-relaxed">{feature.desc}</p>
+                  <h3 className="text-xl font-bold text-white mb-4 group-hover:text-emerald-400 transition-colors">{feature.title}</h3>
+                  <p className="text-slate-400 text-sm font-medium leading-relaxed">{feature.desc}</p>
                 </motion.div>
               ))}
             </div>
@@ -436,12 +476,12 @@ export default function HomePage() {
           </motion.div>
         </section>
 
-        {/* Testimonials */}
-        <section className="py-24 sm:py-32 bg-white">
+        {/* Testimonials - Updated for Color Theme */}
+        <section className="py-24 sm:py-40 bg-white relative">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
             <div className="text-center mb-24">
-              <span className="text-emerald-600 font-bold text-[10px] uppercase tracking-[0.3em] mb-4 inline-block">Success Stories</span>
-              <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">The Community Voice</h2>
+              <span className="text-emerald-600 font-bold text-[10px] uppercase tracking-[0.4em] mb-4 inline-block">Validation</span>
+              <h2 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter">The Community Voice</h2>
             </div>
             <TestimonialSlider testimonials={[
               { name: "Alex Rivera", role: "TECHFLOW DIRECTOR", img: "11", text: "Noillin streamlined our influencer outreach. We found the perfect micro-influencers within hours." },
