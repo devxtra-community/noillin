@@ -27,7 +27,26 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [profile, setProfile] = useState<{ fullName?: string; profileImageUrl?: string } | null>(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 10) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   useEffect(() => {
     if (user) {
@@ -76,9 +95,9 @@ export default function Navbar() {
     <motion.nav 
       layout
       initial={false}
-      className={`fixed top-6 left-1/2 -translate-x-1/2 w-[92%] sm:w-[95%] max-w-[1400px] z-50 bg-white/80 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] ${
+      className={`fixed top-6 left-1/2 -translate-x-1/2 w-[92%] sm:w-[95%] max-w-[1400px] z-50 bg-white/80 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] transition-all duration-500 ${
         isMenuOpen ? "rounded-[32px] overflow-hidden" : "rounded-full overflow-visible"
-      }`}
+      } ${isVisible ? "translate-y-0 opacity-100" : "-translate-y-32 opacity-0"}`}
       transition={{
         type: "spring",
         stiffness: 400,
@@ -115,12 +134,12 @@ export default function Navbar() {
           {!user ? (
             <>
               <Link href="/login" className="hidden sm:block">
-                <Button variant="ghost" className="text-slate-600 text-xs font-bold hover:text-emerald-600 hover:bg-emerald-50 transition-all px-4">
+                <Button variant="ghost" className="text-slate-500 text-[10px] font-black uppercase tracking-[0.15em] hover:text-slate-900 hover:bg-slate-50 transition-all px-6">
                   Sign In
                 </Button>
               </Link>
               <Link href="/signup">
-                <Button className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-6 sm:px-8 py-5 sm:py-6 shadow-lg shadow-emerald-200 rounded-full">
+                <Button className="bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-black uppercase tracking-[0.15em] px-8 py-6 rounded-full shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 transition-all active:scale-95">
                   Get Started
                 </Button>
               </Link>
