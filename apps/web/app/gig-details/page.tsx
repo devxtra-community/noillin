@@ -217,68 +217,98 @@ function GigDetailsContent() {
                         {/* Content Wrapper */}
                         <div>
                             {/* Header & Mobile Action */}
-                            <div className="flex flex-row items-center justify-between gap-3 sm:gap-6 mb-8">
-                                <Link href={`/influencer-profile-page?id=${influencer?._id}`} className="flex items-center gap-3 sm:gap-4 hover:opacity-80 transition-opacity bg-white p-2.5 sm:p-4 rounded-2xl sm:rounded-3xl border border-slate-100 shadow-sm flex-1 min-w-0 group">
-                                <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-lg sm:text-xl">
-                                    {avatar ? (
-                                        <>
-                                            <Image 
-                                                src={avatar} 
-                                                alt={influencer?.fullName || "Influencer"} 
-                                                fill 
-                                                unoptimized
-                                                className="object-cover"
-                                                onError={(e) => {
-                                                    const target = e.target as HTMLImageElement;
-                                                    target.style.display = 'none';
-                                                    const fallback = target.nextElementSibling as HTMLElement;
-                                                    if (fallback) fallback.style.display = 'block';
-                                                }}
-                                            />
-                                            <span className="hidden">{(influencer?.fullName || "I").charAt(0).toUpperCase()}</span>
-                                        </>
-                                    ) : (
-                                        (influencer?.fullName || "I").charAt(0).toUpperCase()
-                                    )}
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
-                                        <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{influencer?.fullName || "Unknown Creator"}</h1>
-                                        {influencer?.isVerified && (
-                                            <span className="bg-[#E6F6ED] text-[#0CAF60] text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                                <CheckCircle2 className="w-3 h-3 fill-current" />
-                                                Verified
-                                            </span>
+                            <div className="flex flex-row items-stretch justify-between gap-3 sm:gap-4 mb-12 lg:hidden">
+                                <Link 
+                                    href={`/influencer-profile-page?id=${influencer?._id}`} 
+                                    className="flex items-center gap-2 sm:gap-4 hover:opacity-80 transition-opacity bg-white p-3 sm:p-5 rounded-[2rem] border border-slate-100 shadow-sm basis-0 grow min-w-0 group"
+                                >
+                                    <div className="relative w-10 h-10 sm:w-16 sm:h-16 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-base sm:text-xl shrink-0">
+                                        {avatar ? (
+                                            <>
+                                                <Image 
+                                                    src={avatar} 
+                                                    alt={influencer?.fullName || "Influencer"} 
+                                                    fill 
+                                                    unoptimized
+                                                    className="object-cover"
+                                                    onError={(e) => {
+                                                        const target = e.target as HTMLImageElement;
+                                                        target.style.display = 'none';
+                                                        const fallback = target.nextElementSibling as HTMLElement;
+                                                        if (fallback) fallback.style.display = 'block';
+                                                    }}
+                                                />
+                                                <span className="hidden">{(influencer?.fullName || "I").charAt(0).toUpperCase()}</span>
+                                            </>
+                                        ) : (
+                                            (influencer?.fullName || "I").charAt(0).toUpperCase()
                                         )}
                                     </div>
-                                    <div className="text-[10px] sm:text-xs text-gray-500 flex items-center gap-2 mt-0.5 font-medium">
-                                        <span>{influencer.categories.join(" & ")}</span>
-                                        <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                        <span className="flex items-center text-gray-700">
-                                            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 mr-1" />
-                                            <span className="font-bold">New</span>
-                                        </span>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-1.5">
+                                            <h1 className="text-xs sm:text-lg font-black text-gray-900 truncate tracking-tight">{influencer?.fullName?.split(' ')[0] || "Creator"}</h1>
+                                            {influencer?.isVerified && (
+                                                <CheckCircle2 className="w-3 h-3 text-[#0CAF60] fill-current shrink-0" />
+                                            )}
+                                        </div>
+                                        <p className="text-[9px] sm:text-xs text-emerald-600 font-black uppercase tracking-wider truncate">Profile</p>
                                     </div>
-                                </div>
-                            </Link>
+                                </Link>
 
-                            {/* Mobile/Tablet Request Button */}
-                            <div className="lg:hidden">
-                                <button
-                                    onClick={() => {
-                                        if (!user) {
-                                            router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
-                                            return;
-                                        }
-                                        setIsModalOpen(true);
-                                    }}
-                                    disabled={!isInitialized || alreadyRequested || isRequestSuccess}
-                                    className="h-12 sm:h-14 px-8 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-2xl font-bold text-sm sm:text-base transition-all shadow-lg shadow-emerald-500/20 whitespace-nowrap"
-                                >
-                                    {alreadyRequested ? "Requested" : "Request Now"}
-                                </button>
+                                <div className="basis-0 grow min-w-0">
+                                    <button
+                                        onClick={() => {
+                                            if (!user) {
+                                                router.push(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+                                                return;
+                                            }
+                                            setIsModalOpen(true);
+                                        }}
+                                        disabled={!isInitialized || alreadyRequested || isRequestSuccess}
+                                        className="w-full h-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none text-white px-3 sm:px-6 rounded-[2rem] font-bold text-[13px] sm:text-lg transition-all shadow-lg flex items-center justify-center gap-1 sm:gap-2 group"
+                                    >
+                                        <span className="truncate">
+                                            {alreadyRequested ? "Already Requested" : "Request Booking"}
+                                        </span>
+                                        {!alreadyRequested && <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6 group-hover:translate-x-1 transition-transform shrink-0" />}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
+
+                            {/* Desktop Header Only */}
+                            <div className="hidden lg:flex items-center gap-6 mb-8">
+                                <Link 
+                                    href={`/influencer-profile-page?id=${influencer?._id}`} 
+                                    className="flex items-center gap-4 hover:opacity-80 transition-opacity bg-white p-4 rounded-3xl border border-slate-100 shadow-sm group"
+                                >
+                                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-emerald-100 shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-xl">
+                                        {avatar ? (
+                                            <Image src={avatar} alt={influencer?.fullName || "Influencer"} fill unoptimized className="object-cover" />
+                                        ) : (
+                                            (influencer?.fullName || "I").charAt(0).toUpperCase()
+                                        )}
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h1 className="text-xl font-bold text-gray-900">{influencer?.fullName || "Unknown Creator"}</h1>
+                                            {influencer?.isVerified && (
+                                                <span className="bg-[#E6F6ED] text-[#0CAF60] text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                                    <CheckCircle2 className="w-3 h-3 fill-current" />
+                                                    Verified
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="text-xs text-gray-500 flex items-center gap-2 mt-0.5 font-medium">
+                                            <span>{influencer.categories.join(" & ")}</span>
+                                            <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                            <span className="flex items-center text-gray-700 font-bold">
+                                                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400 mr-1" />
+                                                New
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Link>
+                            </div>
 
                             <h2 className="text-4xl font-black text-gray-900 leading-tight mb-5 pr-8">
                                 {gig.title}
@@ -439,7 +469,7 @@ function GigDetailsContent() {
                                             setIsModalOpen(true);
                                         }}
                                         disabled={!isInitialized || alreadyRequested || isRequestSuccess}
-                                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none text-white py-5 rounded-2xl font-black text-lg transition-all shadow-lg flex items-center justify-center gap-3 group"
+                                        className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:cursor-not-allowed disabled:shadow-none text-white py-5 rounded-2xl font-bold text-lg xl:text-xl transition-all shadow-lg flex items-center justify-center gap-3 group"
                                     >
                                         {alreadyRequested ? "Already Requested" : "Request Booking"}
                                         {!alreadyRequested && <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />}

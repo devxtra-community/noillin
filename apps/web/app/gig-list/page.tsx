@@ -260,6 +260,24 @@ export default function ExploreGigs() {
   const [committedSearch, setCommittedSearch] = useState<string>("");
   const [committedMaxPrice, setCommittedMaxPrice] = useState<number>(MAX_PRICE_LIMIT);
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [isNavbarVisible, setIsNavbarVisible] = useState<boolean>(true);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 10) {
+        setIsNavbarVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setIsNavbarVisible(false);
+      } else {
+        setIsNavbarVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   const fetchGigs = useCallback(async (
     opts: {
@@ -382,7 +400,7 @@ export default function ExploreGigs() {
         </div>
 
         {/* Premium Minimal Filter System */}
-        <div className="sticky top-24 z-40 mb-12">
+        <div className={`sticky z-40 mb-12 transition-all duration-500 ${!isNavbarVisible ? "top-6" : "top-32"}`}>
           <div className="flex items-center gap-3 md:gap-4">
             {/* Unified Search Bar */}
             <div className="relative flex-1 group">
