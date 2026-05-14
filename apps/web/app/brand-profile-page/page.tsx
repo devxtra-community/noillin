@@ -45,7 +45,7 @@ interface BrandData {
 
 const LoadingState = () => (
     <>
-        <DashboardHeader />
+        <DashboardHeader isPill={true} />
         <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4 text-emerald-500 pt-20">
             <div className="relative">
                 <Loader2 className="w-12 h-12 animate-spin" />
@@ -60,7 +60,7 @@ const LoadingState = () => (
 
 const ErrorState = ({ message }: { message: string }) => (
     <>
-        <DashboardHeader />
+        <DashboardHeader isPill={true} />
         <div className="min-h-[80vh] flex flex-col items-center justify-center gap-6 p-4 pt-20 text-center">
             <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center shadow-sm">
                 <AlertCircle className="w-10 h-10" />
@@ -108,7 +108,7 @@ function BrandProfileContent() {
 
     return (
         <div className="min-h-screen bg-[#FAFAFA] font-sans selection:bg-emerald-100 selection:text-emerald-900">
-            <DashboardHeader />
+            <DashboardHeader isPill={true} />
             
             <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 space-y-8">
                 
