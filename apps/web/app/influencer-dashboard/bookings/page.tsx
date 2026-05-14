@@ -146,7 +146,7 @@ function BookingsContent() {
     }
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1500px] mx-auto w-full h-full flex flex-col overflow-hidden">
+        <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1500px] mx-auto w-full flex flex-col">
             {/* Header Area */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 mb-8">
                 <div>
@@ -188,7 +188,7 @@ function BookingsContent() {
             </div>
 
             {/* Content Container (2-Column Grid) */}
-            <div className="flex flex-col xl:flex-row gap-6 flex-1 min-h-0 h-full">
+            <div className="flex flex-col xl:flex-row gap-6 flex-1">
                 {/* Table Card (Left Column) */}
                 <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex-1 overflow-hidden flex flex-col">
                     <div className="overflow-x-auto overflow-y-auto flex-1">
@@ -255,8 +255,8 @@ function BookingsContent() {
                 </div>
 
                 {/* Details Card (Right Column) */}
-                <div className="xl:w-[400px] shrink-0 h-full">
-                    <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex flex-col h-full sticky top-0 overflow-y-auto scrollbar-hide">
+                <div className="xl:w-[400px] shrink-0">
+                    <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex flex-col">
                         <div className="p-6 flex flex-col min-h-full">
                             {selectedBooking ? (
                                 <>
@@ -295,7 +295,7 @@ function BookingsContent() {
                                     </div>
 
                                     {/* Details List */}
-                                    <div className="space-y-1.5 flex-grow overflow-y-auto">
+                                    <div className="space-y-1.5 flex-grow">
                                         <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">

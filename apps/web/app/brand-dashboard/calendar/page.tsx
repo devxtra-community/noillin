@@ -114,10 +114,10 @@ export default function BrandCalendarPage() {
     }
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-8 h-full flex flex-col min-h-0 bg-[#f8fafc]">
-            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 flex-1 overflow-y-auto lg:overflow-hidden pb-20 lg:pb-0">
+        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col bg-[#f8fafc]">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 flex-1 pb-20 lg:pb-0">
                 {/* Left Column: Calendar Grid */}
-                <div className="flex-1 bg-white rounded-[1.5rem] lg:rounded-[2.5rem] border border-gray-100 shadow-sm p-5 sm:p-8 lg:p-10 flex flex-col items-center lg:overflow-y-auto">
+                <div className="flex-1 bg-white rounded-[1.5rem] lg:rounded-[2.5rem] border border-gray-100 shadow-sm p-5 sm:p-8 lg:p-10 flex flex-col items-center">
                     <div className="w-full max-w-2xl">
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 sm:mb-12">
                             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">Select Date</h1>

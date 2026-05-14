@@ -149,7 +149,7 @@ function BrandBookingsContent() {
     };
 
     return (
-        <div className="px-4 sm:px-8 lg:px-10 py-8 h-full flex flex-col min-h-0 bg-transparent max-w-[1600px] mx-auto w-full">
+        <div className="px-4 sm:px-8 lg:px-10 py-8 flex flex-col bg-transparent max-w-[1600px] mx-auto w-full">
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                 <div>
@@ -188,10 +188,10 @@ function BrandBookingsContent() {
                 </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-8 flex-1 lg:overflow-hidden overflow-visible">
+            <div className="flex flex-col lg:flex-row gap-8 flex-1">
                 {/* Left Column: Table */}
-                <div className={`flex-1 bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 overflow-hidden flex-col lg:min-h-0 ${selectedId ? "hidden lg:flex" : "flex"}`}>
-                    <div className="overflow-x-auto flex-1 h-full custom-scrollbar">
+                <div className={`flex-1 bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 overflow-hidden flex-col ${selectedId ? "hidden lg:flex" : "flex"}`}>
+                    <div className="overflow-x-auto flex-1 custom-scrollbar">
                         <table className="w-full text-left border-collapse min-w-[500px]">
                             <thead>
                                 <tr className="border-b border-slate-100 bg-slate-50/50 sticky top-0 z-10">
@@ -260,8 +260,8 @@ function BrandBookingsContent() {
                 </div>
 
                 {/* Right Column: Detail View */}
-                <div className={`lg:w-[420px] flex-col gap-6 lg:min-h-0 ${selectedId ? "flex" : "hidden lg:flex"}`}>
-                    <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 p-8 lg:h-full flex flex-col relative lg:overflow-hidden overflow-visible lg:overflow-y-auto min-h-0 custom-scrollbar">
+                <div className={`lg:w-[420px] flex-col gap-6 ${selectedId ? "flex" : "hidden lg:flex"}`}>
+                    <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 p-8 flex flex-col relative min-h-0">
                         {!selectedBooking ? (
                             <div className="h-full flex flex-col items-center justify-center text-slate-400 text-center gap-4">
                                 <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
