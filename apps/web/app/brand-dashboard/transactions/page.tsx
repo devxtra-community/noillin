@@ -1,14 +1,27 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Plus, DollarSign, Clock, Calendar, ChevronRight, Loader2, ShieldAlert } from "lucide-react";
+import { Plus, DollarSign, Clock, Calendar, ChevronRight, ChevronLeft, Loader2, ShieldAlert, Activity } from "lucide-react";
 import Image from "next/image";
 
 import api from "@/lib/axios.client";
 
+interface Transaction {
+    _id: string;
+    status: string;
+    amount?: number;
+    influencerAmount?: number;
+    createdAt: string;
+    influencerProfile?: {
+        fullName?: string;
+        username?: string;
+        profileImageUrl?: string;
+    };
+    gigId?: { title: string };
+}
+
 export default function BrandTransactionsPage() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [transactions, setTransactions] = useState<any[]>([]);
+    const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [stats, setStats] = useState({ totalSpent: 0, inEscrow: 0, thisMonth: 0 });
     const [loading, setLoading] = useState(true);
@@ -32,111 +45,135 @@ export default function BrandTransactionsPage() {
 
     const getStatusStyle = (status: string) => {
         switch (status) {
-            case "COMPLETED": return "bg-emerald-50 text-emerald-500";
-            case "IN_ESCROW": return "bg-blue-50 text-blue-500";
-            case "CANCELLED": return "bg-red-50 text-red-500";
-            default: return "bg-orange-50 text-orange-500";
+            case "COMPLETED": return "bg-emerald-100/80 text-emerald-700 border border-emerald-200";
+            case "IN_ESCROW": return "bg-blue-100/80 text-blue-700 border border-blue-200";
+            case "CANCELLED": return "bg-rose-100/80 text-rose-700 border border-rose-200";
+            default: return "bg-orange-100/80 text-orange-700 border border-orange-200";
         }
     };
 
     if (loading) {
         return (
-            <div className="h-full w-full flex items-center justify-center bg-[#f8fafc]">
+            <div className="h-full w-full flex items-center justify-center bg-transparent">
                 <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-8 h-full flex flex-col gap-8 bg-[#f8fafc]">
+        <div className="px-4 sm:px-8 lg:px-10 py-8 h-full flex flex-col gap-8 bg-transparent max-w-[1600px] mx-auto w-full">
+            <div className="mb-2">
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Transactions</h1>
+                <p className="text-sm text-slate-500 mt-1.5 font-medium">Manage your platform credits and transaction history.</p>
+            </div>
+
             {/* Top Metrics Area */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between group hover:shadow-md transition-all">
-                    <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Available Balance</p>
-                        <h3 className="text-3xl font-black text-gray-900 leading-tight">₹0</h3>
-                        <p className="text-[9px] font-bold text-gray-300 uppercase mt-1">Platform credits</p>
+                <div className="bg-slate-900 p-8 rounded-[32px] border border-slate-800 shadow-xl shadow-slate-900/10 flex flex-col justify-between group hover:shadow-2xl transition-all relative overflow-hidden">
+                    <div className="absolute -right-10 -top-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-2xl"></div>
+                    <div className="relative z-10 flex items-start justify-between w-full mb-6">
+                        <p className="text-[11px] font-black text-emerald-400 uppercase tracking-widest">Available Balance</p>
                     </div>
-                    <button className="bg-[#1CD36B] hover:bg-[#19C061] text-white p-4 rounded-2xl shadow-lg shadow-emerald-50 transition-all hover:scale-105 flex items-center gap-2 text-xs font-bold px-5">
-                        <Plus className="w-4 h-4" />
-                        Add Funds
-                    </button>
-                </div>
-
-                <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between group hover:shadow-md transition-all">
-                    <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Spent</p>
-                        <h3 className="text-3xl font-black text-gray-900 leading-tight">₹{stats.totalSpent.toLocaleString()}</h3>
-                        <p className="text-[9px] font-bold text-gray-300 uppercase mt-1">Lifetime spending</p>
-                    </div>
-                    <div className="p-4 bg-blue-50 rounded-2xl group-hover:scale-110 transition-transform">
-                        <DollarSign className="w-6 h-6 text-blue-500" />
+                    <div className="relative z-10 flex items-end justify-between w-full mt-auto">
+                        <div>
+                           <h3 className="text-4xl font-black text-white leading-tight">₹0</h3>
+                           <p className="text-[10px] font-medium text-slate-400 uppercase mt-1">Platform credits</p>
+                        </div>
+                        <button className="bg-white hover:bg-emerald-50 text-slate-900 p-3 rounded-2xl shadow-lg transition-all hover:-translate-y-1 flex items-center justify-center">
+                            <Plus className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
 
-                <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between group hover:shadow-md transition-all">
-                    <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">In Escrow</p>
-                        <h3 className="text-3xl font-black text-gray-900 leading-tight">₹{stats.inEscrow.toLocaleString()}</h3>
-                        <p className="text-[9px] font-bold text-gray-300 uppercase mt-1">Active projects</p>
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 flex flex-col justify-between group hover:shadow-md transition-all relative overflow-hidden">
+                    <div className="absolute -right-8 -top-8 w-32 h-32 bg-blue-50 rounded-full group-hover:scale-110 transition-transform duration-500 -z-10"></div>
+                    <div className="flex items-start justify-between w-full mb-6">
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Total Spent</p>
+                        <div className="p-2.5 bg-blue-100/50 rounded-2xl text-blue-500 shadow-inner">
+                            <DollarSign className="w-5 h-5" />
+                        </div>
                     </div>
-                    <div className="p-4 bg-orange-50 rounded-2xl group-hover:scale-110 transition-transform">
-                        <Clock className="w-6 h-6 text-orange-500" />
+                    <div className="mt-auto">
+                        <h3 className="text-4xl font-black text-slate-900 leading-tight">₹{stats.totalSpent.toLocaleString()}</h3>
+                        <p className="text-[10px] font-medium text-slate-400 uppercase mt-1">Lifetime spending</p>
                     </div>
                 </div>
 
-                <div className="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex items-center justify-between group hover:shadow-md transition-all">
-                    <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">This Month</p>
-                        <h3 className="text-3xl font-black text-gray-900 leading-tight">₹{stats.thisMonth.toLocaleString()}</h3>
-                        <p className="text-[9px] font-bold text-emerald-500 uppercase mt-1">Current Cycle</p>
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 flex flex-col justify-between group hover:shadow-md transition-all relative overflow-hidden">
+                    <div className="absolute -right-8 -top-8 w-32 h-32 bg-orange-50 rounded-full group-hover:scale-110 transition-transform duration-500 -z-10"></div>
+                    <div className="flex items-start justify-between w-full mb-6">
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">In Escrow</p>
+                        <div className="p-2.5 bg-orange-100/50 rounded-2xl text-orange-500 shadow-inner">
+                            <Clock className="w-5 h-5" />
+                        </div>
                     </div>
-                    <div className="p-4 bg-emerald-50 rounded-2xl group-hover:scale-110 transition-transform">
-                        <Calendar className="w-6 h-6 text-emerald-500" />
+                    <div className="mt-auto">
+                        <h3 className="text-4xl font-black text-slate-900 leading-tight">₹{stats.inEscrow.toLocaleString()}</h3>
+                        <p className="text-[10px] font-medium text-slate-400 uppercase mt-1">Active projects</p>
+                    </div>
+                </div>
+
+                <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 flex flex-col justify-between group hover:shadow-md transition-all relative overflow-hidden">
+                    <div className="absolute -right-8 -top-8 w-32 h-32 bg-emerald-50 rounded-full group-hover:scale-110 transition-transform duration-500 -z-10"></div>
+                    <div className="flex items-start justify-between w-full mb-6">
+                        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">This Month</p>
+                        <div className="p-2.5 bg-emerald-100/50 rounded-2xl text-emerald-500 shadow-inner">
+                            <Calendar className="w-5 h-5" />
+                        </div>
+                    </div>
+                    <div className="mt-auto">
+                        <h3 className="text-4xl font-black text-slate-900 leading-tight">₹{stats.thisMonth.toLocaleString()}</h3>
+                        <p className="text-[10px] font-medium text-emerald-500 uppercase mt-1">Current Cycle</p>
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 flex-1 min-h-0">
+            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-8 flex-1 lg:overflow-hidden overflow-visible">
                 {/* Left Column: Recent Transactions List */}
-                <div className="lg:col-span-8 bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden flex flex-col">
-                    <div className="p-10 pb-6">
-                        <h2 className="text-xl font-bold text-gray-900">Recent Transactions</h2>
+                <div className={`lg:col-span-8 bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 overflow-hidden flex-col lg:min-h-0 ${selectedId ? "hidden lg:flex" : "flex"}`}>
+                    <div className="p-8 pb-4">
+                        <h2 className="text-xl font-black text-slate-900">Recent Transactions</h2>
                     </div>
-                    <div className="flex-1 overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="flex-1 overflow-x-auto custom-scrollbar">
+                        <table className="w-full text-left border-collapse min-w-[600px]">
                             <thead>
-                                <tr className="border-b border-gray-50 bg-gray-50/10">
-                                    <th className="py-4 px-10 text-[10px] font-bold text-gray-300 uppercase tracking-[0.2em]">Gig Name</th>
-                                    <th className="py-4 px-10 text-[10px] font-bold text-gray-300 uppercase tracking-[0.2em]">Influencer</th>
-                                    <th className="py-4 px-10 text-[10px] font-bold text-gray-300 uppercase tracking-[0.2em]">Gross Amount</th>
-                                    <th className="py-4 px-10"></th>
+                                <tr className="border-b border-slate-100 bg-slate-50/50">
+                                    <th className="py-4 px-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">Gig Name</th>
+                                    <th className="py-4 px-8 text-[11px] font-black text-slate-400 uppercase tracking-widest">Influencer</th>
+                                    <th className="py-4 px-8 text-[11px] font-black text-slate-400 uppercase tracking-widest text-right">Gross Amount</th>
+                                    <th className="py-4 px-8"></th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-50">
+                            <tbody className="divide-y divide-slate-50">
                                 {transactions.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} className="py-20 text-center text-gray-400 font-semibold italic">No transactions found</td>
+                                        <td colSpan={4} className="py-24 text-center">
+                                           <div className="flex flex-col items-center justify-center text-slate-400">
+                                              <Activity className="w-10 h-10 text-slate-300 mb-4" />
+                                              <p className="text-sm font-bold">No transactions found</p>
+                                              <p className="text-xs mt-1">Your payment history will appear here.</p>
+                                           </div>
+                                        </td>
                                     </tr>
                                 )}
                                 {transactions.map((t) => (
                                     <tr
                                         key={t._id}
                                         onClick={() => setSelectedId(t._id)}
-                                        className={`transition-all cursor-pointer group ${selectedId === t._id ? "bg-emerald-50/30" : "hover:bg-gray-50/50"}`}
+                                        className={`transition-all cursor-pointer group ${selectedId === t._id ? "bg-emerald-50/30" : "hover:bg-slate-50/80"}`}
                                     >
-                                        <td className="py-6 px-10">
-                                            <p className="text-sm font-bold text-gray-900">{t.gigId?.title || "Project Checkout"}</p>
-                                            <p className="text-[10px] text-gray-400 font-medium mt-1">{new Date(t.createdAt).toLocaleDateString()}</p>
+                                        <td className="py-6 px-8">
+                                            <p className="text-[14px] font-bold text-slate-900">{t.gigId?.title || "Project Checkout"}</p>
+                                            <p className="text-[11px] text-slate-400 font-medium mt-1">{new Date(t.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                                         </td>
-                                        <td className="py-6 px-10">
-                                            <div className="flex items-center gap-3">
-                                                <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-white shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-[10px]">
+                                        <td className="py-6 px-8">
+                                            <div className="flex items-center gap-4">
+                                                <div className="relative w-9 h-9 rounded-2xl overflow-hidden shadow-sm bg-slate-100 border border-slate-200 group-hover:border-emerald-200 transition-colors flex items-center justify-center text-slate-600 font-black text-sm">
                                                     {t.influencerProfile?.profileImageUrl ? (
                                                         <Image 
                                                             src={t.influencerProfile.profileImageUrl} 
-                                                            width={32} 
-                                                            height={32} 
+                                                            width={36} 
+                                                            height={36} 
                                                             alt="" 
                                                             className="w-full h-full object-cover"
                                                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -145,14 +182,14 @@ export default function BrandTransactionsPage() {
                                                         (t.influencerProfile?.fullName || t.influencerProfile?.username || "A").charAt(0).toUpperCase()
                                                     )}
                                                 </div>
-                                                <span className="text-sm font-bold text-gray-900">{t.influencerProfile?.fullName || t.influencerProfile?.username || "Unknown Provider"}</span>
+                                                <span className={`text-[14px] font-bold ${selectedId === t._id ? "text-emerald-700" : "text-slate-900 group-hover:text-emerald-600"} transition-colors`}>{t.influencerProfile?.fullName || t.influencerProfile?.username || "Unknown Provider"}</span>
                                             </div>
                                         </td>
-                                        <td className="py-6 px-10">
-                                            <span className="text-sm font-black text-gray-900">₹{(t.amount || 0).toLocaleString()}</span>
+                                        <td className="py-6 px-8 text-right">
+                                            <span className="text-[16px] font-black text-slate-900">₹{(t.amount || 0).toLocaleString()}</span>
                                         </td>
-                                        <td className="py-6 px-10 text-right">
-                                            <ChevronRight className={`w-4 h-4 transition-all ${selectedId === t._id ? "text-emerald-500 translate-x-1" : "text-gray-200"}`} />
+                                        <td className="py-6 px-8 text-right">
+                                            <ChevronRight className={`w-5 h-5 transition-transform ${selectedId === t._id ? "text-emerald-500 translate-x-1" : "text-slate-300 group-hover:translate-x-1"}`} />
                                         </td>
                                     </tr>
                                 ))}
@@ -162,19 +199,27 @@ export default function BrandTransactionsPage() {
                 </div>
 
                 {/* Right Column: Transaction Details */}
-                <div className="lg:col-span-4 flex flex-col">
+                <div className={`lg:col-span-4 flex-col lg:min-h-0 ${selectedId ? "flex" : "hidden lg:flex"}`}>
                     {selectedTransaction ? (
-                        <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-10 flex flex-col h-full sticky top-24">
-                            <h2 className="text-xl font-bold text-gray-900 mb-8">Transaction Details</h2>
+                        <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 p-8 flex flex-col lg:h-full relative lg:overflow-hidden overflow-visible lg:overflow-y-auto min-h-0 custom-scrollbar">
+                            <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-orange-100/40 to-transparent rounded-bl-full pointer-events-none"></div>
 
-                            <div className="flex items-center justify-between mb-10 pb-8 border-b border-gray-50">
-                                <div className="flex items-center gap-4">
-                                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-lg">
+                            <button 
+                                onClick={() => setSelectedId(null)}
+                                className="absolute left-6 top-8 p-2.5 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 lg:hidden transition-colors z-10"
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            <h2 className="text-xl font-black text-slate-900 mb-8 text-center lg:text-left relative z-10">Transaction Details</h2>
+
+                            <div className="flex flex-col items-center mb-8 pb-8 border-b border-slate-100 relative z-10">
+                                <div className="mb-4">
+                                    <div className="relative w-20 h-20 rounded-[24px] shadow-sm bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 font-black text-3xl overflow-hidden">
                                         {selectedTransaction.influencerProfile?.profileImageUrl ? (
                                             <Image 
                                                 src={selectedTransaction.influencerProfile.profileImageUrl} 
-                                                width={48} 
-                                                height={48} 
+                                                width={80} 
+                                                height={80} 
                                                 alt="" 
                                                 className="w-full h-full object-cover"
                                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -183,70 +228,72 @@ export default function BrandTransactionsPage() {
                                             (selectedTransaction.influencerProfile?.fullName || selectedTransaction.influencerProfile?.username || "A").charAt(0).toUpperCase()
                                         )}
                                     </div>
-                                    <div>
-                                        <h3 className="text-sm font-bold text-gray-900">{selectedTransaction.influencerProfile?.fullName || selectedTransaction.influencerProfile?.username || "Unknown Provider"}</h3>
-                                        <p className="text-xs text-gray-400 font-medium">{selectedTransaction.gigId?.title || "Booking"}</p>
-                                    </div>
                                 </div>
-                                <span className={`px-3 py-1 text-[9px] font-black rounded-full uppercase tracking-widest ${getStatusStyle(selectedTransaction.status)}`}>
+                                <h3 className="text-xl font-black text-slate-900 text-center">{selectedTransaction.influencerProfile?.fullName || selectedTransaction.influencerProfile?.username || "Unknown Provider"}</h3>
+                                <p className="text-sm text-slate-500 font-medium text-center mt-1 mb-4">{selectedTransaction.gigId?.title || "Booking"}</p>
+                                
+                                <span className={`px-4 py-1.5 text-[10px] font-black rounded-full uppercase tracking-widest border ${getStatusStyle(selectedTransaction.status)}`}>
                                     {selectedTransaction.status}
                                 </span>
                             </div>
 
-                            <div className="space-y-8 flex-1">
+                            <div className="space-y-8 flex-1 relative z-10">
                                 {/* Timeline */}
                                 <div className="space-y-6">
-                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Timeline</p>
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Timeline</p>
                                     <div className="space-y-6 relative ml-3">
-                                        <div className="absolute left-[-1px] top-2 bottom-2 w-[2px] bg-gray-50" />
+                                        <div className="absolute left-[3px] top-3 bottom-3 w-[2px] bg-slate-100" />
 
                                         <div className="flex justify-between items-center relative pl-8">
-                                            <div className="absolute left-[-5px] w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
-                                            <span className="text-xs font-bold text-gray-900">Payment Processed</span>
-                                            <span className="text-[10px] font-medium text-gray-400">{new Date(selectedTransaction.createdAt).toLocaleDateString()}</span>
+                                            <div className="absolute left-[-2px] w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />
+                                            <span className="text-sm font-bold text-slate-900">Payment Processed</span>
+                                            <span className="text-[11px] font-bold text-slate-400">{new Date(selectedTransaction.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
                                         </div>
 
                                         <div className="flex justify-between items-center relative pl-8">
-                                            <div className={`absolute left-[-5px] w-2.5 h-2.5 rounded-full border-2 shadow-sm ${selectedTransaction.status === "COMPLETED" ? "bg-emerald-500 border-white" : "bg-gray-200 border-white"}`} />
-                                            <span className={`text-xs font-bold ${selectedTransaction.status === "COMPLETED" ? "text-gray-900" : "text-gray-400"}`}>Work Delivered</span>
+                                            <div className={`absolute left-[-2px] w-3 h-3 rounded-full border-2 shadow-sm ${selectedTransaction.status === "COMPLETED" ? "bg-emerald-500 border-white" : "bg-slate-200 border-white"}`} />
+                                            <span className={`text-sm font-bold ${selectedTransaction.status === "COMPLETED" ? "text-slate-900" : "text-slate-400"}`}>Work Delivered</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Financial Breakdown */}
-                                <div className="pt-8 border-t border-gray-50 space-y-6">
-                                    <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest">Financial Breakdown</p>
-                                    <div className="space-y-4">
+                                <div className="pt-8 border-t border-slate-100 space-y-6">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Financial Breakdown</p>
+                                    <div className="space-y-4 bg-slate-50 p-6 rounded-[24px] border border-slate-100">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs font-medium text-gray-400">Total Purchase Power</span>
-                                            <span className="text-xs font-bold text-gray-900">₹{(selectedTransaction.amount || 0).toLocaleString()}</span>
+                                            <span className="text-[13px] font-bold text-slate-500">Total Purchase Power</span>
+                                            <span className="text-[14px] font-black text-slate-900">₹{(selectedTransaction.amount || 0).toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs font-medium text-gray-400">Net To Influencer</span>
-                                            <span className="text-xs font-bold text-gray-500">₹{(selectedTransaction.influencerAmount || 0).toLocaleString()}</span>
+                                            <span className="text-[13px] font-bold text-slate-500">Net To Influencer</span>
+                                            <span className="text-[14px] font-bold text-slate-500">₹{(selectedTransaction.influencerAmount || 0).toLocaleString()}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
-                                            <span className="text-xs font-medium text-gray-400">Escrow Disputed</span>
-                                            <span className="text-xs font-bold text-gray-900">₹0</span>
+                                            <span className="text-[13px] font-bold text-slate-500">Escrow Disputed</span>
+                                            <span className="text-[14px] font-bold text-slate-900">₹0</span>
                                         </div>
-                                        <div className="pt-4 border-t border-dashed border-gray-100 flex justify-between items-center">
-                                            <span className="text-sm font-bold text-gray-900">Total Settled</span>
-                                            <span className="text-lg font-black text-emerald-500">₹{(selectedTransaction.amount || 0).toLocaleString()}</span>
+                                        <div className="pt-4 border-t border-dashed border-slate-200 flex justify-between items-center">
+                                            <span className="text-[14px] font-black text-slate-900">Total Settled</span>
+                                            <span className="text-xl font-black text-emerald-500">₹{(selectedTransaction.amount || 0).toLocaleString()}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="mt-10 pt-8 border-t border-gray-50">
-                                <button className="w-full py-4 bg-gray-50 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-2xl text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2">
-                                    <ShieldAlert className="w-4 h-4" /> Report Transaction Issue
+                            <div className="mt-8 pt-8 border-t border-slate-100 relative z-10">
+                                <button className="w-full py-4 bg-white border border-slate-200 hover:bg-rose-50 text-slate-400 hover:text-rose-500 hover:border-rose-100 rounded-[20px] text-xs font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-2 shadow-sm">
+                                    <ShieldAlert className="w-4 h-4" /> Report Issue
                                 </button>
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm p-10 flex flex-col items-center justify-center h-[50vh] text-center">
-                            <Clock className="w-12 h-12 text-gray-200 mb-4" />
-                            <p className="text-gray-400 font-bold text-sm">Select a transaction to view details</p>
+                        <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm shadow-slate-200/50 p-10 flex flex-col items-center justify-center h-full min-h-[400px] text-center">
+                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                                <DollarSign className="w-8 h-8 text-slate-300" />
+                            </div>
+                            <p className="text-slate-600 font-bold text-sm">Select a transaction</p>
+                            <p className="text-slate-400 text-xs mt-1">View timeline and financial breakdown.</p>
                         </div>
                     )}
                 </div>
