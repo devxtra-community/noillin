@@ -49,8 +49,8 @@ export default function BrandRequestsPage() {
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Requests</h1>
-                    <p className="text-sm text-slate-500 mt-1.5 font-medium">Manage incoming and outgoing collaboration requests.</p>
+                    <h1 className="text-title-lg text-slate-900">Requests</h1>
+                    <p className="text-body-md text-slate-500 mt-1.5">Manage incoming and outgoing collaboration requests.</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -173,7 +173,7 @@ export default function BrandRequestsPage() {
                                             )}
                                         </div>
                                     </div>
-                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">{selectedRequest.influencerId?.fullName}</h2>
+                                    <h2 className="text-title-lg !text-2xl text-slate-900 tracking-tight">{selectedRequest.influencerId?.fullName}</h2>
                                     <span className={`mt-3 px-4 py-1 text-[10px] font-black rounded-full uppercase tracking-widest border ${selectedRequest.status === 'pending' ? 'text-amber-700 bg-amber-50 border-amber-200' : selectedRequest.status === 'accepted' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-rose-700 bg-rose-50 border-rose-200'}`}>
                                         {selectedRequest.status}
                                     </span>

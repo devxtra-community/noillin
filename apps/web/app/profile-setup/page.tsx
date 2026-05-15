@@ -218,15 +218,15 @@ export default function ProfileSetupPage() {
 
 
     return (
-        <div className="min-h-screen bg-[#F9FAFB] font-sans selection:bg-green-100 selection:text-green-900">
+        <div className="min-h-screen bg-background font-sans selection:bg-green-100 selection:text-green-900">
             <SetupNavbar step={3} />
 
             <main className="pt-24 pb-20 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-3xl mx-auto">
                     {/* Header */}
                     <div className="text-center mb-10">
-                        <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">Complete Your Profile</h1>
-                        <p className="mt-3 text-lg text-gray-500">
+                        <h1 className="text-title-lg text-gray-900">Complete Your Profile</h1>
+                        <p className="text-body-md text-gray-500 mt-3">
                             Tell us a bit more about yourself to get started with Noillin.
                         </p>
                     </div>
@@ -239,8 +239,8 @@ export default function ProfileSetupPage() {
                             {/* Section: Basic Info */}
                             <div className="space-y-8">
                                 <div className="border-b border-gray-100 pb-4">
-                                    <h2 className="text-2xl font-bold text-gray-900">Basic Information</h2>
-                                    <p className="mt-1 text-sm text-gray-500">This will be displayed on your public profile.</p>
+                                    <h2 className="text-title-lg !text-2xl text-gray-900">Basic Information</h2>
+                                    <p className="text-body-md text-gray-500 mt-1">This will be displayed on your public profile.</p>
                                 </div>
 
                                 <div className="flex flex-col sm:flex-row gap-8 items-start">
@@ -312,8 +312,8 @@ export default function ProfileSetupPage() {
                             {userType === "INFLUENCER" ? (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
                                     <div className="border-b border-gray-100 pb-4">
-                                        <h2 className="text-2xl font-bold text-gray-900">Influencer Details</h2>
-                                        <p className="mt-1 text-sm text-gray-500">Help brands find you by adding your details.</p>
+                                        <h2 className="text-title-lg !text-2xl text-gray-900">Influencer Details</h2>
+                                        <p className="text-body-md text-gray-500 mt-1">Help brands find you by adding your details.</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-2">
@@ -408,8 +408,8 @@ export default function ProfileSetupPage() {
                             ) : (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
                                     <div className="border-b border-gray-100 pb-4">
-                                        <h2 className="text-2xl font-bold text-gray-900">Brand Details</h2>
-                                        <p className="mt-1 text-sm text-gray-500">Tell us about your company and what you are looking for.</p>
+                                        <h2 className="text-title-lg !text-2xl text-gray-900">Brand Details</h2>
+                                        <p className="text-body-md text-gray-500 mt-1">Tell us about your company and what you are looking for.</p>
                                     </div>
 
                                     <div className="grid grid-cols-1 gap-y-8 gap-x-6 sm:grid-cols-2">

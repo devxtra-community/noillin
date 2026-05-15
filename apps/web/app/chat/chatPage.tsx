@@ -46,11 +46,11 @@ export default function ChatPage() {
   const activeConv = conversations.find((c) => c.gigRequestId === gigRequestId);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
 
       {/* Sidebar */}
-      <aside className="w-80 border-r bg-white p-4 shadow-sm z-10">
-        <h2 className="font-bold mb-6 flex items-center text-gray-900">
+      <aside className="w-80 border-r bg-white p-6 shadow-sm z-10">
+        <h2 className="text-title-lg !text-xl !mb-6 flex items-center text-gray-900">
           <MessageSquare className="mr-2 text-emerald-600" /> Messages
         </h2>
 

@@ -380,7 +380,7 @@ export default function ExploreGigs() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-16 sm:pt-20">
+    <div className="min-h-screen text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-16 sm:pt-20">
       {/* Navbar */}
       <Navbar />
 
@@ -389,7 +389,7 @@ export default function ExploreGigs() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-4 sm:mb-12">
           <div>
           <br />
-            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none mb-2 sm:mb-4">
+            <h1 className="text-title-lg text-slate-900 mb-2 sm:mb-4">
               Explore Influencer Gigs
             </h1>
             <p className="text-slate-500 text-xs sm:text-base max-w-md">

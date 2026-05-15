@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body
-        className="antialiased font-sans bg-[#F1F5F9]"
+        className="antialiased font-sans"
       >
         <SmoothScroll>
           <AuthInitializer />

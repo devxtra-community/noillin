@@ -81,7 +81,7 @@ function SignupForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] font-sans">
+    <div className="min-h-screen bg-background font-sans">
       <SetupNavbar step={1} />
 
       <main className="pt-24 pb-20 px-4 flex items-center justify-center min-h-screen">
@@ -94,8 +94,8 @@ function SignupForm() {
         >
 
           <div className="text-center mb-6">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Create your Account</h1>
-            <p className="text-sm text-gray-500 mt-2">Join as a Brand or Influencer to get started</p>
+            <h1 className="text-title-lg !text-2xl text-gray-900">Create your Account</h1>
+            <p className="text-body-md text-gray-500 mt-2">Join as a Brand or Influencer to get started</p>
           </div>
 
           {(
@@ -240,7 +240,7 @@ function SignupForm() {
                 </Link>
               </p>
 
-              <p className="text-[10px] text-center text-gray-300 mt-8 uppercase tracking-[0.2em] font-black">
+              <p className="text-label text-center text-gray-300 mt-8">
                 Secure login · Data protected
               </p>
             </>
@@ -253,7 +253,7 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background">Loading...</div>}>
       <SignupForm />
     </Suspense>
   );

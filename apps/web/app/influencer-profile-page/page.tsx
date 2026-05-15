@@ -87,7 +87,7 @@ function ProfileContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] text-slate-900 font-sans sm:px-0">
+    <div className="min-h-screen bg-background text-slate-900 font-sans sm:px-0">
       <Navbar />
       
       <div className="pt-24 sm:pt-32">
@@ -131,14 +131,14 @@ function ProfileContent() {
           <div className="flex-1 text-center md:text-left space-y-5 py-2">
             <div className="space-y-1">
               <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{name}</h1>
+                <h1 className="text-title-lg text-slate-900 tracking-tight">{name}</h1>
                 {profile.isVerified && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50/80 text-emerald-600 text-[11px] font-bold rounded-full uppercase tracking-wide mx-auto md:mx-0 w-fit">
                     <CheckCircle2 className="w-3 h-3" /> Verified
                   </span>
                 )}
               </div>
-              <p className="text-slate-500 font-medium md:text-lg">{profile.categories?.join(" & ") || "Creator"}</p>
+              <p className="text-body-md text-slate-500 !font-medium">{profile.categories?.join(" & ") || "Creator"}</p>
             </div>
 
             <div className="flex flex-wrap justify-center md:justify-start gap-2.5">
@@ -172,8 +172,8 @@ function ProfileContent() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] text-center space-y-1">
-            <div className="text-2xl font-bold text-slate-800">{gigs?.length || 0}</div>
-            <p className="text-[11px] text-slate-400 font-medium uppercase tracking-wider">Active Gigs</p>
+            <div className="text-title-xl !text-2xl text-slate-800">{gigs?.length || 0}</div>
+            <p className="text-label text-slate-400 !mb-0">Active Gigs</p>
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.02)] text-center space-y-2">
             <div className="flex justify-center gap-0.5 text-yellow-400 pt-1">

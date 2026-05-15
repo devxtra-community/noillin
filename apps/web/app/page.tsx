@@ -177,7 +177,7 @@ function TestimonialSlider({ testimonials }: { testimonials: Testimonial[] }) {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
       <Navbar />
 
       <main>
@@ -212,7 +212,7 @@ export default function HomePage() {
 
             <motion.h1
               variants={fadeInUp}
-              className="text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter leading-[1.1] mb-8 text-white drop-shadow-2xl"
+              className="text-display mb-8 text-white drop-shadow-2xl"
             >
               Book Trusted Influencers.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">
@@ -222,7 +222,7 @@ export default function HomePage() {
 
             <motion.p
               variants={fadeInUp}
-              className="text-lg sm:text-xl md:text-2xl text-white/80 mb-12 max-w-2xl mx-auto leading-relaxed font-medium"
+              className="text-body-lg text-white/80 mb-12 max-w-2xl mx-auto"
             >
               Discover, schedule, and collaborate with verified creators — all in one seamless, high-performance ecosystem.
             </motion.p>
@@ -389,8 +389,8 @@ export default function HomePage() {
           
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 relative z-10">
             <div className="text-center mb-24">
-              <span className="text-emerald-400 font-bold text-[10px] uppercase tracking-[0.4em] mb-6 inline-block">System Architecture</span>
-              <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter">The Noillin Edge</h2>
+              <span className="text-label text-emerald-400">System Architecture</span>
+              <h2 className="text-section-title text-white">The Noillin Edge</h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

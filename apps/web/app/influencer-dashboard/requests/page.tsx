@@ -101,8 +101,8 @@ export default function RequestsPage() {
             {/* Header Area */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-[28px] font-bold text-gray-900 tracking-tight">Requests</h1>
-                    <p className="text-[14px] text-gray-500 mt-1">Manage incoming collaboration requests</p>
+                    <h1 className="text-title-lg text-gray-900">Requests</h1>
+                    <p className="text-body-md text-gray-500 mt-1">Manage incoming collaboration requests</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
@@ -197,7 +197,7 @@ export default function RequestsPage() {
                 <div className="xl:w-[400px] shrink-0">
                     <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex flex-col">
                         <div className="p-6 flex flex-col h-full">
-                            <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-6">Request Details</h2>
+                            <h2 className="text-label text-gray-400 !mb-6">Request Details</h2>
 
                             {selectedRequest ? (
                                 <div className="flex flex-col h-full min-h-0">
@@ -212,7 +212,7 @@ export default function RequestsPage() {
                                                 )}
                                             </div>
                                             <Link href={`/brand-profile-page?id=${selectedRequest.brandId?._id}`} className="hover:opacity-80 transition-opacity">
-                                                <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1.5">{selectedRequest.brandId?.fullName || "Brand User"}</h3>
+                                                <h3 className="text-title-lg !text-lg text-gray-900 leading-tight mb-1.5">{selectedRequest.brandId?.fullName || "Brand User"}</h3>
                                             </Link>
                                             <p className="text-xs text-gray-500 font-medium mb-3">{selectedRequest.gigId?.title}</p>
                                             <div className="flex items-center justify-center gap-2">

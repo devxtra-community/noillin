@@ -101,8 +101,8 @@ export default function BrandDashboardPage() {
       {/* Header Area */}
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Platform Overview</h1>
-          <p className="text-sm text-slate-500 mt-1.5 font-medium">Welcome back! Here&apos;s what&apos;s happening across your campaigns today.</p>
+          <h1 className="text-title-lg text-slate-900">Platform Overview</h1>
+          <p className="text-body-md text-slate-500 mt-1.5">Welcome back! Here&apos;s what&apos;s happening across your campaigns today.</p>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/brand-dashboard/requests" className="px-4 py-2 bg-white border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 text-slate-700 text-sm font-bold rounded-xl transition-all shadow-sm">
@@ -120,10 +120,10 @@ export default function BrandDashboardPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-orange-100/50 to-transparent rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-500"></div>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">Active Requests</p>
+              <p className="text-label text-slate-400">Active Requests</p>
               <div className="flex items-end gap-3">
-                <h2 className="text-4xl font-black text-slate-900 tracking-tighter">{requests.length}</h2>
-                <span className="flex items-center text-xs font-bold text-emerald-500 mb-1.5 bg-emerald-50 px-2 py-0.5 rounded-full"><TrendingUp className="w-3 h-3 mr-1"/> Active</span>
+                <h2 className="text-title-xl text-slate-900">{requests.length}</h2>
+                <span className="flex items-center text-[10px] font-black text-emerald-500 mb-1.5 bg-emerald-50 px-2 py-0.5 rounded-full uppercase tracking-wider"><TrendingUp className="w-3 h-3 mr-1"/> Active</span>
               </div>
             </div>
             <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 shrink-0 border border-orange-100 shadow-inner group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300">
@@ -136,9 +136,9 @@ export default function BrandDashboardPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-emerald-100/50 to-transparent rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-500"></div>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">Agreements</p>
+              <p className="text-label text-slate-400">Agreements</p>
               <div className="flex items-end gap-3">
-                <h2 className="text-4xl font-black text-slate-900 tracking-tighter">{proposals.length}</h2>
+                <h2 className="text-title-xl text-slate-900">{proposals.length}</h2>
               </div>
             </div>
             <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 shrink-0 border border-emerald-100 shadow-inner group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
@@ -151,9 +151,9 @@ export default function BrandDashboardPage() {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-100/50 to-transparent rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-500"></div>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">Calendar Sync</p>
+              <p className="text-label text-slate-400">Calendar Sync</p>
               <div className="flex items-end gap-3">
-                <h2 className="text-4xl font-black text-slate-900 tracking-tighter">Active</h2>
+                <h2 className="text-title-xl text-slate-900">Active</h2>
               </div>
             </div>
             <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shrink-0 border border-blue-100 shadow-inner group-hover:bg-blue-500 group-hover:text-white transition-colors duration-300">
@@ -173,7 +173,7 @@ export default function BrandDashboardPage() {
           </div>
 
           <div className="flex items-center justify-between mb-8 relative z-10">
-            <h3 className="text-xl font-black text-slate-900">Recent Activity</h3>
+            <h3 className="text-title-lg text-slate-900 !text-xl">Recent Activity</h3>
             <Link href="/brand-dashboard/transactions" className="text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors flex items-center gap-1">
               View All <ChevronRight className="w-4 h-4" />
             </Link>

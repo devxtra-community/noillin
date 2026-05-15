@@ -46,18 +46,18 @@ export default function InfluencerDashboardLayout({
 
     return (
         <RoleGuard allowedRoles={["INFLUENCER", "BRAND"]}>
-            <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
+            <div className="flex min-h-screen">
 
                 {/* Mobile Sidebar Overlay */}
                 {isSidebarOpen && (
                     <div
-                        className="fixed inset-0 bg-black/20 z-40 lg:hidden"
+                        className="fixed inset-0 bg-black/20 z-50 lg:hidden"
                         onClick={() => setIsSidebarOpen(false)}
                     ></div>
                 )}
 
                 {/* Sidebar */}
-                <aside className={`fixed lg:static inset-y-0 left-0 w-64 bg-white border-r border-gray-100 flex flex-col py-6 shrink-0 transition-transform duration-300 z-50 lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+                <aside className={`fixed lg:sticky top-0 left-0 w-64 h-screen bg-white border-r border-gray-100 flex flex-col py-6 shrink-0 transition-transform duration-300 z-[60] lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
                     <div className="flex items-center justify-between px-6 mb-10">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-gray-50 border border-gray-200">
@@ -105,7 +105,7 @@ export default function InfluencerDashboardLayout({
                 </aside>
 
                 {/* Main Area */}
-                <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+                <main className="flex-1 flex flex-col min-w-0">
                     {/* Dashboard Header */}
                     <DashboardHeader
                         isFixed={false}
@@ -125,9 +125,8 @@ export default function InfluencerDashboardLayout({
 
                     {/* Content */}
                     <div
-                        className={`flex-1 w-full ${pathname.includes("/messages") ? "overflow-hidden" : "overflow-y-auto pb-10"
+                        className={`flex-1 w-full ${pathname.includes("/messages") ? "overflow-hidden" : "pb-10"
                             }`}
-                        data-lenis-prevent
                     >
                         {children}
                     </div>

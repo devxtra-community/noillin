@@ -107,7 +107,7 @@ function BrandProfileContent() {
     const initials = brand.companyName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA] font-sans selection:bg-emerald-100 selection:text-emerald-900">
+        <div className="min-h-screen bg-background font-sans selection:bg-emerald-100 selection:text-emerald-900">
             <DashboardHeader isPill={true} />
             
             <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 space-y-8">
@@ -129,7 +129,7 @@ function BrandProfileContent() {
                     <div className="flex-1 text-center md:text-left space-y-6 py-2">
                         <div className="space-y-3">
                             <div className="flex flex-col md:flex-row md:items-center gap-3">
-                                <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight leading-tight">{brand.companyName}</h1>
+                                <h1 className="text-title-lg text-slate-900">{brand.companyName}</h1>
                                 {brand.isVerified && (
                                     <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 text-[10px] font-black rounded-full uppercase tracking-wider mx-auto md:mx-0 w-fit ring-1 ring-emerald-100">
                                         <BadgeCheck className="w-3.5 h-3.5" /> Verified
@@ -179,7 +179,7 @@ function BrandProfileContent() {
                     {/* Left Column: About */}
                     <div className="md:col-span-2 space-y-8">
                         <section className="bg-white p-8 md:p-10 rounded-[2rem] border border-slate-200/60 shadow-[0_4px_20px_rgb(0,0,0,0.01)] space-y-6">
-                            <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                            <h2 className="text-title-lg !text-xl text-slate-900 flex items-center gap-3">
                                 <div className="w-1.5 h-6 bg-emerald-500 rounded-full" />
                                 About the Brand
                             </h2>
@@ -207,7 +207,7 @@ function BrandProfileContent() {
                     {/* Right Column: Metadata */}
                     <aside className="space-y-6">
                         <div className="bg-white p-8 rounded-[2rem] border border-slate-200/60 shadow-[0_4px_20px_rgb(0,0,0,0.01)] space-y-8 sticky top-28">
-                            <h3 className="text-lg font-black text-slate-900 tracking-tight">Key Information</h3>
+                            <h3 className="text-label text-slate-900 !mb-8">Key Information</h3>
                             
                             <div className="space-y-6">
                                 <div className="flex items-start gap-4">

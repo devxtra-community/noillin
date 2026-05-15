@@ -51,8 +51,8 @@ export default function GigCreatePage() {
 
                 {/* Header Section */}
                 <div className="mb-10 text-center">
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Create a New Gig</h1>
-                    <p className="text-gray-500 mt-2 text-lg">
+                    <h1 className="text-title-lg text-gray-900">Create a New Gig</h1>
+                    <p className="text-body-md text-gray-500 mt-2">
                         {currentStep === 1 && "Set up your gig details to start connecting with brands."}
                         {currentStep === 2 && "Define clearly what you will deliver to the client."}
                         {currentStep === 3 && "Set your pricing and packages."}
@@ -84,8 +84,8 @@ export default function GigCreatePage() {
                                 <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                     <FaCheck size={40} />
                                 </div>
-                                <h2 className="text-3xl font-bold text-gray-900">Gig Published Successfully!</h2>
-                                <p className="text-gray-500 max-w-md mx-auto">
+                                <h2 className="text-title-lg text-gray-900">Gig Published Successfully!</h2>
+                                <p className="text-body-md text-gray-500 max-w-md mx-auto">
                                     Your gig is now live and visible to brands. You can manage it from your dashboard.
                                 </p>
                                 <button

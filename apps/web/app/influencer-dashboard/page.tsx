@@ -109,8 +109,8 @@ export default function InfluencerDashboardPage() {
       {/* Header Area */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Platform Overview</h1>
-          <p className="text-sm text-gray-500 mt-1">Welcome back, here&apos;s what&apos;s happening today.</p>
+          <h1 className="text-title-lg text-gray-900">Platform Overview</h1>
+          <p className="text-body-md text-gray-500 mt-1">Welcome back, here&apos;s what&apos;s happening today.</p>
         </div>
       </div>
 
@@ -120,8 +120,8 @@ export default function InfluencerDashboardPage() {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-500 mb-2">Total Earnings</p>
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">₹{stats.earnings.toLocaleString()}</h2>
+              <p className="text-label text-gray-500">Total Earnings</p>
+              <h2 className="text-title-xl text-gray-900">₹{stats.earnings.toLocaleString()}</h2>
               <div className="inline-block mt-3 bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-0.5 rounded-md">
                 +12%
               </div>
@@ -136,8 +136,8 @@ export default function InfluencerDashboardPage() {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-500 mb-2">Active Bookings</p>
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{stats.activeBookings}</h2>
+              <p className="text-label text-gray-500">Active Bookings</p>
+              <h2 className="text-title-xl text-gray-900">{stats.activeBookings}</h2>
             </div>
             <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 shrink-0">
               <Calendar className="w-5 h-5" />
@@ -149,8 +149,8 @@ export default function InfluencerDashboardPage() {
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-500 mb-2">Pending Requests</p>
-              <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{stats.pendingRequests}</h2>
+              <p className="text-label text-gray-500">Pending Requests</p>
+              <h2 className="text-title-xl text-gray-900">{stats.pendingRequests}</h2>
               {stats.pendingRequests > 0 && (
                 <div className="inline-block mt-3 bg-orange-50 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-md">
                   Action Needed
@@ -170,8 +170,8 @@ export default function InfluencerDashboardPage() {
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-lg font-bold text-gray-900 mt-1">Your Bookings</h3>
-              <p className="text-xs text-gray-500 mt-1">Recently updated influencer collaborations.</p>
+              <h3 className="text-title-lg text-gray-900 !text-lg mt-1">Your Bookings</h3>
+              <p className="text-body-md text-gray-500 !text-xs mt-1">Recently updated influencer collaborations.</p>
             </div>
             <button className="text-sm font-bold text-emerald-600 hover:text-emerald-700">
               View All

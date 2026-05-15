@@ -112,7 +112,7 @@ export default function CalendarPage() {
                 {/* Left Section: Calendar */}
                 <div className="flex-1 bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 flex flex-col">
                     <div className="flex items-center justify-between mb-12">
-                        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Select Date</h1>
+                        <h1 className="text-title-lg text-gray-900">Select Date</h1>
                         <div className="flex items-center gap-6">
                             <button
                                 onClick={() => handleMonthChange(-1)}
@@ -176,8 +176,8 @@ export default function CalendarPage() {
                 {/* Right Section: Gigs Due */}
                 <div className="xl:w-[450px] shrink-0 flex flex-col py-4">
                     <div className="mb-10 pl-2">
-                        <span className="text-[11px] font-extrabold text-emerald-500 uppercase tracking-[0.2em]">Due Today</span>
-                        <h2 className="text-3xl font-black text-gray-900 mt-2">{monthNames[currentDate.getMonth()]} {selectedDate}, {currentDate.getFullYear()}</h2>
+                        <span className="text-label text-emerald-500 !mb-2">Due Today</span>
+                        <h2 className="text-title-lg text-gray-900 mt-2">{monthNames[currentDate.getMonth()]} {selectedDate}, {currentDate.getFullYear()}</h2>
                     </div>
 
                     <div className="space-y-4">

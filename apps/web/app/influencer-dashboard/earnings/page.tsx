@@ -143,8 +143,8 @@ export default function EarningsPage() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8">
                 <div>
-                    <h1 className="text-3xl font-black text-gray-900 tracking-tight">Earnings</h1>
-                    <p className="text-sm font-semibold text-gray-500 mt-1.5 uppercase tracking-wide">Manage your revenue and track your payouts</p>
+                    <h1 className="text-title-lg text-gray-900">Earnings</h1>
+                    <p className="text-body-md text-gray-500 mt-1.5 uppercase tracking-wide">Manage your revenue and track your payouts</p>
                 </div>
 
                 <div className="bg-white border border-gray-100 rounded-2xl p-1.5 flex gap-1 shadow-sm">
@@ -168,8 +168,8 @@ export default function EarningsPage() {
                 <div className="mb-8 bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl shadow-emerald-100 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                     <div className="relative z-10">
-                        <h2 className="text-2xl font-black tracking-tight mb-2">Complete Your Payout Setup</h2>
-                        <p className="text-emerald-50 text-sm font-semibold max-w-md">Connect your Stripe account to start receiving payments for your collaborations securely. It only takes a few minutes.</p>
+                        <h2 className="text-title-lg text-white mb-2">Complete Your Payout Setup</h2>
+                        <p className="text-body-md text-emerald-50 max-w-md">Connect your Stripe account to start receiving payments for your collaborations securely. It only takes a few minutes.</p>
                     </div>
                     <button
                         onClick={handleConnectStripe}
@@ -188,8 +188,8 @@ export default function EarningsPage() {
                 <div className="lg:col-span-1 bg-white rounded-[28px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between relative overflow-hidden group min-h-[160px]">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-3xl opacity-40 -translate-y-1/2 translate-x-1/2"></div>
                     <div>
-                        <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">Available Balance</p>
-                        <h2 className="text-4xl font-black text-gray-900 tracking-tighter leading-none">₹{stats.available.toLocaleString()}</h2>
+                        <p className="text-label text-gray-400 !mb-2">Available Balance</p>
+                        <h2 className="text-title-xl text-gray-900 leading-none">₹{stats.available.toLocaleString()}</h2>
                     </div>
                     <button
                         onClick={handleWithdraw}
@@ -202,9 +202,9 @@ export default function EarningsPage() {
                 </div>
 
                 <div className="bg-white rounded-[28px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between group h-full">
-                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">TOTAL EARNED</p>
+                    <p className="text-label text-gray-400 !mb-2">TOTAL EARNED</p>
                     <div className="flex items-end justify-between">
-                        <h3 className="text-3xl font-black tracking-tight text-gray-900">₹{stats.total.toLocaleString()}</h3>
+                        <h3 className="text-title-lg text-gray-900">₹{stats.total.toLocaleString()}</h3>
                         <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-200 group-hover:text-emerald-500 transition-colors">
                             <ArrowUpRight className="w-5 h-5" />
                         </div>
@@ -212,9 +212,9 @@ export default function EarningsPage() {
                 </div>
 
                 <div className="bg-white rounded-[28px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between group h-full">
-                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">IN ESCROW</p>
+                    <p className="text-label text-gray-400 !mb-2">IN ESCROW</p>
                     <div className="flex items-end justify-between">
-                        <h3 className="text-3xl font-black tracking-tight text-blue-600">₹{stats.escrow.toLocaleString()}</h3>
+                        <h3 className="text-title-lg text-blue-600">₹{stats.escrow.toLocaleString()}</h3>
                         <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-200 group-hover:text-emerald-500 transition-colors">
                             <ArrowUpRight className="w-5 h-5" />
                         </div>
@@ -222,9 +222,9 @@ export default function EarningsPage() {
                 </div>
 
                 <div className="bg-white rounded-[28px] p-8 shadow-sm border border-gray-100 flex flex-col justify-between group h-full">
-                    <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-2">THIS MONTH</p>
+                    <p className="text-label text-gray-400 !mb-2">THIS MONTH</p>
                     <div className="flex items-end justify-between">
-                        <h3 className="text-3xl font-black tracking-tight text-emerald-500">₹{stats.thisMonth.toLocaleString()}</h3>
+                        <h3 className="text-title-lg text-emerald-500">₹{stats.thisMonth.toLocaleString()}</h3>
                         <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-200 group-hover:text-emerald-500 transition-colors">
                             <ArrowUpRight className="w-5 h-5" />
                         </div>

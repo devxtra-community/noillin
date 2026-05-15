@@ -45,18 +45,18 @@ export default function BrandDashboardLayout({
 
     return (
         <RoleGuard allowedRoles={["BRAND"]}>
-            <div className="flex h-[100dvh] bg-[#F8FAFC] overflow-hidden font-sans">
+            <div className="flex min-h-screen font-sans">
 
                 {/* Mobile Sidebar Overlay */}
                 {isSidebarOpen && (
                     <div
-                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden transition-all duration-300"
+                        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 lg:hidden transition-all duration-300"
                         onClick={() => setIsSidebarOpen(false)}
                     />
                 )}
 
                 {/* Sidebar */}
-                <aside className={`fixed lg:static inset-y-0 left-0 w-72 bg-white border-r border-slate-100 flex flex-col py-6 shrink-0 transition-transform duration-300 ease-in-out z-50 shadow-2xl lg:shadow-none lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+                <aside className={`fixed lg:sticky top-0 left-0 w-72 h-screen bg-white border-r border-slate-100 flex flex-col py-6 shrink-0 transition-transform duration-300 ease-in-out z-[60] shadow-2xl lg:shadow-none lg:translate-x-0 ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
                     <div className="flex items-center justify-between px-8 mb-10">
                         <div className="flex items-center gap-3 group cursor-pointer">
                             <div className="w-9 h-9 rounded-xl overflow-hidden shrink-0 flex items-center justify-center bg-emerald-50 border border-emerald-100 group-hover:shadow-md group-hover:shadow-emerald-100 transition-all">
@@ -104,7 +104,7 @@ export default function BrandDashboardLayout({
                 </aside>
 
                 {/* Main Header & Content Area */}
-                <main className="flex-1 flex flex-col min-w-0 h-[100dvh] overflow-hidden bg-slate-50/50">
+                <main className="flex-1 flex flex-col min-w-0">
                     {/* Dashboard Header */}
                     <DashboardHeader
                         isFixed={false}
@@ -123,8 +123,7 @@ export default function BrandDashboardLayout({
                     </DashboardHeader>
 
                     <div 
-                        className="flex-1 w-full overflow-y-auto custom-scrollbar"
-                        data-lenis-prevent
+                        className="flex-1 w-full"
                     >
                         <div className="min-h-full pb-6">
                             {children}

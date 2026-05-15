@@ -150,8 +150,8 @@ function BookingsContent() {
             {/* Header Area */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5 mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-[28px] font-bold text-gray-900 tracking-tight">Bookings</h1>
-                    <p className="text-[14px] text-gray-500 mt-1">Track and manage your ongoing collaborations</p>
+                  <h1 className="text-2xl font-black text-gray-900">Requests</h1>
+                  <p className="text-sm text-gray-500 mt-1">Manage incoming collaboration requests</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
@@ -260,7 +260,7 @@ function BookingsContent() {
                         <div className="p-6 flex flex-col min-h-full">
                             {selectedBooking ? (
                                 <>
-                                    <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-6">Booking Details</h2>
+                                    <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest !mb-6">Booking Details</h2>
 
                                     {/* Brand Profile */}
                                     <div className="flex flex-col items-center text-center mb-8">
@@ -280,9 +280,9 @@ function BookingsContent() {
                                                 )}
                                             </div>
                                         </div>
-                                        <Link href={`/brand-profile-page?id=${selectedBooking.brandProfile?._id || selectedBooking.brandProfile?.userId}`} className="hover:opacity-80 transition-opacity">
-                                            <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{selectedBooking.brandProfile?.companyName || "Unknown Brand"}</h3>
-                                        </Link>
+                                            <Link href={`/brand-profile-page?id=${selectedBooking.brandProfile?._id}`} className="hover:opacity-80 transition-opacity">
+                                                <h3 className="text-lg font-black text-gray-900 leading-tight mb-1.5">{selectedBooking.brandProfile?.companyName || "Brand User"}</h3>
+                                            </Link>
                                         {selectedBooking.brandProfile?.contactEmail && (
                                             <p className="text-xs text-gray-400 font-medium mb-3">{selectedBooking.brandProfile.contactEmail}</p>
                                         )}
@@ -301,9 +301,9 @@ function BookingsContent() {
                                                 <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
                                                     <AlertCircle className="w-4 h-4" />
                                                 </div>
-                                                <span className="text-[13px] font-bold text-gray-400">Status</span>
+                                                <span className="text-sm font-medium text-gray-400">Status</span>
                                             </div>
-                                            <span className="text-[13px] font-bold text-gray-900">{getStatusLabel(selectedBooking.status)}</span>
+                                            <span className="text-sm font-bold text-gray-900">{getStatusLabel(selectedBooking.status)}</span>
                                         </div>
 
                                         <div className="flex items-center justify-between py-2 text-sm border-b border-gray-50/80">
@@ -311,10 +311,10 @@ function BookingsContent() {
                                                 <div className="w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
                                                     <Calendar className="w-4 h-4" />
                                                 </div>
-                                                <span className="text-[13px] font-bold text-gray-400">Booked Date</span>
+                                                <span className="text-sm font-medium text-gray-400">Booked Date</span>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-[13px] font-bold text-gray-900">{new Date(selectedBooking.createdAt).toLocaleDateString()}</p>
+                                                <p className="text-sm font-bold text-gray-900">{new Date(selectedBooking.createdAt).toLocaleDateString()}</p>
                                             </div>
                                         </div>
 
@@ -324,16 +324,14 @@ function BookingsContent() {
                                                     <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
                                                         <Clock className="w-4 h-4" />
                                                     </div>
-                                                    <span className="text-[13px] font-bold text-gray-400">Due Date</span>
+                                                    <span className="text-sm font-medium text-gray-400">Due Date</span>
                                                 </div>
-                                                <span className="text-[13px] font-bold text-rose-600">{new Date(selectedBooking.dueDate).toLocaleDateString()}</span>
+                                                <span className="text-sm font-bold text-rose-600">{new Date(selectedBooking.dueDate).toLocaleDateString()}</span>
                                             </div>
                                         )}
 
                                         <div className="py-6 border-b border-gray-50/80">
-                                            <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                                                <Clock className="w-3 h-3" /> Booking Lifecycle
-                                            </p>
+                                            <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest !mb-6">Request Details</h2>
                                             <div className="space-y-6 relative ml-2">
                                                 <div className="absolute left-[11px] top-2 bottom-2 w-[1px] bg-gray-100"></div>
                                                 {[

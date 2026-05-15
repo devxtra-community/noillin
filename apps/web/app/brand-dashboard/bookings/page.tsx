@@ -153,8 +153,8 @@ function BrandBookingsContent() {
             {/* Header Area */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Bookings</h1>
-                    <p className="text-sm text-slate-500 mt-1.5 font-medium">Track and manage your ongoing collaborations</p>
+                    <h1 className="text-title-lg text-slate-900">Bookings</h1>
+                    <p className="text-body-md text-slate-500 mt-1.5">Track and manage your ongoing collaborations</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -301,7 +301,7 @@ function BrandBookingsContent() {
                                             )}
                                         </div>
                                     </div>
-                                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">{selectedBooking.influencerProfile?.fullName || selectedBooking.influencerProfile?.username || "Unknown Influencer"}</h2>
+                                    <h2 className="text-title-lg text-slate-900 tracking-tight">{selectedBooking.influencerProfile?.fullName || selectedBooking.influencerProfile?.username || "Unknown Influencer"}</h2>
                                     <span className={`mt-3 px-4 py-1 text-[10px] font-black rounded-full uppercase tracking-widest ${getStatusStyles(selectedBooking.status)}`}>
                                         {getStatusLabel(selectedBooking.status)}
                                     </span>

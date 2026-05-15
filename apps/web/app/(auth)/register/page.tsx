@@ -7,7 +7,7 @@ export default function LoginPage() {
   const [role, setRole] = useState<"brand" | "influencer">("brand");
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 ">
+    <div className="min-h-screen flex items-center justify-center bg-background ">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8 sm:m-0">
 
         <div className="text-center mb-3">

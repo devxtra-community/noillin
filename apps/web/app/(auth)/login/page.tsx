@@ -70,7 +70,7 @@ function LoginForm() {
 
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] font-sans">
+    <div className="min-h-screen bg-background font-sans">
       <AuthNavbar />
 
       <main className="pt-24 pb-20 px-4 flex items-center justify-center min-h-screen">
@@ -83,10 +83,10 @@ function LoginForm() {
         >
 
           <div className="text-center mb-6">
-            <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+            <h1 className="text-title-lg !text-2xl text-gray-800">
               Welcome Back
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-body-md text-gray-500 mt-1">
               Log in to your Noillin account as{" "}
               <span className="font-medium capitalize">{role.toLowerCase()}</span>
             </p>
@@ -204,7 +204,7 @@ function LoginForm() {
             </Link>
           </p>
 
-          <p className="text-[10px] text-center text-gray-300 mt-8 uppercase tracking-[0.2em] font-black">
+          <p className="text-label text-center text-gray-300 mt-8">
             Secure login · Data protected
           </p>
         </motion.div>
@@ -215,7 +215,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background">Loading...</div>}>
       <LoginForm />
     </Suspense>
   );

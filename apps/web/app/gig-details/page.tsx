@@ -154,7 +154,7 @@ function GigDetailsContent() {
     const gigHeroImage = gig.bannerUrl || categoryHeroImages[gig.category?.toLowerCase() || "default"] || categoryHeroImages["default"];
 
     return (
-        <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 relative flex flex-col">
+        <div className="min-h-screen bg-background text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 relative flex flex-col">
             {/* Toast Notification */}
             {showToast && (
                 <div className="fixed top-24 right-8 z-[200] animate-in slide-in-from-right duration-300">
@@ -208,7 +208,7 @@ function GigDetailsContent() {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
                             <div className="absolute bottom-8 left-8 right-8">
-                                <span className="bg-emerald-500 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/30 mb-4 inline-block">
+                                <span className="text-label bg-emerald-500 text-white px-4 py-1.5 rounded-full shadow-lg shadow-emerald-500/30 mb-4 inline-block">
                                     {gig.category}
                                 </span>
                             </div>
@@ -246,12 +246,12 @@ function GigDetailsContent() {
                                     </div>
                                     <div className="min-w-0 flex-1">
                                         <div className="flex items-center gap-1.5">
-                                            <h1 className="text-xs sm:text-lg font-black text-gray-900 truncate tracking-tight">{influencer?.fullName?.split(' ')[0] || "Creator"}</h1>
+                                            <h1 className="text-title-lg !text-lg text-gray-900 truncate">{influencer?.fullName?.split(' ')[0] || "Creator"}</h1>
                                             {influencer?.isVerified && (
                                                 <CheckCircle2 className="w-3 h-3 text-[#0CAF60] fill-current shrink-0" />
                                             )}
                                         </div>
-                                        <p className="text-[9px] sm:text-xs text-emerald-600 font-black uppercase tracking-wider truncate">Profile</p>
+                                        <p className="text-label text-emerald-600 !mb-0">Profile</p>
                                     </div>
                                 </Link>
 
@@ -310,7 +310,7 @@ function GigDetailsContent() {
                                 </Link>
                             </div>
 
-                            <h2 className="text-4xl font-black text-gray-900 leading-tight mb-5 pr-8">
+                            <h2 className="text-title-xl text-gray-900 mb-5 pr-8">
                                 {gig.title}
                             </h2>
 
@@ -345,7 +345,7 @@ function GigDetailsContent() {
 
                         {/* About */}
                         <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-100/50">
-                            <h3 className="text-xl font-bold text-gray-900 mb-4">About this Gig</h3>
+                            <h3 className="text-title-lg !text-xl text-gray-900 mb-4">About this Gig</h3>
                             <p className="text-gray-600 leading-relaxed font-medium whitespace-pre-wrap">
                                 {gig.shortDescription}
                             </p>
@@ -353,7 +353,7 @@ function GigDetailsContent() {
 
                         {/* Deliverables */}
                         <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-100/50">
-                            <h3 className="text-xl font-bold text-gray-900 mb-6">Deliverables</h3>
+                            <h3 className="text-title-lg !text-xl text-gray-900 mb-6">Deliverables</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {gig.deliverables.map((item, i) => (
                                     <div key={i} className="flex flex-col p-5 rounded-xl border border-gray-100 bg-gray-50/50 hover:bg-white hover:border-[#0CAF60]/30 hover:shadow-md transition-all duration-300">
@@ -372,12 +372,12 @@ function GigDetailsContent() {
 
                         {/* Stats */}
                         <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-100/50">
-                            <h3 className="text-xl font-bold text-gray-900 mb-6">Audience Insights</h3>
+                            <h3 className="text-title-lg !text-xl text-gray-900 mb-6">Audience Insights</h3>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                 <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100/50">
                                     <Users className="w-4 h-4 text-blue-600 mb-2" />
-                                    <div className="text-2xl font-extrabold text-gray-900 mb-1">{(influencer.followersCount || 0).toLocaleString()}</div>
-                                    <div className="text-[10px] font-bold text-gray-500 uppercase">Followers</div>
+                                    <div className="text-title-xl !text-2xl text-gray-900 mb-1">{(influencer.followersCount || 0).toLocaleString()}</div>
+                                    <div className="text-label text-gray-500 !mb-0">Followers</div>
                                 </div>
                                 <div className="p-4 bg-purple-50/50 rounded-xl border border-purple-100/50">
                                     <BarChart className="w-4 h-4 text-purple-600 mb-2" />
@@ -399,7 +399,7 @@ function GigDetailsContent() {
 
                         {/* Reviews */}
                         <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 shadow-xl shadow-slate-100/50">
-                            <h3 className="text-xl font-bold text-gray-900 mb-6">Recent Brand Reviews</h3>
+                            <h3 className="text-title-lg !text-xl text-gray-900 mb-6">Recent Brand Reviews</h3>
                             <div className="space-y-6">
                                 <div className="p-6 bg-slate-50/50 rounded-3xl border border-gray-100 flex flex-col gap-4">
                                     <div className="flex items-center justify-between">

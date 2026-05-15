@@ -28,8 +28,8 @@ export default function DashboardPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
                 <FadeIn delay={0}>
                     <div className="space-y-1">
-                        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Platform Overview</h1>
-                        <p className="text-gray-400 font-medium font-sans">Welcome back, here&apos;s what&apos;s happening today.</p>
+                        <h1 className="text-title-lg text-gray-900">Platform Overview</h1>
+                        <p className="text-body-md text-gray-500">Welcome back, here&apos;s what&apos;s happening today.</p>
                     </div>
                 </FadeIn>
                 <FadeIn delay={0.1}>
