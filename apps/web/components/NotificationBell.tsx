@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bell, X } from "lucide-react";
+import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { useNotificationStore, Notification } from "@/store/notification.store";
@@ -16,9 +16,9 @@ export default function NotificationBell() {
 
   const mountedRef = useRef(false);
 
-useEffect(() => {
-  mountedRef.current = true;
-}, []);
+  useEffect(() => {
+    mountedRef.current = true;
+  }, []);
 
   // Fetch notifications on mount if user is logged in
   useEffect(() => {
@@ -58,11 +58,6 @@ useEffect(() => {
       markAsRead(notification._id);
     }
 
-    // TEST ROUTER PUSH (Uncomment if needed)
-    // console.log("🔥 TEST ROUTER PUSH");
-    // router.push("/influencer-dashboard");
-    // return;
-
     const type = notification?.type?.toUpperCase();
 
     if (type === "GIG_REQUEST") {
@@ -87,7 +82,6 @@ useEffect(() => {
 
     } else {
       console.warn("❌ Unknown navigation type", notification);
-      // Fallback
       setIsOpen(false);
     }
   };
@@ -131,26 +125,24 @@ useEffect(() => {
             )}
           </div>
 
-          <div className="max-h-[350px] sm:max-h-96 overflow-y-auto">
+          <div 
+            className="max-h-[350px] sm:max-h-[420px] overflow-y-auto custom-scrollbar bg-slate-50/50"
+            data-lenis-prevent
+          >
             {loading && notifications.length === 0 ? (
-              <div className="p-6 flex justify-center">
-                <div className="w-5 h-5 border-2 border-[#059669] border-t-transparent rounded-full animate-spin"></div>
+              <div className="p-10 flex justify-center">
+                <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
-            </div>
-
-            <div 
-              className="flex-1 overflow-y-auto sm:max-h-[420px] custom-scrollbar bg-slate-50/50"
-              data-lenis-prevent
-            >
-              {loading && notifications.length === 0 ? (
-                <div className="p-10 flex justify-center">
-                  <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+            ) : notifications.length === 0 ? (
+              <div className="p-8 flex flex-col items-center justify-center text-center">
+                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                  <Bell className="w-6 h-6 text-gray-300" />
                 </div>
                 <p className="text-sm text-gray-500 font-medium">No notifications yet</p>
                 <p className="text-xs text-gray-400 mt-1">We&apos;ll let you know when something happens.</p>
               </div>
             ) : (
-              <ul className="divide-y divide-gray-50">
+              <ul className="divide-y divide-gray-50 bg-white">
                 {notifications.map((notification) => (
                   <li
                     key={notification._id}
@@ -171,13 +163,13 @@ useEffect(() => {
                           {formatTime(notification.createdAt)}
                         </p>
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
