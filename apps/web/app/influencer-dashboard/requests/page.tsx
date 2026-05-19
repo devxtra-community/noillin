@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, ChevronLeft, ChevronRight, Calendar, Globe, Loader2 } from "lucide-react";
-import Image from "next/image";
 
 import api from "@/lib/axios.client";
 import { useDashboardStore } from "@/store/dashboard.store";

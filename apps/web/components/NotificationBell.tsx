@@ -155,8 +155,7 @@ useEffect(() => {
                   <li
                     key={notification._id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`px-5 py-4 transition-colors cursor-pointer group ${!notification.read ? "bg-green-50/30 hover:bg-green-50/50" : "hover:bg-gray-50"
-                      }`}
+                    className={`px-5 py-4 transition-colors cursor-pointer group ${!notification.read ? "bg-green-50/30 hover:bg-green-50/50" : "hover:bg-gray-50"}`}
                   >
                     <div className="flex items-start gap-3">
                       <div className="mt-1.5 shrink-0 w-2 h-2 flex items-center justify-center">
