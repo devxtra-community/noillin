@@ -121,17 +121,17 @@ useEffect(() => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in-0 duration-200">
-          <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-            <h3 className="font-semibold text-gray-900 text-sm">Notifications</h3>
+        <div className="fixed sm:absolute top-20 sm:top-full left-4 sm:left-auto right-4 sm:right-0 mt-2 w-auto sm:w-80 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)] border border-gray-100 overflow-hidden z-50 animate-in slide-in-from-top-2 fade-in-0 duration-200">
+          <div className="px-5 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+            <h3 className="font-bold text-gray-900 text-sm">Notifications</h3>
             {unreadCount > 0 && (
-              <span className="text-xs font-medium bg-green-100 text-[#059669] px-2 py-0.5 rounded-full">
+              <span className="text-xs font-bold bg-green-100 text-[#059669] px-2 py-0.5 rounded-full">
                 {unreadCount} new
               </span>
             )}
           </div>
 
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-[350px] sm:max-h-96 overflow-y-auto">
             {loading && notifications.length === 0 ? (
               <div className="p-6 flex justify-center">
                 <div className="w-5 h-5 border-2 border-[#059669] border-t-transparent rounded-full animate-spin"></div>
@@ -150,18 +150,20 @@ useEffect(() => {
                   <li
                     key={notification._id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`p-4 transition-colors cursor-pointer group ${!notification.read ? "bg-green-50/30 hover:bg-green-50/50" : "hover:bg-gray-50"
+                    className={`px-5 py-4 transition-colors cursor-pointer group ${!notification.read ? "bg-green-50/30 hover:bg-green-50/50" : "hover:bg-gray-50"
                       }`}
                   >
                     <div className="flex items-start gap-3">
-                      {!notification.read && (
-                        <div className="mt-1.5 shrink-0 w-2 h-2 bg-[#059669] rounded-full"></div>
-                      )}
-                      <div className={`flex-1 ${!notification.read ? "ml-0" : "ml-5"}`}>
-                        <p className={`text-sm leading-snug ${!notification.read ? "text-gray-900 font-medium" : "text-gray-600"}`}>
+                      <div className="mt-1.5 shrink-0 w-2 h-2 flex items-center justify-center">
+                        {!notification.read && (
+                          <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-sm shadow-emerald-200"></div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-[13px] leading-snug ${!notification.read ? "text-gray-900 font-extrabold" : "text-gray-600 font-medium"}`}>
                           {notification.message}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1.5 font-medium">
+                        <p className="text-[10px] text-gray-400 mt-1.5 font-bold uppercase tracking-wider">
                           {formatTime(notification.createdAt)}
                         </p>
                       </div>

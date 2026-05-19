@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { Search, Loader2, MessageSquare } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 import api from "@/lib/axios.client";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { useAuthStore } from "@/store/auth.store";
+import { useDashboardStore } from "@/store/dashboard.store";
 
 interface Conversation {
     gigRequestId: string;
@@ -26,6 +27,8 @@ interface Conversation {
 
 function MessagesContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
     const initialGigRequestId = searchParams.get("gigRequestId");
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -35,6 +38,21 @@ function MessagesContent() {
     const [fetchedConv, setFetchedConv] = useState<Conversation | null>(null);
     const { user } = useAuthStore();
     const currentUserId = user?.id;
+    const { setIsChatActive } = useDashboardStore();
+
+    useEffect(() => {
+        setIsChatActive(!!selectedConvId);
+        return () => setIsChatActive(false);
+    }, [selectedConvId, setIsChatActive]);
+
+    const handleSelectConv = (id: string | null) => {
+        setSelectedConvId(id);
+        if (id) {
+            router.push(`${pathname}?gigRequestId=${id}`);
+        } else {
+            router.push(pathname);
+        }
+    };
 
     // Fallback for historical gig requests with no existing messages
     useEffect(() => {
@@ -109,11 +127,11 @@ function MessagesContent() {
     };
 
     return (
-        <div className="px-2 sm:px-4 py-4 w-full h-[calc(100vh-80px)] lg:h-[calc(100vh-100px)] flex flex-col overflow-hidden">
-            <div className="flex bg-white rounded-[24px] lg:rounded-[32px] shadow-xl shadow-gray-100/50 border border-gray-100 flex-1 overflow-hidden">
+        <div className="p-0 lg:px-4 lg:py-4 w-full h-[calc(100vh-80px)] lg:h-[calc(100vh-100px)] flex flex-col overflow-hidden">
+            <div className="flex bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl lg:shadow-gray-100/50 border-none lg:border lg:border-gray-100 flex-1 overflow-hidden">
 
                 {/* Sidebar */}
-                <div className="w-[340px] border-r border-gray-100 flex flex-col bg-gray-50/30 shrink-0">
+                <div className={`w-full lg:w-[340px] border-r border-gray-100 flex flex-col bg-gray-50/30 shrink-0 ${selectedConvId ? "hidden lg:flex" : "flex"}`}>
                     <div className="p-6">
                         <h1 className="text-2xl font-black text-gray-900 mb-6">Messages</h1>
                         <div className="relative">
@@ -144,7 +162,7 @@ function MessagesContent() {
                         ) : filteredConvs.map((conv) => (
                             <button
                                 key={conv.gigRequestId}
-                                onClick={() => setSelectedConvId(conv.gigRequestId)}
+                                onClick={() => handleSelectConv(conv.gigRequestId)}
                                 className={`w-full p-4 rounded-[20px] transition-all flex items-start gap-3 group text-left ${selectedConvId === conv.gigRequestId
                                     ? "bg-white shadow-lg shadow-gray-200/50 border border-emerald-100"
                                     : "hover:bg-white hover:shadow-md border border-transparent"
@@ -176,17 +194,18 @@ function MessagesContent() {
 
                 {/* Main Chat Area */}
                 {selectedConvId && activeConv && currentUserId ? (
-                    <div className="flex-1 flex flex-col min-w-0 border-l border-gray-100">
+                    <div className={`flex-1 flex flex-col min-w-0 border-l border-gray-100 ${selectedConvId ? "flex" : "hidden lg:flex"}`}>
                         <ChatWindow
                             currentUserId={currentUserId}
                             gigRequestId={selectedConvId}
                             receiverId={activeConv.user._id}
                             receiverName={activeConv.user.name}
                             receiverImage={activeConv.user.profileImage || undefined}
+                            onBack={() => handleSelectConv(null)}
                         />
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-gray-400 gap-4">
+                    <div className="hidden lg:flex flex-1 flex-col items-center justify-center text-gray-400 gap-4">
                         <MessageSquare className="w-14 h-14 opacity-30" />
                         <p className="font-medium text-sm">Select a conversation to start chatting</p>
                         <p className="text-xs text-center max-w-[240px]">Conversations appear here once a brand&apos;s gig request is accepted</p>

@@ -255,34 +255,33 @@ export function MessageBubble({ message, currentUserId, isBrand, onRespond, onRe
             )}
           </div>
         ) : isDeliverable && dData ? (
-          <div className="flex flex-col">
-            <div className="p-5 bg-gradient-to-br from-gray-50 to-white">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-[11px] font-black uppercase tracking-widest text-emerald-600">Final Deliverable</span>
-                <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold border capitalize",
-                  dData.status === "ACCEPTED" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-                    dData.status === "REJECTED" ? "bg-rose-50 text-rose-600 border-rose-100" :
-                      "bg-orange-50 text-orange-600 border-orange-100"
-                )}>
-                  {dData.status}
-                </span>
-              </div>
-
-              {/* Secure Media Viewer */}
-              <div className="mt-2">
-                <SecureMediaPreview
-                  url={dData.url}
-                  type={dData.mediaType === "VIDEO" ? "video" : "image"}
-                />
-              </div>
-
-              {dData.status === "REJECTED" && dData.rejectionNote && (
-                <div className="mt-4 p-3 bg-rose-50 rounded-xl border border-rose-100">
-                  <p className="text-[10px] font-black text-rose-500 uppercase tracking-tight mb-1">Feedback</p>
-                  <p className="text-xs text-rose-700 font-medium italic">&ldquo;{dData.rejectionNote}&rdquo;</p>
-                </div>
-              )}
+          <div className="flex flex-col w-full">
+            <div className="px-5 py-3.5 bg-gradient-to-r from-gray-50 to-white flex items-center justify-between border-b border-gray-50">
+              <span className="text-[11px] font-black uppercase tracking-widest text-emerald-600">Final Deliverable</span>
+              <span className={cn("px-2.5 py-0.5 rounded-full text-[10px] font-bold border capitalize",
+                dData.status === "ACCEPTED" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                  dData.status === "REJECTED" ? "bg-rose-50 text-rose-600 border-rose-100" :
+                    "bg-orange-50 text-orange-600 border-orange-100"
+              )}>
+                {dData.status}
+              </span>
             </div>
+
+            {/* Secure Media Viewer */}
+            <div className="w-full">
+              <SecureMediaPreview
+                url={dData.url}
+                type={dData.mediaType === "VIDEO" ? "video" : "image"}
+                className="rounded-none border-none shadow-none"
+              />
+            </div>
+
+            {dData.status === "REJECTED" && dData.rejectionNote && (
+              <div className="p-4 bg-rose-50 border-t border-rose-100">
+                <p className="text-[10px] font-black text-rose-500 uppercase tracking-tight mb-1">Feedback</p>
+                <p className="text-xs text-rose-700 font-medium italic">&ldquo;{dData.rejectionNote}&rdquo;</p>
+              </div>
+            )}
 
             {dData.status === "PENDING" && isBrand && (
               <div className="p-4 bg-white border-t border-gray-50 space-y-3">

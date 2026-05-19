@@ -6,12 +6,16 @@ import NextImage from "next/image";
 
 import { SecureMediaModal } from "./SecureMediaModal";
 
+import { cn } from "@/lib/utils";
+
+
 interface SecureMediaPreviewProps {
     url: string;
     type?: "image" | "video";
+    className?: string;
 }
 
-export function SecureMediaPreview({ url, type = "image" }: SecureMediaPreviewProps) {
+export function SecureMediaPreview({ url, type = "image", className }: SecureMediaPreviewProps) {
     const [isVisible, setIsVisible] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -50,7 +54,7 @@ export function SecureMediaPreview({ url, type = "image" }: SecureMediaPreviewPr
             <div
                 ref={containerRef}
                 onClick={() => setIsModalOpen(true)}
-                className="relative group w-full aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800 cursor-zoom-in"
+                className={cn("relative group w-full aspect-video bg-slate-900 rounded-2xl overflow-hidden shadow-2xl border border-slate-800 cursor-zoom-in", className)}
             >
                 {!isVisible && (
                     <div className="absolute inset-0 z-50 backdrop-blur-3xl bg-slate-900/80 flex flex-col items-center justify-center text-white gap-4">

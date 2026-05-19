@@ -46,6 +46,7 @@ interface ChatWindowProps {
   receiverName?: string;
   receiverImage?: string;
   disabled?: boolean;
+  onBack?: () => void;
 }
 
 interface Order {
@@ -62,6 +63,7 @@ export function ChatWindow({
   receiverId,
   receiverName,
   receiverImage,
+  onBack,
 }: ChatWindowProps) {
   const searchParams = useSearchParams();
   const urlGigId = searchParams.get("gigId") || searchParams.get("gig");
@@ -410,7 +412,15 @@ export function ChatWindow({
     <div className="flex flex-col h-full bg-[#f8f9fa] shadow-2xl relative w-full overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white/95 backdrop-blur-xl sticky top-0 z-20">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3 sm:space-x-4">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="lg:hidden p-2 text-gray-500 hover:text-gray-900 rounded-full hover:bg-gray-100 -ml-2"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+          )}
           <div className="relative">
             <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 overflow-hidden flex items-center justify-center ring-2 ring-white shadow-sm relative">
               {receiverImage ? (
