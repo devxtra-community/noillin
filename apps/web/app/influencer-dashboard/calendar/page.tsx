@@ -131,7 +131,7 @@ export default function CalendarPage() {
                     </div>
 
                     <div className="flex-1 flex flex-col">
-                        <div className="grid grid-cols-7 gap-4 mb-8">
+                        <div className="grid grid-cols-7 gap-2 sm:gap-4 mb-8">
                             {weekDays.map(day => (
                                 <div key={day} className="text-center text-[11px] font-bold text-gray-400 tracking-wider">
                                     {day}
@@ -139,16 +139,16 @@ export default function CalendarPage() {
                             ))}
                         </div>
 
-                        <div className="grid grid-cols-7 gap-y-10 gap-x-4">
+                        <div className="grid grid-cols-7 gap-y-6 sm:gap-y-10 gap-x-1.5 sm:gap-x-4">
                             {Array.from({ length: firstDayOfMonth(currentDate.getFullYear(), currentDate.getMonth()) }).map((_, i) => (
-                                <div key={`empty-${i}`} className="h-12"></div>
+                                <div key={`empty-${i}`} className="h-9 sm:h-12 md:h-14"></div>
                             ))}
 
                             {days.map((d) => (
                                 <div key={d.day} className="flex flex-col items-center group relative">
                                     <button
                                         onClick={() => setSelectedDate(d.day)}
-                                        className={`w-14 h-14 rounded-full flex items-center justify-center text-[15px] font-bold transition-all relative z-10 ${selectedDate === d.day
+                                        className={`w-9 h-9 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-[13px] sm:text-[15px] font-bold transition-all relative z-10 ${selectedDate === d.day
                                             ? "bg-emerald-500 text-white shadow-lg shadow-emerald-200 scale-110"
                                             : "text-gray-900 hover:bg-gray-50"
                                             }`}

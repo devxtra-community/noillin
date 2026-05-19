@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { Search, Loader2, MessageSquare, Sparkles, Filter } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { Search, Loader2, MessageSquare } from "lucide-react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 
 import api from "@/lib/axios.client";
 import { ChatWindow } from "@/components/chat/ChatWindow";
 import { useAuthStore } from "@/store/auth.store";
+import { useDashboardStore } from "@/store/dashboard.store";
 
 interface Conversation {
     gigRequestId: string;
@@ -26,6 +27,8 @@ interface Conversation {
 
 function MessagesContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
+    const pathname = usePathname();
     const initialGigRequestId = searchParams.get("gigRequestId");
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -35,6 +38,21 @@ function MessagesContent() {
     const [fetchedConv, setFetchedConv] = useState<Conversation | null>(null);
     const { user } = useAuthStore();
     const currentUserId = user?.id;
+    const { setIsChatActive } = useDashboardStore();
+
+    useEffect(() => {
+        setIsChatActive(!!selectedConvId);
+        return () => setIsChatActive(false);
+    }, [selectedConvId, setIsChatActive]);
+
+    const handleSelectConv = (id: string | null) => {
+        setSelectedConvId(id);
+        if (id) {
+            router.push(`${pathname}?gigRequestId=${id}`);
+        } else {
+            router.push(pathname);
+        }
+    };
 
     // Fallback for historical gig requests with no existing messages
     useEffect(() => {
@@ -107,18 +125,13 @@ function MessagesContent() {
     };
 
     return (
-        <div className="px-2 sm:px-6 py-6 w-full min-h-[calc(100vh-100px)] flex flex-col max-w-[1600px] mx-auto">
-            <div className="flex bg-white rounded-[32px] shadow-xl shadow-slate-200/50 border border-slate-100 flex-1 overflow-hidden relative">
+        <div className="p-0 lg:px-4 lg:py-4 w-full h-[calc(100vh-80px)] lg:h-[calc(100vh-100px)] flex flex-col overflow-hidden">
+            <div className="flex bg-white rounded-none lg:rounded-[32px] shadow-none lg:shadow-xl lg:shadow-gray-100/50 border-none lg:border lg:border-gray-100 flex-1 overflow-hidden">
 
                 {/* Sidebar */}
-                <div className={`w-full lg:w-[380px] border-r border-slate-100 flex-col bg-slate-50/50 shrink-0 ${selectedConvId ? "hidden lg:flex" : "flex"} relative z-10`}>
-                    <div className="p-6 pb-4">
-                        <div className="flex items-center justify-between mb-6">
-                           <h1 className="text-2xl font-black text-slate-900 tracking-tight">Messages</h1>
-                           <button className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-xl transition-all">
-                               <Filter className="w-5 h-5" />
-                           </button>
-                        </div>
+                <div className={`w-full lg:w-[340px] border-r border-gray-100 flex flex-col bg-gray-50/30 shrink-0 ${selectedConvId ? "hidden lg:flex" : "flex"}`}>
+                    <div className="p-6">
+                        <h1 className="text-2xl font-black text-gray-900 mb-6">Messages</h1>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                 <Search className="w-4 h-4 text-slate-400" />
@@ -152,10 +165,10 @@ function MessagesContent() {
                         ) : filteredConvs.map((conv) => (
                             <button
                                 key={conv.gigRequestId}
-                                onClick={() => setSelectedConvId(conv.gigRequestId)}
-                                className={`w-full p-3.5 rounded-[20px] transition-all flex items-start gap-3 group text-left relative overflow-hidden ${selectedConvId === conv.gigRequestId
-                                    ? "bg-white shadow-lg shadow-slate-200/50 border border-emerald-100"
-                                    : "hover:bg-white hover:shadow-sm border border-transparent"
+                                onClick={() => handleSelectConv(conv.gigRequestId)}
+                                className={`w-full p-4 rounded-[20px] transition-all flex items-start gap-3 group text-left ${selectedConvId === conv.gigRequestId
+                                    ? "bg-white shadow-lg shadow-gray-200/50 border border-emerald-100"
+                                    : "hover:bg-white hover:shadow-md border border-transparent"
                                     }`}
                             >
                                 {selectedConvId === conv.gigRequestId && (
@@ -187,26 +200,21 @@ function MessagesContent() {
 
                 {/* Main Chat Area */}
                 {selectedConvId && activeConv && currentUserId ? (
-                    <div className={`flex-1 flex-col min-w-0 bg-white relative z-20 ${selectedConvId ? "flex" : "hidden lg:flex"}`}>
+                    <div className={`flex-1 flex flex-col min-w-0 border-l border-gray-100 ${selectedConvId ? "flex" : "hidden lg:flex"}`}>
                         <ChatWindow
                             currentUserId={currentUserId}
                             gigRequestId={selectedConvId}
                             receiverId={activeConv.user._id}
                             receiverName={activeConv.user.name}
                             receiverImage={activeConv.user.profileImage || undefined}
-                            onBack={() => setSelectedConvId(null)}
+                            onBack={() => handleSelectConv(null)}
                         />
                     </div>
                 ) : (
-                    <div className={`flex-1 flex-col items-center justify-center text-slate-400 gap-6 hidden lg:flex bg-slate-50/30`}>
-                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-100 relative">
-                            <MessageSquare className="w-10 h-10 text-emerald-100" />
-                            <Sparkles className="w-6 h-6 text-emerald-400 absolute top-4 right-4" />
-                        </div>
-                        <div className="text-center">
-                            <h2 className="font-black text-xl text-slate-700 mb-2">Your Inbox</h2>
-                            <p className="text-sm font-medium text-slate-500 max-w-[280px]">Select a conversation from the sidebar to view messages, proposals, and deliverables.</p>
-                        </div>
+                    <div className="hidden lg:flex flex-1 flex-col items-center justify-center text-gray-400 gap-4">
+                        <MessageSquare className="w-14 h-14 opacity-30" />
+                        <p className="font-medium text-sm">Select a conversation to start chatting</p>
+                        <p className="text-xs text-center max-w-[240px]">Conversations appear here once a brand&apos;s gig request is accepted</p>
                     </div>
                 )}
             </div>
