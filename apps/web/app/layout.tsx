@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 
 import "./globals.css";
 import AuthInitializer from "@/components/AuthInitializer";
+import SmoothScroll from "@/components/SmoothScroll";
 
 
 
@@ -26,8 +27,10 @@ export default function RootLayout({
       <body
         className="antialiased font-sans bg-[#F1F5F9]"
       >
-        <AuthInitializer />
-        {children}
+        <SmoothScroll>
+          <AuthInitializer />
+          {children}
+        </SmoothScroll>
       </body>
     </html>
   );

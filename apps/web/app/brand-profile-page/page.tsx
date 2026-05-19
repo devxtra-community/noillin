@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from 'next/link';
+import Image from 'next/image';
 import {
     BadgeCheck,
     Globe,
@@ -44,7 +45,7 @@ interface BrandData {
 
 const LoadingState = () => (
     <>
-        <DashboardHeader />
+        <DashboardHeader isPill={true} />
         <div className="min-h-[80vh] flex flex-col items-center justify-center gap-4 text-emerald-500 pt-20">
             <div className="relative">
                 <Loader2 className="w-12 h-12 animate-spin" />
@@ -59,7 +60,7 @@ const LoadingState = () => (
 
 const ErrorState = ({ message }: { message: string }) => (
     <>
-        <DashboardHeader />
+        <DashboardHeader isPill={true} />
         <div className="min-h-[80vh] flex flex-col items-center justify-center gap-6 p-4 pt-20 text-center">
             <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-3xl flex items-center justify-center shadow-sm">
                 <AlertCircle className="w-10 h-10" />
@@ -107,7 +108,7 @@ function BrandProfileContent() {
 
     return (
         <div className="min-h-screen bg-[#FAFAFA] font-sans selection:bg-emerald-100 selection:text-emerald-900">
-            <DashboardHeader />
+            <DashboardHeader isPill={true} />
             
             <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 space-y-8">
                 
@@ -116,7 +117,7 @@ function BrandProfileContent() {
                     <div className="shrink-0 group">
                         {brand.profileImageUrl ? (
                             <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-4 border-slate-50 shadow-xl shadow-slate-100 relative transition-transform duration-500 group-hover:scale-105">
-                                <img src={brand.profileImageUrl} alt={brand.companyName} className="w-full h-full object-cover" />
+                                <Image src={brand.profileImageUrl} alt={brand.companyName} fill className="object-cover" />
                             </div>
                         ) : (
                             <div className="w-32 h-32 md:w-40 md:h-40 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-[2rem] flex items-center justify-center text-white text-5xl font-black shadow-xl shadow-emerald-100 transition-transform duration-500 group-hover:scale-105">

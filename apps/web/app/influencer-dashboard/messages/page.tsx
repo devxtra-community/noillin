@@ -148,7 +148,7 @@ function MessagesContent() {
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
+                    <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2" data-lenis-prevent>
                         {loadingConvs ? (
                             <div className="flex items-center justify-center py-20">
                                 <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />

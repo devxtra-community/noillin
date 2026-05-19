@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { useNotificationStore, Notification } from "@/store/notification.store";
@@ -136,10 +136,15 @@ useEffect(() => {
               <div className="p-6 flex justify-center">
                 <div className="w-5 h-5 border-2 border-[#059669] border-t-transparent rounded-full animate-spin"></div>
               </div>
-            ) : notifications.length === 0 ? (
-              <div className="p-8 flex flex-col items-center justify-center text-center">
-                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                  <Bell className="w-6 h-6 text-gray-300" />
+            </div>
+
+            <div 
+              className="flex-1 overflow-y-auto sm:max-h-[420px] custom-scrollbar bg-slate-50/50"
+              data-lenis-prevent
+            >
+              {loading && notifications.length === 0 ? (
+                <div className="p-10 flex justify-center">
+                  <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
                 <p className="text-sm text-gray-500 font-medium">No notifications yet</p>
                 <p className="text-xs text-gray-400 mt-1">We&apos;ll let you know when something happens.</p>
@@ -167,13 +172,13 @@ useEffect(() => {
                           {formatTime(notification.createdAt)}
                         </p>
                       </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

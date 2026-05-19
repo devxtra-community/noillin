@@ -107,8 +107,6 @@ function MessagesContent() {
         fetchConversations();
     }, []);
 
-    // Removed legacy fetchMessages and handleSend because ChatWindow handles it
-
     const filteredConvs = conversations.filter(c =>
         (c.user?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
         (c.gigTitle || "").toLowerCase().includes(searchQuery.toLowerCase())
@@ -136,28 +134,33 @@ function MessagesContent() {
                         <h1 className="text-2xl font-black text-gray-900 mb-6">Messages</h1>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <Search className="w-4 h-4 text-gray-400" />
+                                <Search className="w-4 h-4 text-slate-400" />
                             </div>
                             <input
                                 type="text"
-                                placeholder="Search..."
+                                placeholder="Search conversations..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-11 pr-4 py-3 bg-white border border-gray-100 rounded-2xl text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all shadow-sm"
+                                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm"
                             />
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
+                    <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-1.5 custom-scrollbar" data-lenis-prevent>
                         {loadingConvs ? (
-                            <div className="flex items-center justify-center py-20">
+                            <div className="flex flex-col items-center justify-center py-20 gap-4">
                                 <Loader2 className="w-6 h-6 text-emerald-500 animate-spin" />
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Syncing Messages...</p>
                             </div>
                         ) : filteredConvs.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
-                                <MessageSquare className="w-10 h-10" />
-                                <p className="text-sm font-medium">No conversations yet</p>
-                                <p className="text-xs text-center">Accepted gig collaborations will appear here</p>
+                            <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-4 px-6 text-center">
+                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                                    <MessageSquare className="w-8 h-8 text-slate-300" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-600">No conversations found</p>
+                                    <p className="text-xs mt-1 leading-relaxed">When an influencer accepts your gig, the conversation will appear here.</p>
+                                </div>
                             </div>
                         ) : filteredConvs.map((conv) => (
                             <button
@@ -168,22 +171,25 @@ function MessagesContent() {
                                     : "hover:bg-white hover:shadow-md border border-transparent"
                                     }`}
                             >
-                                <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-sm font-black shrink-0 shadow-sm bg-emerald-50 text-emerald-700 relative">
+                                {selectedConvId === conv.gigRequestId && (
+                                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-emerald-500 rounded-r-full" />
+                                )}
+                                <div className="w-12 h-12 rounded-[18px] flex items-center justify-center text-sm font-black shrink-0 shadow-sm bg-slate-100 text-slate-600 border border-slate-200 relative ml-1">
                                     {conv.user.name?.charAt(0) || "?"}
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
+                                    <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-[2.5px] border-white rounded-full" />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between mb-0.5">
-                                        <span className="font-bold text-[14px] text-gray-900 truncate">{conv.user.name || "Unknown"}</span>
-                                        <span className="text-[11px] font-bold text-gray-400 shrink-0 ml-2">{formatTime(conv.lastMessageTime)}</span>
+                                <div className="flex-1 min-w-0 pt-0.5">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <span className={`font-bold text-[14px] truncate ${selectedConvId === conv.gigRequestId ? "text-slate-900" : "text-slate-700 group-hover:text-emerald-600 transition-colors"}`}>{conv.user.name || "Unknown"}</span>
+                                        <span className={`text-[10px] font-bold shrink-0 ml-2 uppercase tracking-wider ${conv.unreadCount > 0 ? "text-emerald-600" : "text-slate-400"}`}>{formatTime(conv.lastMessageTime)}</span>
                                     </div>
                                     <p className="text-[11px] text-emerald-600 font-bold truncate mb-0.5">{conv.gigTitle}</p>
-                                    <p className={`text-[13px] truncate ${conv.unreadCount > 0 ? "font-bold text-gray-900" : "text-gray-500"}`}>
+                                    <p className={`text-[13px] truncate pr-4 ${conv.unreadCount > 0 ? "font-bold text-slate-900" : "text-slate-500"}`}>
                                         {conv.lastMessage}
                                     </p>
                                 </div>
                                 {conv.unreadCount > 0 && (
-                                    <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shrink-0 text-white text-[10px] font-black">
+                                    <div className="absolute right-4 bottom-4 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center shrink-0 text-white text-[10px] font-black shadow-md shadow-emerald-500/20">
                                         {conv.unreadCount}
                                     </div>
                                 )}

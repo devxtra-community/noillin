@@ -1,3 +1,9 @@
 packages:
-  - "apps/*"
-  - "packages/*" 
+  - apps/*
+  - packages/*
+
+ignoredBuiltDependencies:
+  - msgpackr-extract
+
+onlyBuiltDependencies:
+  - sharp

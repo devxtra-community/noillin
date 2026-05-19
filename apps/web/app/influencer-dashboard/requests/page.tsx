@@ -99,7 +99,7 @@ export default function RequestsPage() {
     }
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1500px] mx-auto w-full h-full flex flex-col overflow-hidden">
+        <div className="px-4 sm:px-6 lg:px-8 py-8 max-w-[1500px] mx-auto w-full flex flex-col">
             {/* Header Area */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
@@ -140,7 +140,7 @@ export default function RequestsPage() {
             </div>
 
             {/* Content Container (2-Column Grid) */}
-            <div className="flex flex-col xl:flex-row gap-6 flex-1 min-h-0 h-full">
+            <div className="flex flex-col xl:flex-row gap-6 flex-1">
                 {/* Table Card (Left Column) */}
                 <div className={`xl:bg-white xl:rounded-[24px] xl:shadow-sm xl:border xl:border-gray-100 flex-1 overflow-hidden flex flex-col ${selectedRequestId ? "hidden xl:flex" : "flex"}`}>
                     {/* Desktop View: Table */}

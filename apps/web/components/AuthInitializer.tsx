@@ -39,7 +39,8 @@ export default function AuthInitializer() {
   useEffect(() => {
     if (!user?.id) return;
 
-    const socket = io("http://localhost:6001", {
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL!, {
+      path: "/socket.io",
       auth: { userId: user.id },
       transports: ["websocket"],
       reconnection: true,

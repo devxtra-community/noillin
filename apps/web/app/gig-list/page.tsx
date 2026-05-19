@@ -2,14 +2,15 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Zap, Check, ArrowRight, Calendar } from "lucide-react";
+import { Check, ArrowRight, Calendar, Search, Zap, X, Filter, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import api from "@/lib/axios.client";
-import DashboardHeader from "@/components/DashboardHeader";
-import NotificationBell from "@/components/NotificationBell";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type ViewMode = "grid" | "list";
+
 type SortOption = "recommended" | "price_asc" | "price_desc" | "next_available";
 
 interface GigPricing {
@@ -72,15 +73,7 @@ const sortOptions: { label: string; value: SortOption }[] = [
   { label: "Next Available", value: "next_available" },
 ];
 
-// Deterministic avatar color based on id string
-const avatarColor = (id: string) => {
-  const colors = [
-    "#e8736c", "#5b8dee", "#4db89e", "#f0a500", "#b57bee", "#e06060",
-  ];
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-};
+
 
 const initials = (name: string) => {
   if (!name) return "";
@@ -102,9 +95,9 @@ const formatCurrency = (amount: number, currency = "INR") => {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden animate-pulse">
+    <div className="bg-white rounded-[1.5rem] lg:rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-100/50 overflow-hidden animate-pulse">
       <div className="h-1 bg-slate-200 w-full" />
-      <div className="p-8 flex flex-col gap-4">
+      <div className="p-6 sm:p-8 flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-full bg-gray-200 shrink-0" />
           <div className="flex-1 space-y-1.5">
@@ -133,12 +126,11 @@ function SkeletonCard() {
 
 // ─── Gig Card ─────────────────────────────────────────────────────────────────
 
-function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
+function GigCard({ gig }: { gig: Gig }) {
   const influencer = gig.primaryInfluencerId;
   const name = influencer?.fullName ?? "Unknown Creator";
   const niche = gig.category;
   const availableFrom = undefined;
-  const color = avatarColor(gig._id);
 
   const availableLabel = availableFrom
     ? new Date(availableFrom).toLocaleDateString("en-US", { month: "short", day: "numeric" })
@@ -156,74 +148,18 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
 
   const gigImage = gig.bannerUrl || categoryImages[gig.category] || categoryImages["default"];
 
-  if (view === "list") {
-    return (
-      <Link
-        href={`/gig-details?id=${gig._id}`}
-        className="bg-white rounded-[1.5rem] border border-slate-50 shadow-2xl shadow-slate-100/30 hover:shadow-emerald-50/50 transition-all duration-500 overflow-hidden group flex items-center gap-8 px-8 py-6 hover:-translate-y-1 relative cursor-pointer"
-      >
-        <div className="relative w-14 h-14 rounded-full overflow-hidden shadow-inner shrink-0 flex items-center justify-center font-bold text-white text-sm" style={{ background: color }}>
-          {(influencer?.profileImageUrl || influencer?.profileImage) ? (
-            <Image 
-              src={influencer.profileImageUrl || influencer.profileImage || ""} 
-              fill 
-              unoptimized
-              alt={name} 
-              className="object-cover"
-              onError={(e) => { 
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const sibling = target.nextElementSibling as HTMLElement;
-                if (sibling) sibling.style.display = 'block';
-              }}
-            />
-          ) : null}
-          <span className="relative z-[1]" style={{ display: (influencer?.profileImageUrl || influencer?.profileImage) ? 'none' : 'block' }}>{initials(name)}</span>
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="font-bold text-slate-900 text-lg truncate">{name}</span>
-            <div className="bg-emerald-500 rounded-full p-0.5">
-              <Check className="w-2.5 h-2.5 text-white" />
-            </div>
-          </div>
-          <h3 className="text-lg font-extrabold text-slate-800 truncate mb-1 group-hover:text-emerald-600 transition-colors">{gig.title}</h3>
-          <p className="text-xs text-slate-400 truncate max-w-lg leading-relaxed">{gig.shortDescription}</p>
-        </div>
-
-        <div className="text-right shrink-0 px-8 border-x border-slate-50 self-stretch flex flex-col justify-center">
-          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest mb-1">Starting at</p>
-          <p className="text-2xl font-black text-slate-900 tracking-tight">
-            {formatCurrency(gig.pricing.basePrice, gig.pricing.currency)}
-          </p>
-        </div>
-
-        <div className="shrink-0 flex items-center gap-4">
-          <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-full group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-colors">
-            <Calendar className="w-3 h-3" />
-            {availableLabel}
-          </div>
-          <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-110 transition-transform">
-            <ArrowRight className="w-5 h-5" />
-          </div>
-        </div>
-      </Link>
-    );
-  }
-
   return (
     <Link
       href={`/gig-details?id=${gig._id}`}
-      className="bg-white rounded-[2.5rem] border border-slate-50 shadow-2xl shadow-slate-100/30 hover:shadow-emerald-50/50 transition-all duration-500 hover:-translate-y-2 overflow-hidden group flex flex-col h-full cursor-pointer"
+      className="bg-white rounded-[1.5rem] lg:rounded-[2.5rem] border border-slate-50 shadow-2xl shadow-slate-100/30 hover:shadow-emerald-50/50 transition-all duration-500 hover:-translate-y-2 overflow-hidden group flex flex-col h-full cursor-pointer"
     >
       <div className="h-48 w-full relative overflow-hidden bg-slate-50">
-        <Image 
-          fill 
+        <Image
+          fill
           unoptimized
-          src={gigImage} 
-          alt={gig.title} 
-          className="object-cover group-hover:scale-105 transition-transform duration-500" 
+          src={gigImage}
+          alt={gig.title}
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
           onError={(e) => {
             const target = e.target as HTMLImageElement;
             const fallback = categoryImages[gig.category] || categoryImages["default"];
@@ -237,28 +173,28 @@ function GigCard({ gig, view }: { gig: Gig; view: ViewMode }) {
           {availableLabel}
         </div>
       </div>
-      <div className="p-8 flex flex-col flex-1">
+      <div className="p-6 sm:p-8 flex flex-col flex-1">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm bg-emerald-50 flex items-center justify-center font-bold text-emerald-600 text-[10px]">
-            {(influencer?.profileImageUrl || influencer?.profileImage) ? (
-              <>
-                <Image 
-                  fill 
-                  unoptimized
-                  src={influencer.profileImageUrl || influencer.profileImage || ""} 
-                  alt={name} 
-                  className="object-cover"
-                  onError={(e) => { 
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const fallback = target.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
-                />
-                <span className="hidden w-full h-full items-center justify-center">{initials(name)}</span>
-              </>
-            ) : initials(name)}
+              {(influencer?.profileImageUrl || influencer?.profileImage) ? (
+                <>
+                  <Image
+                    fill
+                    unoptimized
+                    src={influencer.profileImageUrl || influencer.profileImage || ""}
+                    alt={name}
+                    className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                  <span className="hidden w-full h-full items-center justify-center">{initials(name)}</span>
+                </>
+              ) : initials(name)}
             </div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -307,7 +243,6 @@ export default function ExploreGigs() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activePlatform, setActivePlatform] = useState<string | null>(null);
   const [availableOnly, setAvailableOnly] = useState<boolean>(false);
-  const [view, setView] = useState<ViewMode>("grid");
   const [sort, setSort] = useState<SortOption>("recommended");
   const [maxPrice, setMaxPrice] = useState<number>(MAX_PRICE_LIMIT);
   const [page, setPage] = useState<number>(1);
@@ -322,6 +257,25 @@ export default function ExploreGigs() {
   // the user finishes typing (blur / Enter) or stops dragging the slider.
   const [committedSearch, setCommittedSearch] = useState<string>("");
   const [committedMaxPrice, setCommittedMaxPrice] = useState<number>(MAX_PRICE_LIMIT);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [isNavbarVisible, setIsNavbarVisible] = useState<boolean>(true);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY < 10) {
+        setIsNavbarVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setIsNavbarVisible(false);
+      } else {
+        setIsNavbarVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   const fetchGigs = useCallback(async (
     opts: {
@@ -377,7 +331,7 @@ export default function ExploreGigs() {
     setPage(1);
   };
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     setSort(e.target.value as SortOption);
     setPage(1);
   };
@@ -398,11 +352,17 @@ export default function ExploreGigs() {
       setPage(1);
     }
   };
+
   const handleSearchBlur = () => {
     if (search !== committedSearch) {
       setCommittedSearch(search);
       setPage(1);
     }
+  };
+
+  const handleSearchClick = () => {
+    setCommittedSearch(search);
+    setPage(1);
   };
 
   const totalPages = pagination?.totalPages ?? 1;
@@ -420,180 +380,274 @@ export default function ExploreGigs() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-20">
+    <div className="min-h-screen bg-[#F1F5F9] text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-16 sm:pt-20">
       {/* Navbar */}
-      <DashboardHeader>
-        <div className="flex items-center gap-6">
-          <NotificationBell />
-        </div>
-      </DashboardHeader>
+      <Navbar />
 
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-4 sm:mb-12">
           <div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-none mb-4">
+          <br />
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none mb-2 sm:mb-4">
               Explore Influencer Gigs
             </h1>
-            <p className="text-slate-500 text-base max-w-md">
+            <p className="text-slate-500 text-xs sm:text-base max-w-md">
               The world&apos;s most elite creators, verified and ready for your next campaign.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Grid/List Toggle */}
-            <div className="flex bg-white/50 backdrop-blur-sm border border-slate-200 rounded-2xl p-1 shadow-sm">
-              <button
-                onClick={() => setView("grid")}
-                className={`p-2.5 rounded-xl transition-all ${view === "grid" ? "bg-white shadow-sm text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 16 16">
-                  <rect x="1" y="1" width="6" height="6" rx="1.5" />
-                  <rect x="9" y="1" width="6" height="6" rx="1.5" />
-                  <rect x="1" y="9" width="6" height="6" rx="1.5" />
-                  <rect x="9" y="9" width="6" height="6" rx="1.5" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setView("list")}
-                className={`p-2.5 rounded-xl transition-all ${view === "list" ? "bg-white shadow-sm text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-            </div>
-          </div>
         </div>
 
-        {/* Modern Filter System - Sticky Glassmorphism Header */}
-        <div className="sticky top-20 z-40 -mx-4 px-4 py-6 mb-10 bg-[#F1F5F9]/80 backdrop-blur-xl border-b border-slate-200/50 space-y-6">
-          {/* Category & Platform Pills */}
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">Niche:</span>
-              <button
-                onClick={() => { setActiveCategory(null); setPage(1); }}
-                className={`shrink-0 px-6 py-2.5 rounded-full text-xs font-bold transition-all border ${!activeCategory ? "bg-slate-900 border-slate-900 text-white shadow-lg shadow-slate-900/20" : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"}`}
-              >
-                All Gigs
-              </button>
-              {categories.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => handleCategoryChange(c)}
-                  className={`shrink-0 px-6 py-2.5 rounded-full text-xs font-bold transition-all border ${activeCategory === c ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"}`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">Platform:</span>
-              {platformList.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => handlePlatformChange(p)}
-                  className={`shrink-0 px-6 py-2.5 rounded-full text-xs font-bold transition-all border ${activePlatform === p ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20" : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"}`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Utility Bar */}
-          <div className="flex flex-col lg:flex-row items-center gap-4">
-            <div className="relative flex-1 group w-full">
-              <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1110 2.5a7.5 7.5 0 016.65 14.15z" />
-                </svg>
+        {/* Premium Minimal Filter System */}
+        <div className={`sticky z-40 mb-12 transition-all duration-500 ${!isNavbarVisible ? "top-6" : "top-32"}`}>
+          <div className="flex items-center gap-3 md:gap-4">
+            {/* Unified Search Bar */}
+            <div className="relative flex-1 group">
+              <div className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-all duration-300">
+                <Search className="w-4 h-4 md:w-5 md:h-5 stroke-[2.5]" />
               </div>
               <input
                 type="text"
-                placeholder="Search creators, keywords, or niches..."
+                placeholder="Search gigs..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={handleSearchKeyDown}
                 onBlur={handleSearchBlur}
-                className="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-[2rem] text-sm font-medium focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm"
+                className="w-full pl-10 md:pl-14 pr-24 md:pr-32 py-3.5 md:py-5 bg-white/70 backdrop-blur-xl border border-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl md:rounded-3xl text-xs md:text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500/20 transition-all placeholder:text-slate-400"
               />
-            </div>
-
-            <div className="flex items-center gap-3 w-full lg:w-auto">
-              <div className="bg-white border border-slate-200 rounded-[2rem] px-6 py-3 flex items-center gap-4 flex-1 lg:flex-none">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest shrink-0">Budget:</span>
-                <input
-                  type="range"
-                  min={1000}
-                  max={MAX_PRICE_LIMIT}
-                  step={1000}
-                  value={maxPrice}
-                  onChange={handleMaxPriceChange}
-                  onMouseUp={handleMaxPriceCommit}
-                  onTouchEnd={handleMaxPriceCommit}
-                  className="w-32 accent-emerald-500 h-1.5"
-                />
-                <span className="text-xs font-bold text-slate-900 w-12 text-right">
-                  {maxPrice >= MAX_PRICE_LIMIT ? "50k+" : `${(maxPrice / 1000).toFixed(0)}k`}
-                </span>
+              <div className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 md:gap-2">
+                <AnimatePresence>
+                  {search && (
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      onClick={() => { setSearch(""); setCommittedSearch(""); setPage(1); }}
+                      className="w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5 md:w-4 md:h-4 stroke-[2.5]" />
+                    </motion.button>
+                  )}
+                </AnimatePresence>
+                <button
+                  onClick={handleSearchClick}
+                  className="bg-emerald-500 text-white px-3 md:px-5 py-1.5 md:py-2 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-bold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                >
+                  Search
+                </button>
               </div>
-
-              <select
-                value={sort}
-                onChange={handleSortChange}
-                className="bg-white border border-slate-200 rounded-[2rem] px-6 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm flex-1 lg:flex-none appearance-none"
-                style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2.5\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1.5rem center', backgroundSize: '1rem' }}
-              >
-                {sortOptions.map((o) => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-
-              <button
-                onClick={() => { setAvailableOnly(!availableOnly); setPage(1); }}
-                className={`flex items-center gap-2 px-6 py-3 rounded-[2rem] border transition-all truncate ${availableOnly ? "bg-emerald-50 border-emerald-200 text-emerald-700 font-bold" : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 font-medium"}`}
-              >
-                <div className={`w-2 h-2 rounded-full ${availableOnly ? "bg-emerald-500 animate-pulse" : "bg-slate-300"}`} />
-                <span className="text-xs">Live Now</span>
-              </button>
             </div>
+
+            {/* Filter Toggle Button */}
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className={`flex items-center gap-2 px-4 md:px-8 py-3.5 md:py-5 rounded-2xl md:rounded-3xl border transition-all shrink-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] justify-center ${
+                isFilterOpen 
+                ? "bg-emerald-500 border-emerald-500 text-white" 
+                : "bg-white/70 backdrop-blur-xl border-white text-slate-700 hover:border-emerald-500/20"
+              }`}
+            >
+              <Filter className={`w-4 h-4 md:w-5 md:h-5 ${isFilterOpen ? "fill-white" : "text-emerald-500"}`} />
+              <span className="text-xs md:text-sm font-bold hidden sm:inline">Filters</span>
+              <ChevronDown className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-transform duration-300 ${isFilterOpen ? "rotate-180" : ""} hidden sm:inline`} />
+            </button>
           </div>
+
+          {/* Filter Dropdown */}
+          <AnimatePresence>
+            {isFilterOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                className="absolute top-full left-0 right-0 mt-4 p-8 bg-white/90 backdrop-blur-2xl border border-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] z-50 overflow-hidden"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                  {/* Column 1: Categories */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Niche & Categories</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => { setActiveCategory(null); setPage(1); }}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                          !activeCategory 
+                          ? "bg-slate-900 text-white shadow-lg shadow-slate-900/20" 
+                          : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                        }`}
+                      >
+                        All Categories
+                      </button>
+                      {categories.map((c) => (
+                        <button
+                          key={c}
+                          onClick={() => handleCategoryChange(c)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                            activeCategory === c 
+                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/20" 
+                            : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Column 2: Platform & Status */}
+                  <div className="space-y-8">
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Platform Preference</span>
+                      </div>
+                      <div className="flex gap-2 p-1 bg-slate-100 rounded-2xl w-fit">
+                        <button
+                          onClick={() => { setActivePlatform(null); setPage(1); }}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                            !activePlatform 
+                            ? "bg-white text-slate-900 shadow-sm" 
+                            : "text-slate-500 hover:text-slate-700"
+                          }`}
+                        >
+                          All
+                        </button>
+                        {platformList.map((p) => (
+                          <button
+                            key={p}
+                            onClick={() => handlePlatformChange(p)}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                              activePlatform === p 
+                              ? "bg-white text-slate-900 shadow-sm" 
+                              : "text-slate-500 hover:text-slate-700"
+                            }`}
+                          >
+                            {p}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Availability</span>
+                      </div>
+                      <button
+                        onClick={() => { setAvailableOnly(!availableOnly); setPage(1); }}
+                        className={`flex items-center gap-3 px-5 py-3 rounded-2xl border transition-all ${
+                          availableOnly 
+                          ? "bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20" 
+                          : "bg-white border-slate-200 text-slate-700 hover:border-emerald-500/30"
+                        }`}
+                      >
+                        <Zap className={`w-4 h-4 ${availableOnly ? "fill-white" : "text-emerald-500"}`} />
+                        <span className="text-xs font-bold">Show Live Gigs Only</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Column 3: Budget & Sorting */}
+                  <div className="space-y-8">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Max Budget</span>
+                        </div>
+                        <span className="text-xs font-black text-slate-900 tabular-nums bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md">
+                          {maxPrice >= MAX_PRICE_LIMIT ? "Any" : `₹${(maxPrice / 1000).toFixed(0)}k`}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={1000}
+                        max={MAX_PRICE_LIMIT}
+                        step={1000}
+                        value={maxPrice}
+                        onChange={handleMaxPriceChange}
+                        onMouseUp={handleMaxPriceCommit}
+                        onTouchEnd={handleMaxPriceCommit}
+                        className="w-full accent-emerald-500 h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sort Results By</span>
+                      </div>
+                      <div className="relative">
+                        <select
+                          value={sort}
+                          onChange={handleSortChange}
+                          className="w-full bg-white border border-slate-200 rounded-2xl pl-5 pr-12 py-3.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 hover:border-emerald-500/30 transition-all appearance-none cursor-pointer"
+                        >
+                          {sortOptions.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500 pointer-events-none" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer of Dropdown */}
+                <div className="mt-12 pt-6 border-t border-slate-100 flex items-center justify-between">
+                   <p className="text-[10px] font-medium text-slate-400">
+                    Adjust filters to refine your search results
+                  </p>
+                  <button
+                    onClick={() => setIsFilterOpen(false)}
+                    className="text-xs font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors"
+                  >
+                    Apply & Close
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
+
+
         {/* Stats Context Bar */}
-        <div className="flex items-center justify-between mb-8 px-2 border-b border-slate-200 pb-4">
-          <div className="text-xs font-bold text-slate-400 tracking-wide uppercase">
+        <div className="flex items-center justify-between mb-10 px-4 py-3 bg-white/20 rounded-2xl border border-white/40 backdrop-blur-sm">
+          <div className="text-[10px] font-black text-slate-400 tracking-[0.15em] uppercase">
             {loading ? (
-              <span className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-slate-200 border-t-emerald-500 animate-spin" />
-                Synchronizing...
+              <span className="flex items-center gap-3">
+                <div className="w-4 h-4 rounded-full border-2 border-slate-100 border-t-emerald-500 animate-spin" />
+                Updating Catalog...
               </span>
             ) : pagination ? (
-              <>Found <span className="text-slate-900">{pagination.total}</span> Results Matches</>
+              <>Found <span className="text-slate-900 font-black">{pagination.total}</span> Matching Opportunities</>
             ) : null}
           </div>
 
-          {(activeCategory || activePlatform || maxPrice < MAX_PRICE_LIMIT || availableOnly) && (
-            <button
+          {(activeCategory || activePlatform || maxPrice < MAX_PRICE_LIMIT || availableOnly || search) && (
+            <motion.button
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
               onClick={() => {
+                setSearch("");
+                setCommittedSearch("");
                 setActiveCategory(null);
                 setActivePlatform(null);
                 setMaxPrice(MAX_PRICE_LIMIT);
                 setCommittedMaxPrice(MAX_PRICE_LIMIT);
-                setAvailableOnly(false);
                 setPage(1);
               }}
-              className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors"
+              className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:text-emerald-700 transition-colors group"
             >
-              Reset Search
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+              Reset All Filters
+              <X className="w-3 h-3 group-hover:rotate-90 transition-transform duration-300" />
+            </motion.button>
           )}
         </div>
+
 
         {/* Error state */}
         {error && (
@@ -612,17 +666,12 @@ export default function ExploreGigs() {
         )}
 
         {/* Cards */}
-        <div
-          className={`grid gap-12 ${view === "grid"
-            ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
-            : "grid-cols-1"
-            }`}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-12">
           {loading
             ? Array.from({ length: LIMIT }).map((_, i) => <SkeletonCard key={i} />)
             : gigs.map((gig) => (
-              <GigCard key={gig._id} gig={gig} view={view} />
-            ))}
+                <GigCard key={gig._id} gig={gig} />
+              ))}
         </div>
 
         {/* Empty state */}
@@ -688,47 +737,7 @@ export default function ExploreGigs() {
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="bg-[#0F172A] pt-28 pb-16 text-slate-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-12 pb-20 border-b border-white/5">
-            <div className="flex items-center gap-3 group cursor-pointer">
-              <div className="w-10 h-10 text-white bg-[#10B981] rounded-xl flex items-center justify-center transition-all group-hover:rotate-12">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-white">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <span className="text-2xl font-black text-white tracking-tight ">Noillin</span>
-            </div>
-
-            <div className="flex gap-16 text-[13px] font-bold uppercase tracking-widest">
-              {["About", "Support", "Privacy", "Terms"].map(l => (
-                <a key={l} href="#" className="hover:text-emerald-500 transition-colors">{l}</a>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-8">
-              {[
-                { label: "SECURE PAYMENTS", icon: "🔒" },
-                { label: "VERIFIED PROFILES", icon: "✔" }
-              ].map((badge, i) => (
-                <div key={i} className="flex items-center gap-3 text-[10px] font-black tracking-[.2em] opacity-80 group">
-                  <span className="text-emerald-500 text-lg group-hover:scale-125 transition-transform">{badge.icon}</span>
-                  <span className="text-slate-100">{badge.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="pt-12 flex flex-col md:flex-row justify-between items-center gap-6 text-[11px] font-bold tracking-widest opacity-30">
-            <p>&copy; 2026 NOILLIN INC. ALL RIGHTS RESERVED.</p>
-            <p className="flex items-center gap-2">
-              <Zap className="w-3 h-3 fill-white" />
-              BUILT FOR THE FUTURE OF INFLUENCE
-            </p>
-          </div>
-        </div>
-      </footer >
-    </div >
+      <Footer />
+    </div>
   );
 }
