@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  # 1. Our Redis In-Memory Database
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  # 2. Our Message Queue
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+      - "5672:5672" # The main connection port
+      - "15672:15672" # The web UI dashboard port
+
+  # 3. Our Search Engine
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    environment:
+      - MEILI_MASTER_KEY=${MEILI_KEY}
+      - MEILI_NO_ANALYTICS=true
+    ports:
+      - "7700:7700"
+
+  # 4. Our Next.js Web Frontend
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - apps/web/.env.local
+    depends_on:
+      - meilisearch
