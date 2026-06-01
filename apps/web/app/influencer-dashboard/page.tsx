@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   Loader2
 } from "lucide-react";
+import Link from "next/link";
 
 import api from "@/lib/axios.client";
 
@@ -117,48 +118,55 @@ export default function InfluencerDashboardPage() {
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {/* Earnings */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-emerald-200/50 group cursor-default">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-label text-gray-500">Total Earnings</p>
-              <h2 className="text-title-xl text-gray-900">₹{stats.earnings.toLocaleString()}</h2>
-              <div className="inline-block mt-3 bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-0.5 rounded-md">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Total Earnings</p>
+              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">₹{stats.earnings.toLocaleString()}</h2>
+              <div className="inline-flex items-center mt-3 bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
                 +12%
               </div>
             </div>
-            <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 shrink-0">
-              <DollarSign className="w-5 h-5" />
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-sm shadow-emerald-100/50">
+              <DollarSign className="w-6 h-6" />
             </div>
           </div>
         </div>
 
         {/* Active Bookings */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-blue-200/50 group cursor-default">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-label text-gray-500">Active Bookings</p>
-              <h2 className="text-title-xl text-gray-900">{stats.activeBookings}</h2>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Active Bookings</p>
+              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">{stats.activeBookings}</h2>
+              <div className="inline-flex items-center mt-3 bg-blue-50 text-blue-600 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
+                Live Campaign
+              </div>
             </div>
-            <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center text-blue-500 shrink-0">
-              <Calendar className="w-5 h-5" />
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-500 shrink-0 group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 shadow-sm shadow-blue-100/50">
+              <Calendar className="w-6 h-6" />
             </div>
           </div>
         </div>
 
         {/* Pending Requests */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-orange-200/50 group cursor-default">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-label text-gray-500">Pending Requests</p>
-              <h2 className="text-title-xl text-gray-900">{stats.pendingRequests}</h2>
-              {stats.pendingRequests > 0 && (
-                <div className="inline-block mt-3 bg-orange-50 text-orange-600 text-xs font-bold px-2 py-0.5 rounded-md">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Pending Requests</p>
+              <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">{stats.pendingRequests}</h2>
+              {stats.pendingRequests > 0 ? (
+                <div className="inline-flex items-center mt-3 bg-orange-50 text-orange-600 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full animate-pulse">
                   Action Needed
+                </div>
+              ) : (
+                <div className="inline-flex items-center mt-3 bg-gray-50 text-gray-400 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
+                  All Caught Up
                 </div>
               )}
             </div>
-            <div className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-500 shrink-0">
-              <Clock className="w-5 h-5" />
+            <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500 shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-sm shadow-orange-100/50">
+              <Clock className="w-6 h-6" />
             </div>
           </div>
         </div>
@@ -173,12 +181,13 @@ export default function InfluencerDashboardPage() {
               <h3 className="text-title-lg text-gray-900 !text-lg mt-1">Your Bookings</h3>
               <p className="text-body-md text-gray-500 !text-xs mt-1">Recently updated influencer collaborations.</p>
             </div>
-            <button className="text-sm font-bold text-emerald-600 hover:text-emerald-700">
+            <Link href="/influencer-dashboard/bookings" className="text-sm font-bold text-emerald-600 hover:text-emerald-700">
               View All
-            </button>
+            </Link>
           </div>
 
-          <div className="overflow-x-auto flex-1 pb-4">
+          {/* Desktop Table View */}
+          <div className="hidden sm:block overflow-x-auto flex-1 pb-4">
             <table className="w-full text-left border-separate border-spacing-y-2 min-w-[500px]">
               <thead>
                 <tr>
@@ -213,6 +222,31 @@ export default function InfluencerDashboardPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="sm:hidden flex flex-col gap-3">
+            {recentBookings.map((booking) => (
+              <div key={booking._id} className="p-4 rounded-2xl border border-gray-50 bg-white flex items-center justify-between gap-3 shadow-sm">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-500 shrink-0">
+                    {booking.gigId?.title?.charAt(0) || "B"}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-bold text-[13px] text-gray-900 truncate leading-snug">{booking.gigId?.title || "Influencer Booking"}</span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mt-1">₹{(booking.influencerAmount || 0).toLocaleString()}</span>
+                  </div>
+                </div>
+                <span className={`px-2.5 py-1 text-[8px] font-black uppercase tracking-wider rounded-full shrink-0 ${getStatusStyles(booking.status)}`}>
+                  {getStatusLabel(booking.status)}
+                </span>
+              </div>
+            ))}
+            {recentBookings.length === 0 && (
+              <div className="py-12 text-center text-gray-400 font-semibold italic text-sm">
+                No bookings found
+              </div>
+            )}
           </div>
         </div>
 
@@ -273,9 +307,9 @@ export default function InfluencerDashboardPage() {
                     key={day}
                     onClick={() => setSelectedDate(dateString)}
                     className={`flex justify-center items-center h-10 w-10 mx-auto text-[13px] font-bold cursor-pointer rounded-2xl relative transition-all ${isSelected
-                      ? "bg-gray-900 text-white shadow-lg shadow-gray-200 scale-110"
+                      ? "bg-emerald-600 text-white shadow-md shadow-emerald-100 scale-105"
                       : hasEvent
-                        ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                        ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100/80"
                         : "text-gray-900 hover:bg-gray-50"
                       }`}
                   >
@@ -294,7 +328,7 @@ export default function InfluencerDashboardPage() {
             {!selectedDate ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-12">
                 <div className="w-16 h-16 bg-gray-50 rounded-3xl flex items-center justify-center text-gray-200 mb-5 group-hover:scale-110 transition-transform duration-300">
-                  <Calendar className="w-8 h-8" />
+                  <Calendar className="w-8 h-8 text-gray-400" />
                 </div>
                 <h4 className="text-[15px] font-black text-gray-900 uppercase tracking-tight">Timeline Detail</h4>
                 <p className="text-[11px] font-bold text-gray-400 mt-2 uppercase tracking-[0.2em] leading-relaxed">Select a date to view <br />your direct milestones</p>
@@ -347,8 +381,12 @@ export default function InfluencerDashboardPage() {
                       </div>
                     ))
                   ) : (
-                    <div className="py-12 text-center bg-gray-50/50 rounded-3xl border border-dashed border-gray-200">
-                      <p className="text-gray-400 text-[11px] font-black uppercase tracking-widest">No Milestones</p>
+                    <div className="py-10 flex flex-col items-center justify-center text-center bg-gray-50/30 rounded-3xl border border-dashed border-gray-200/80 p-5">
+                      <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 mb-3">
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest">No Milestones Today</p>
+                      <p className="text-gray-400 text-[10px] mt-1 font-semibold">Enjoy your free day!</p>
                     </div>
                   )}
                 </div>

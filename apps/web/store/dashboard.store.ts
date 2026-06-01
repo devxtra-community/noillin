@@ -11,6 +11,8 @@ interface DashboardStore {
   counts: DashboardCounts;
   loading: boolean;
   fetchCounts: () => Promise<void>;
+  isChatActive: boolean;
+  setIsChatActive: (active: boolean) => void;
 }
 
 export const useDashboardStore = create<DashboardStore>((set) => ({
@@ -19,6 +21,9 @@ export const useDashboardStore = create<DashboardStore>((set) => ({
     pendingRequestsCount: 0,
   },
   loading: false,
+  isChatActive: false,
+
+  setIsChatActive: (active) => set({ isChatActive: active }),
 
   fetchCounts: async () => {
     set({ loading: true });

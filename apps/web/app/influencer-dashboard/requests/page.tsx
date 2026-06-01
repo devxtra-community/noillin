@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, ChevronRight, Calendar, Globe, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { Search, ChevronLeft, ChevronRight, Calendar, Globe, Loader2 } from "lucide-react";
 
 import api from "@/lib/axios.client";
 import { useDashboardStore } from "@/store/dashboard.store";
@@ -59,7 +58,9 @@ export default function RequestsPage() {
 
     useEffect(() => {
         if (filteredRequests.length > 0 && !selectedRequestId) {
-            setSelectedRequestId(filteredRequests[0]._id);
+            if (typeof window !== "undefined" && window.innerWidth >= 1280) {
+                setSelectedRequestId(filteredRequests[0]._id);
+            }
         }
     }, [filteredRequests, selectedRequestId]);
 
@@ -140,8 +141,9 @@ export default function RequestsPage() {
             {/* Content Container (2-Column Grid) */}
             <div className="flex flex-col xl:flex-row gap-6 flex-1">
                 {/* Table Card (Left Column) */}
-                <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex-1 overflow-hidden flex flex-col">
-                    <div className="overflow-x-auto overflow-y-auto flex-1">
+                <div className={`xl:bg-white xl:rounded-[24px] xl:shadow-sm xl:border xl:border-gray-100 flex-1 overflow-hidden flex flex-col ${selectedRequestId ? "hidden xl:flex" : "flex"}`}>
+                    {/* Desktop View: Table */}
+                    <div className="hidden xl:block overflow-x-auto overflow-y-auto flex-1">
                         <table className="w-full text-left border-collapse min-w-[600px]">
                             <thead className="sticky top-0 bg-white z-10">
                                 <tr className="border-b border-gray-100">
@@ -160,12 +162,25 @@ export default function RequestsPage() {
                                     >
                                         <td className="py-4 px-6 text-center">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-[11px] font-bold shrink-0 shadow-sm bg-slate-100 text-slate-600 relative">
-                                                    {req.brandId?.profileImageUrl ? (
-                                                        <Image src={req.brandId.profileImageUrl} alt={req.brandId.fullName} fill className="object-cover" />
-                                                    ) : (
-                                                        req.brandId?.fullName?.charAt(0) || "B"
+                                                <div className="w-8 h-8 rounded-full relative shrink-0">
+                                                    {req.brandId?.profileImageUrl && (
+                                                        <img
+                                                            src={req.brandId.profileImageUrl}
+                                                            alt={req.brandId.fullName}
+                                                            className="w-8 h-8 rounded-full object-cover shadow-sm bg-gray-100 absolute inset-0"
+                                                            onError={(e) => {
+                                                                e.currentTarget.style.display = 'none';
+                                                                const fallback = e.currentTarget.nextSibling as HTMLDivElement;
+                                                                if (fallback) fallback.style.display = 'flex';
+                                                            }}
+                                                        />
                                                     )}
+                                                    <div
+                                                        className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold shadow-sm bg-slate-100 text-slate-600"
+                                                        style={{ display: req.brandId?.profileImageUrl ? 'none' : 'flex' }}
+                                                    >
+                                                        {req.brandId?.fullName?.charAt(0) || "B"}
+                                                    </div>
                                                 </div>
                                                 <Link href={`/brand-profile-page?id=${req.brandId?._id}`} className="font-bold text-[14px] text-gray-900 truncate max-w-[150px] hover:text-emerald-600 transition-colors">
                                                     {req.brandId?.fullName || "Brand User"}
@@ -191,25 +206,109 @@ export default function RequestsPage() {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Mobile/Tablet View: Card-based list */}
+                    <div className="xl:hidden flex-1 overflow-y-auto py-2 px-1 space-y-4">
+                        {filteredRequests.map((req) => (
+                            <div
+                                key={req._id}
+                                onClick={() => setSelectedRequestId(req._id)}
+                                className={`p-4 rounded-3xl border transition-all cursor-pointer ${
+                                    selectedRequestId === req._id
+                                        ? "bg-emerald-50/40 border-emerald-200 shadow-sm"
+                                        : "bg-white border-gray-100 hover:border-gray-200 shadow-sm"
+                                }`}
+                            >
+                                <div className="flex items-center justify-between gap-3 mb-3">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-9 h-9 rounded-full relative shrink-0">
+                                            {req.brandId?.profileImageUrl && (
+                                                <img
+                                                    src={req.brandId.profileImageUrl}
+                                                    alt={req.brandId.fullName}
+                                                    className="w-9 h-9 rounded-full object-cover shadow-sm bg-gray-100 absolute inset-0"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none';
+                                                        const fallback = e.currentTarget.nextSibling as HTMLDivElement;
+                                                        if (fallback) fallback.style.display = 'flex';
+                                                    }}
+                                                />
+                                            )}
+                                            <div
+                                                className="w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold shadow-sm bg-slate-100 text-slate-600"
+                                                style={{ display: req.brandId?.profileImageUrl ? 'none' : 'flex' }}
+                                            >
+                                                {req.brandId?.fullName?.charAt(0) || "B"}
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                            <span className="font-bold text-[14px] text-gray-900 leading-tight truncate">
+                                                {req.brandId?.fullName || "Brand User"}
+                                            </span>
+                                            <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest mt-0.5 shrink-0">
+                                                {activeFilter}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
+                                </div>
+                                <div className="flex justify-between items-center pt-2.5 border-t border-gray-50/60 min-w-0">
+                                    <div className="flex flex-col min-w-0 max-w-[60%]">
+                                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Gig Request</span>
+                                        <span className="text-[12px] font-bold text-gray-700 truncate">{req.gigId?.title || "Gig Request"}</span>
+                                    </div>
+                                    <div className="flex flex-col text-right shrink-0">
+                                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Net Amount</span>
+                                        <span className="text-[13px] font-black text-emerald-600">₹{((req.gigId?.pricing?.basePrice || 0) * 0.9).toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {filteredRequests.length === 0 && (
+                            <div className="py-20 text-center text-gray-400 text-sm italic">
+                                No {activeFilter.toLowerCase()} requests found.
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Details Card (Right Column) */}
-                <div className="xl:w-[400px] shrink-0">
-                    <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex flex-col">
+                <div className={`xl:w-[400px] shrink-0 h-full ${selectedRequestId ? "flex" : "hidden xl:flex"}`}>
+                    <div className="bg-white rounded-[24px] shadow-sm border border-gray-100 flex flex-col h-full sticky top-0 w-full">
                         <div className="p-6 flex flex-col h-full">
-                            <h2 className="text-label text-gray-400 !mb-6">Request Details</h2>
-
-                            {selectedRequest ? (
+                            {selectedRequestId && selectedRequest ? (
                                 <div className="flex flex-col h-full min-h-0">
-                                    <div className="flex-1 pr-2 scrollbar-hide">
+                                    {/* Back Button on mobile */}
+                                    <button
+                                        onClick={() => setSelectedRequestId(null)}
+                                        className="xl:hidden flex items-center gap-2 text-gray-500 hover:text-emerald-600 transition-colors mb-6 text-sm font-semibold -ml-2"
+                                    >
+                                        <ChevronLeft className="w-5 h-5" />
+                                        Back to Requests
+                                    </button>
+                                    <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] mb-6">Request Details</h2>
+                                    <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
                                         {/* Brand Profile */}
                                         <div className="flex flex-col items-center text-center mb-8">
-                                            <div className="w-16 h-16 rounded-[20px] overflow-hidden flex items-center justify-center text-xl font-black mb-4 shadow-xl shadow-gray-200/50 bg-emerald-50 text-emerald-600 relative">
-                                                {selectedRequest.brandId?.profileImageUrl ? (
-                                                    <Image src={selectedRequest.brandId.profileImageUrl} alt={selectedRequest.brandId.fullName} fill className="object-cover" />
-                                                ) : (
-                                                    selectedRequest.brandId?.fullName?.charAt(0) || "B"
+                                            <div className="w-16 h-16 rounded-[20px] relative shrink-0 shadow-xl shadow-gray-200/50 bg-slate-100 overflow-hidden flex items-center justify-center">
+                                                {selectedRequest.brandId?.profileImageUrl && (
+                                                    <img
+                                                        src={selectedRequest.brandId.profileImageUrl}
+                                                        alt={selectedRequest.brandId.fullName}
+                                                        className="w-16 h-16 rounded-[20px] object-cover absolute inset-0"
+                                                        onError={(e) => {
+                                                            e.currentTarget.style.display = 'none';
+                                                            const fallback = e.currentTarget.nextSibling as HTMLDivElement;
+                                                            if (fallback) fallback.style.display = 'flex';
+                                                        }}
+                                                    />
                                                 )}
+                                                <div
+                                                    className="w-16 h-16 rounded-[20px] flex items-center justify-center text-xl font-black text-slate-600 bg-slate-100"
+                                                    style={{ display: selectedRequest.brandId?.profileImageUrl ? 'none' : 'flex' }}
+                                                >
+                                                    {selectedRequest.brandId?.fullName?.charAt(0) || "B"}
+                                                </div>
                                             </div>
                                             <Link href={`/brand-profile-page?id=${selectedRequest.brandId?._id}`} className="hover:opacity-80 transition-opacity">
                                                 <h3 className="text-title-lg !text-lg text-gray-900 leading-tight mb-1.5">{selectedRequest.brandId?.fullName || "Brand User"}</h3>
