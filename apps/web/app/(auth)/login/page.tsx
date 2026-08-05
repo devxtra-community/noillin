@@ -70,7 +70,7 @@ function LoginForm() {
 
 
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <div className="min-h-screen font-sans">
       <AuthNavbar />
 
       <main className="pt-24 pb-20 px-4 flex items-center justify-center min-h-screen">
@@ -215,7 +215,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       <LoginForm />
     </Suspense>
   );

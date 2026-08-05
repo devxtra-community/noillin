@@ -207,7 +207,7 @@ export default function ProfileSetupPage() {
 
     if (!isInitialized || !user) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-600 font-medium">Loading your session...</p>
@@ -218,7 +218,7 @@ export default function ProfileSetupPage() {
 
 
     return (
-        <div className="min-h-screen bg-background font-sans selection:bg-green-100 selection:text-green-900">
+        <div className="min-h-screen font-sans selection: selection:text-green-900">
             <SetupNavbar step={3} />
 
             <main className="pt-24 pb-20 px-4 sm:px-6 lg:px-8">

@@ -380,7 +380,7 @@ export default function ExploreGigs() {
   };
 
   return (
-    <div className="min-h-screen text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pt-16 sm:pt-20">
+    <div className="min-h-screen text-slate-900 font-sans selection: selection:text-emerald-900 pt-16 sm:pt-20">
       {/* Navbar */}
       <Navbar />
 

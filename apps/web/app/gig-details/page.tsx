@@ -124,14 +124,14 @@ function GigDetailsContent() {
     };
 
     if (loading) return (
-        <div className="min-h-screen bg-slate-50/50 flex flex-col items-center justify-center gap-4">
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4">
             <Loader2 className="w-10 h-10 text-[#0CAF60] animate-spin" />
             <p className="text-gray-500 font-medium">Loading gig details...</p>
         </div>
     );
 
     if (error || !gig) return (
-        <div className="min-h-screen bg-slate-50/50 flex flex-col items-center justify-center gap-4">
+        <div className="min-h-screen flex flex-col items-center justify-center gap-4">
             <AlertCircle className="w-10 h-10 text-red-500" />
             <p className="text-gray-900 font-bold text-xl">{error || "Gig not found"}</p>
             <Link href="/gig-list" className="text-[#0CAF60] font-bold hover:underline">Back to Gigs</Link>
@@ -154,7 +154,7 @@ function GigDetailsContent() {
     const gigHeroImage = gig.bannerUrl || categoryHeroImages[gig.category?.toLowerCase() || "default"] || categoryHeroImages["default"];
 
     return (
-        <div className="min-h-screen bg-background text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 relative flex flex-col">
+        <div className="min-h-screen text-slate-900 font-sans selection: selection:text-emerald-900 relative flex flex-col">
             {/* Toast Notification */}
             {showToast && (
                 <div className="fixed top-24 right-8 z-[200] animate-in slide-in-from-right duration-300">
@@ -574,7 +574,7 @@ function GigDetailsContent() {
 export default function Page() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-slate-50/50 flex flex-col items-center justify-center gap-4 text-slate-500">
+            <div className="min-h-screen flex flex-col items-center justify-center gap-4 text-slate-500">
                 <Loader2 className="w-8 h-8 animate-spin" />
                 <span>Loading Gig Experience...</span>
             </div>

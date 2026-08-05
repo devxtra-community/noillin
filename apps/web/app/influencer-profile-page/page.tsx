@@ -87,7 +87,7 @@ function ProfileContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-slate-900 font-sans sm:px-0">
+    <div className="min-h-screen text-slate-900 font-sans sm:px-0">
       <Navbar />
       
       <div className="pt-24 sm:pt-32">

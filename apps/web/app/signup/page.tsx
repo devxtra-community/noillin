@@ -81,7 +81,7 @@ function SignupForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background font-sans">
+    <div className="min-h-screen font-sans">
       <SetupNavbar step={1} />
 
       <main className="pt-24 pb-20 px-4 flex items-center justify-center min-h-screen">
@@ -253,7 +253,7 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-background">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       <SignupForm />
     </Suspense>
   );

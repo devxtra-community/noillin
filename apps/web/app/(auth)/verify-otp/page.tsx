@@ -163,7 +163,7 @@ function VerifyOtpContent() {
 
 export default function VerifyOtp() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       <VerifyOtpContent />
     </Suspense>
   );

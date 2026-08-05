@@ -41,7 +41,7 @@ function PaymentContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="bg-white p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-red-100">
           <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShieldCheck className="w-8 h-8" />
@@ -60,7 +60,7 @@ function PaymentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
       <div className="relative mb-8">
         <div className="w-24 h-24 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"></div>
         <div className="absolute inset-0 flex items-center justify-center">
@@ -84,7 +84,7 @@ function PaymentContent() {
 export default function Page() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
         <Loader2 className="w-10 h-10 text-emerald-600 animate-spin" />
         <p className="text-gray-500 font-medium">Initializing secure checkout...</p>
       </div>
