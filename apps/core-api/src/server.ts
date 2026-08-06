@@ -1,4 +1,3 @@
-
 import cors from "cors"
 import "dotenv/config";
 import express from "express";
@@ -64,6 +63,6 @@ await getChannel().assertQueue("order.created", { durable: true });
 await getChannel().assertQueue(GIG_REQUEST_CREATED_EVENT, { durable: true });
 
 
-app.listen(PORT, "127.0.0.1", () => {
-  logger.info(`Core API is running at http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  logger.info(`Core API listening on port ${PORT}`);
 });

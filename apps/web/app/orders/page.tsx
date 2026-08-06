@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import axios from "axios";
+
+import api from "@/lib/axios.client";
 
 export default function OrdersPage() {
   const [orderId, setOrderId] = useState("");
 
   const releasePayment = async () => {
     try {
-      await axios.patch(
-        `http://localhost:5000/api/orders/release/${orderId}`
-      );
+      await api.patch(`/orders/release/${orderId}`);
 
       alert("Payment Released ✅");
     } catch (err) {
